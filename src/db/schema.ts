@@ -9,6 +9,9 @@ export const scooters = sqliteTable("scooters", {
 		.default("percent"),
 	initialKm: real("initialKm").notNull().default(0),
 	autonomyGoal: real("autonomyGoal").notNull().default(0),
+	showMaintenance: integer("showMaintenance", { mode: "boolean" })
+		.notNull()
+		.default(true),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });
 

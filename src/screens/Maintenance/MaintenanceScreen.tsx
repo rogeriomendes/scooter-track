@@ -1,3 +1,5 @@
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
@@ -5,7 +7,7 @@ import { maintenance } from "@/db/schema";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
 import { eq } from "drizzle-orm";
-import { Button } from "heroui-native/button";
+import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
@@ -23,9 +25,25 @@ export function MaintenanceScreen() {
 		typeof maintenance.$inferSelect | null
 	>(null);
 
+	const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+	const [itemToReset, setItemToReset] = useState<
+		typeof maintenance.$inferSelect | null
+	>(null);
+
 	const handleDelete = async (id: number) => {
 		await db.delete(maintenance).where(eq(maintenance.id, id));
 		refresh();
+		setItemToDelete(null);
+	};
+
+	const handleResetWear = async (item: typeof maintenance.$inferSelect) => {
+		const currentTotalKm = stats?.totalKm || 0;
+		await db
+			.update(maintenance)
+			.set({ lastMaintenanceKm: currentTotalKm })
+			.where(eq(maintenance.id, item.id));
+		refresh();
+		setItemToReset(null);
 	};
 
 	if (isLoading) {
@@ -38,24 +56,23 @@ export function MaintenanceScreen() {
 
 	if (!activeScooterId || !scooter) {
 		return (
-			<ScreenWrapper className="p-6">
-				<Text className="text-xl font-bold text-foreground">Manutenção</Text>
-				<Text className="text-muted mt-4">
-					Selecione uma scooter para gerenciar a manutenção.
-				</Text>
-			</ScreenWrapper>
+			<EmptyScooterState
+				title="Manutenção"
+				description="Adicione uma scooter primeiro para gerenciar suas peças."
+			/>
 		);
 	}
 
 	return (
 		<ScreenWrapper>
-			<View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
+			<View className="p-4 flex-row justify-between items-center">
 				<View>
-					<Text className="text-2xl font-black text-foreground">
+					<Text className="text-3xl font-bold text-foreground mb-1">
 						Manutenção
 					</Text>
 					<Text className="text-sm font-bold text-muted mt-1 uppercase tracking-wider">
-						{maintenanceList.length} itens · {scooter.name}
+						{/* {maintenanceList.length} registros ·  */}
+						{scooter.name}
 					</Text>
 				</View>
 				<Button
@@ -148,7 +165,19 @@ export function MaintenanceScreen() {
 											size="sm"
 											isIconOnly
 											variant="secondary"
-											onPress={() => handleDelete(item.id)}
+											onPress={() => setItemToReset(item)}
+										>
+											<StyledIcon
+												name="refresh-cw"
+												size={16}
+												className="text-success"
+											/>
+										</Button>
+										<Button
+											size="sm"
+											isIconOnly
+											variant="secondary"
+											onPress={() => setItemToDelete(item.id)}
 										>
 											<StyledIcon
 												name="trash-2"
@@ -193,6 +222,34 @@ export function MaintenanceScreen() {
 				onSaved={refresh}
 				editItem={itemToEdit}
 				currentTotalKm={stats?.totalKm || 0}
+			/>
+
+			<ConfirmDialog
+				isOpen={itemToDelete !== null}
+				onOpenChange={(open) => {
+					if (!open) setItemToDelete(null);
+				}}
+				title="Excluir Item"
+				description="Tem certeza que deseja excluir este item de manutenção? O histórico de desgaste será perdido."
+				onConfirm={() => {
+					if (itemToDelete) handleDelete(itemToDelete);
+				}}
+				onCancel={() => setItemToDelete(null)}
+			/>
+
+			<ConfirmDialog
+				isOpen={itemToReset !== null}
+				onOpenChange={(open) => {
+					if (!open) setItemToReset(null);
+				}}
+				title="Zerar Desgaste"
+				description={`Tem certeza que deseja registrar a troca/manutenção de "${itemToReset?.name}"? O desgaste voltará para 0%.`}
+				confirmText="Zerar"
+				confirmVariant="primary"
+				onConfirm={() => {
+					if (itemToReset) handleResetWear(itemToReset);
+				}}
+				onCancel={() => setItemToReset(null)}
 			/>
 		</ScreenWrapper>
 	);

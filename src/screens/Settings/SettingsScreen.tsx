@@ -9,15 +9,14 @@ import { eq } from "drizzle-orm";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import { Text } from "heroui-native";
-import { Button } from "heroui-native/button";
+import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useCallback, useEffect, useState } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { ScooterFormSheet } from "./components/ScooterFormSheet";
 
 export default function SettingsScreen() {
-	const { theme, setTheme, activeScooterId, setActiveScooterId } =
+	const { theme, setTheme, activeScooterId, setActiveScooterId, triggerRefresh } =
 		useAppStore();
 
 	const [scootersList, setScootersList] = useState<
@@ -49,6 +48,7 @@ export default function SettingsScreen() {
 		await db.delete(scooters).where(eq(scooters.id, id));
 		if (activeScooterId === id) setActiveScooterId(null);
 		fetchScooters();
+		triggerRefresh();
 		setScooterToDelete(null);
 	};
 
@@ -62,6 +62,7 @@ export default function SettingsScreen() {
 		await db.delete(scooters);
 		setActiveScooterId(null);
 		fetchScooters();
+		triggerRefresh();
 		setIsClearAllDialogOpen(false);
 	};
 
@@ -227,8 +228,10 @@ export default function SettingsScreen() {
 											</View>
 											<Text className="text-xs text-muted mt-1">
 												KM inicial: {item.initialKm} · Bateria:{" "}
-												{BATTERY_CHARTS[item.batteryType]?.label ||
-													item.batteryType}
+												{item.trackingMode === "percent"
+													? "Porcentagem (%)"
+													: BATTERY_CHARTS[item.batteryType]?.label ||
+														item.batteryType}
 											</Text>
 										</View>
 									</View>
@@ -247,20 +250,8 @@ export default function SettingsScreen() {
 									<Button
 										size="sm"
 										variant="secondary"
-										className="flex-1 bg-transparent border border-surface-secondary"
-										onPress={() => {}}
-									>
-										<StyledIcon
-											name="tool"
-											size={14}
-											className="text-default-foreground"
-										/>
-										<Button.Label>Manutenção</Button.Label>
-									</Button>
-									<Button
-										size="sm"
-										variant="secondary"
 										onPress={() => handleEdit(item)}
+										className="flex-1"
 									>
 										<StyledIcon
 											name="edit-2"
@@ -356,7 +347,10 @@ export default function SettingsScreen() {
 			<ScooterFormSheet
 				isOpen={isBottomSheetOpen}
 				onOpenChange={setIsBottomSheetOpen}
-				onSaved={fetchScooters}
+				onSaved={() => {
+					fetchScooters();
+					triggerRefresh();
+				}}
 				editItem={scooterToEdit}
 			/>
 

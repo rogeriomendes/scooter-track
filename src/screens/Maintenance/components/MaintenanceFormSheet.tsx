@@ -3,8 +3,7 @@ import { db } from "@/db/client";
 import { maintenance, type scooters } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
-import { BottomSheet, Label, TextField } from "heroui-native";
-import { Button } from "heroui-native/button";
+import { BottomSheet, Button, Label, TextField } from "heroui-native";
 import { useEffect, useState } from "react";
 import { Keyboard } from "react-native";
 
@@ -123,13 +122,17 @@ export function MaintenanceFormSheet({
 							}}
 						>
 							<Button.Label>
-								{resetWear ? "Desgaste será zerado" : "Troquei esta peça agora (Zerar desgaste)"}
+								{resetWear
+									? "Desgaste será zerado"
+									: "Troquei esta peça agora (Zerar desgaste)"}
 							</Button.Label>
 						</Button>
 					)}
 
 					<Button variant="primary" className="mt-4" onPress={handleSave}>
-						<Button.Label>{editItem ? "Salvar Alterações" : "Adicionar"}</Button.Label>
+						<Button.Label>
+							{editItem ? "Salvar Alterações" : "Adicionar"}
+						</Button.Label>
 					</Button>
 				</BottomSheet.Content>
 			</BottomSheet.Portal>

@@ -1,24 +1,55 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { desc, eq } from "drizzle-orm";
-import { Button } from "heroui-native/button";
-import { Card } from "heroui-native/card";
-import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { MonthSelector } from "@/components/MonthSelector";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
-import { logs, scooters } from "@/db/schema";
-import { useAppStore } from "@/store/useAppStore";
-import { ChargeFormSheet } from "./components/ChargeFormSheet";
+import { logs } from "@/db/schema";
 import { useScooterData } from "@/hooks/useScooterData";
-import { useMemo } from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { eq } from "drizzle-orm";
+import { Button } from "heroui-native";
+import { Card } from "heroui-native/card";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { ChargeFormSheet } from "./components/ChargeFormSheet";
 
 export default function ChargesScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
-	const { scooter, allLogs, refresh, stats, isLoading } = useScooterData(activeScooterId);
-	const chargesList = useMemo(() => allLogs.filter(l => l.type === "charge"), [allLogs]);
+	const { scooter, allLogs, refresh, stats, isLoading } =
+		useScooterData(activeScooterId);
+	const [currentMonth, setCurrentMonth] = useState(
+		new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+	);
+	const [page, setPage] = useState(1);
+	const itemsPerPage = 20;
+
+	const chargesList = useMemo(() => {
+		return allLogs.filter((l) => {
+			if (l.type !== "charge") return false;
+			const logDate = new Date(l.date);
+			return (
+				logDate.getMonth() === currentMonth.getMonth() &&
+				logDate.getFullYear() === currentMonth.getFullYear()
+			);
+		});
+	}, [allLogs, currentMonth]);
+
+	const displayedCharges = useMemo(
+		() => chargesList.slice(0, page * itemsPerPage),
+		[chargesList, page],
+	);
+
+	const minDate = useMemo(() => {
+		let oldest = scooter?.createdAt ? new Date(scooter.createdAt) : new Date();
+		for (const log of allLogs) {
+			const d = new Date(log.date);
+			if (d < oldest) oldest = d;
+		}
+		return oldest;
+	}, [allLogs, scooter]);
 
 	const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 	const [logToDelete, setLogToDelete] = useState<number | null>(null);
@@ -47,12 +78,10 @@ export default function ChargesScreen() {
 
 	if (!activeScooterId || !scooter) {
 		return (
-			<ScreenWrapper className="p-6">
-				<Text className="text-xl font-bold text-foreground">Recargas</Text>
-				<Text className="text-muted mt-4">
-					Nenhuma scooter ativa selecionada.
-				</Text>
-			</ScreenWrapper>
+			<EmptyScooterState
+				title="Recargas"
+				description="Adicione uma scooter primeiro para registrar recargas."
+			/>
 		);
 	}
 
@@ -63,8 +92,9 @@ export default function ChargesScreen() {
 					<Text className="text-3xl font-bold text-foreground mb-1">
 						Recargas
 					</Text>
-					<Text className="text-muted text-sm">
-						{chargesList.length} registros · {scooter.name}
+					<Text className="text-sm font-bold text-muted mt-1 uppercase tracking-wider">
+						{/* {chargesList.length} registros ·  */}
+						{scooter.name}
 					</Text>
 				</View>
 				<Button
@@ -122,8 +152,31 @@ export default function ChargesScreen() {
 				</Card>
 			</View>
 
+			<View className="px-4">
+				<MonthSelector
+					currentDate={currentMonth}
+					minDate={minDate}
+					maxDate={new Date()}
+					onChange={(newDate) => {
+						setCurrentMonth(newDate);
+						setPage(1);
+					}}
+				/>
+			</View>
+
 			<FlatList
-				data={chargesList}
+				data={displayedCharges}
+				onEndReached={() => {
+					if (displayedCharges.length < chargesList.length) {
+						setPage((p) => p + 1);
+					}
+				}}
+				onEndReachedThreshold={0.5}
+				ListFooterComponent={
+					displayedCharges.length < chargesList.length ? (
+						<ActivityIndicator size="small" color="#10b981" className="py-4" />
+					) : null
+				}
 				keyExtractor={(item) => item.id.toString()}
 				contentContainerClassName="px-4 pb-10 gap-3"
 				ListEmptyComponent={
@@ -135,7 +188,8 @@ export default function ChargesScreen() {
 							Nenhuma recarga registrada
 						</Text>
 						<Text className="text-muted text-center text-sm mt-1 px-10">
-							Sempre que recarregar a bateria, adicione aqui para manter o controle de consumo.
+							Sempre que recarregar a bateria, adicione aqui para manter o
+							controle de consumo.
 						</Text>
 					</View>
 				}

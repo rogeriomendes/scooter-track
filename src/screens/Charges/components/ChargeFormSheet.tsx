@@ -1,13 +1,12 @@
-import { eq } from "drizzle-orm";
-import { BottomSheet, Label, TextField } from "heroui-native";
-import { Button } from "heroui-native/button";
-import { useEffect, useState } from "react";
-import { Keyboard } from "react-native";
-import * as Haptics from 'expo-haptics';
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs, type scooters } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
+import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import { useEffect, useState } from "react";
+import { Keyboard } from "react-native";
 
 interface ChargeFormSheetProps {
 	isOpen: boolean;
@@ -89,11 +88,16 @@ export function ChargeFormSheet({
 					</BottomSheet.Title>
 
 					<TextField>
-						<Label>Voltagem após Carga (V)</Label>
+						<Label>
+							{scooter.trackingMode === "percent"
+								? "Nível da Bateria após Carga (%)"
+								: "Voltagem após Carga (V)"}
+						</Label>
 						<BottomSheetInput
 							placeholder={
-								BATTERY_CHARTS[scooter.batteryType]?.maxVoltage.toString() ||
-								"54.6"
+								scooter.trackingMode === "percent"
+									? "Ex: 100"
+									: BATTERY_CHARTS[scooter.batteryType]?.maxVoltage.toString() || "54.6"
 							}
 							keyboardType="numeric"
 							value={voltage}

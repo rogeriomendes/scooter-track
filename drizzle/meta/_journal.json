@@ -15,6 +15,13 @@
       "when": 1779890251532,
       "tag": "0001_slippery_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1779919159489,
+      "tag": "0002_grey_fallen_one",
+      "breakpoints": true
     }
   ]
 }

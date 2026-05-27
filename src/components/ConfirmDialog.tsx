@@ -1,5 +1,4 @@
-import { Dialog } from "heroui-native";
-import { Button } from "heroui-native/button";
+import { Button, Dialog } from "heroui-native";
 import type React from "react";
 import { View } from "react-native";
 

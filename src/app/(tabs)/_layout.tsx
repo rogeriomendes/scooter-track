@@ -1,18 +1,19 @@
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 import Feather from "@expo/vector-icons/Feather";
 import { Tabs } from "expo-router";
 import { useThemeColor } from "heroui-native";
 
 export default function TabLayout() {
-	const backgroundColor = useThemeColor(
-		"background" as any,
-	) as unknown as string;
-	const surfaceColor = useThemeColor("surface" as any) as unknown as string;
-	const border = useThemeColor("border" as any) as unknown as string;
-	const accentColor = useThemeColor("success" as any) as unknown as string; // Screenshots use Green as active color!
-	const mutedColor = useThemeColor("muted" as any) as unknown as string;
-	const foregroundColor = useThemeColor(
-		"foreground" as any,
-	) as unknown as string;
+	const activeScooterId = useAppStore((s) => s.activeScooterId);
+	const { scooter } = useScooterData(activeScooterId);
+
+	const backgroundColor = useThemeColor("background") as unknown as string;
+	const surfaceColor = useThemeColor("surface") as unknown as string;
+	const border = useThemeColor("border") as unknown as string;
+	const accentColor = useThemeColor("success") as unknown as string; // Screenshots use Green as active color!
+	const mutedColor = useThemeColor("muted") as unknown as string;
+	const foregroundColor = useThemeColor("foreground") as unknown as string;
 
 	return (
 		<Tabs
@@ -79,6 +80,7 @@ export default function TabLayout() {
 				name="maintenance"
 				options={{
 					title: "Manut.",
+					href: scooter && scooter.showMaintenance ? undefined : null,
 					tabBarIcon: ({ color, size }) => (
 						<Feather name="tool" color={color} size={size} />
 					),

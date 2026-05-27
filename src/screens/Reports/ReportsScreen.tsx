@@ -1,9 +1,12 @@
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 import { format } from "date-fns";
-import { asc, eq } from "drizzle-orm";
 import { useThemeColor } from "heroui-native";
 import { Card } from "heroui-native/card";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	ActivityIndicator,
 	Dimensions,
@@ -13,16 +16,13 @@ import {
 	View,
 } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { useAppStore } from "@/store/useAppStore";
-import { useScooterData } from "@/hooks/useScooterData";
 
 const screenWidth = Dimensions.get("window").width;
 
 export default function ReportsScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
-	const { scooter, allLogs, stats, refresh, isLoading } = useScooterData(activeScooterId);
+	const { scooter, allLogs, stats, isLoading } =
+		useScooterData(activeScooterId);
 	const [viewMode, setViewMode] = useState<"day" | "cycle">("day");
 
 	const successColor = useThemeColor("success");
@@ -59,15 +59,17 @@ export default function ReportsScreen() {
 			}));
 		} else {
 			// Por ciclo
-			return stats?.cycles.slice(-10).map((c: any, i: number) => ({
-				value: c.distance,
-				label: `C${i + 1}`,
-				topLabelComponent: () => (
-					<Text className="text-[10px] text-muted mb-1">
-						{c.distance.toFixed(1)}
-					</Text>
-				),
-			})) || [];
+			return (
+				stats?.cycles.slice(-10).map((c: any, i: number) => ({
+					value: c.distance,
+					label: `C${i + 1}`,
+					topLabelComponent: () => (
+						<Text className="text-[10px] text-muted mb-1">
+							{c.distance.toFixed(1)}
+						</Text>
+					),
+				})) || []
+			);
 		}
 	}, [tripsOnly, stats?.cycles, viewMode]);
 
@@ -76,9 +78,7 @@ export default function ReportsScreen() {
 	const isDark =
 		theme === "dark" || (theme === "system" && colorScheme === "dark");
 
-	const _textColor = isDark ? "#f4f4f5" : "#18181b";
 	const mutedColor = isDark ? "#a1a1aa" : "#71717a";
-	const _dividerColor = isDark ? "#3f3f46" : "#e4e4e7";
 
 	if (isLoading) {
 		return (
@@ -90,12 +90,10 @@ export default function ReportsScreen() {
 
 	if (!activeScooterId || !scooter) {
 		return (
-			<ScreenWrapper className="p-6">
-				<Text className="text-xl font-bold text-foreground">Gráficos</Text>
-				<Text className="text-muted mt-4">
-					Nenhuma scooter ativa selecionada.
-				</Text>
-			</ScreenWrapper>
+			<EmptyScooterState
+				title="Gráficos"
+				description="Adicione uma scooter primeiro para visualizar os gráficos de desempenho."
+			/>
 		);
 	}
 
@@ -105,7 +103,9 @@ export default function ReportsScreen() {
 				<Text className="text-3xl font-bold text-foreground mb-1">
 					Gráficos
 				</Text>
-				<Text className="text-muted text-sm">{scooter.name}</Text>
+				<Text className="text-sm font-bold text-muted mt-1 uppercase tracking-wider">
+					{scooter.name}
+				</Text>
 			</View>
 
 			<View className="flex-row gap-3 mb-3">

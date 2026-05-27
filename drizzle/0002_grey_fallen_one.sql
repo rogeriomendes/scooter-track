@@ -1,0 +1,1 @@
+ALTER TABLE `scooters` ADD `showMaintenance` integer DEFAULT true NOT NULL;

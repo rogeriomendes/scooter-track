@@ -1,14 +1,13 @@
-import { eq } from "drizzle-orm";
-import { BottomSheet, Label, TextField } from "heroui-native";
-import { Button } from "heroui-native/button";
-import { useEffect, useState } from "react";
-import { Keyboard, Text, View } from "react-native";
-import * as Haptics from 'expo-haptics';
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
+import { eq } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
+import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import { useEffect, useState } from "react";
+import { Keyboard, Switch, Text, View } from "react-native";
 
 interface ScooterFormSheetProps {
 	isOpen: boolean;
@@ -25,6 +24,10 @@ export function ScooterFormSheet({
 }: ScooterFormSheetProps) {
 	const [name, setName] = useState("");
 	const [batteryType, setBatteryType] = useState("60V");
+	const [trackingMode, setTrackingMode] = useState<"voltage" | "percent">(
+		"voltage",
+	);
+	const [showMaintenance, setShowMaintenance] = useState(true);
 	const [initialKm, setInitialKm] = useState("0");
 
 	const { setActiveScooterId } = useAppStore();
@@ -34,10 +37,14 @@ export function ScooterFormSheet({
 			if (editItem) {
 				setName(editItem.name);
 				setBatteryType(editItem.batteryType);
+				setTrackingMode(editItem.trackingMode as "voltage" | "percent");
+				setShowMaintenance(editItem.showMaintenance);
 				setInitialKm(editItem.initialKm.toString());
 			} else {
 				setName("");
 				setBatteryType("60V");
+				setTrackingMode("voltage");
+				setShowMaintenance(true);
 				setInitialKm("0");
 			}
 		}
@@ -53,6 +60,8 @@ export function ScooterFormSheet({
 				.set({
 					name,
 					batteryType,
+					trackingMode,
+					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
 				})
 				.where(eq(scooters.id, editItem.id));
@@ -62,6 +71,8 @@ export function ScooterFormSheet({
 				.values({
 					name,
 					batteryType,
+					trackingMode,
+					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
 					createdAt: new Date(),
 				})
@@ -111,23 +122,39 @@ export function ScooterFormSheet({
 							variant="secondary"
 						/>
 					</TextField>
-					<View className="gap-2 mt-2">
-						<Text className="text-sm font-medium text-foreground">
-							Tipo de Bateria
+					<View className="flex-row items-center justify-between mt-2">
+						<Text className="text-sm font-medium text-foreground flex-1 pr-4">
+							O painel exibe a bateria em Porcentagem (%)?
 						</Text>
-						<View className="flex-row flex-wrap gap-2">
-							{Object.keys(BATTERY_CHARTS).map((key) => (
-								<Button
-									key={key}
-									size="sm"
-									variant={batteryType === key ? "primary" : "secondary"}
-									onPress={() => setBatteryType(key)}
-								>
-									<Button.Label>{BATTERY_CHARTS[key].label}</Button.Label>
-								</Button>
-							))}
-						</View>
+						<Switch
+							value={trackingMode === "percent"}
+							onValueChange={(val) =>
+								setTrackingMode(val ? "percent" : "voltage")
+							}
+							trackColor={{ false: "#3f3f46", true: "#10b981" }}
+							thumbColor="#ffffff"
+						/>
 					</View>
+
+					{trackingMode === "voltage" && (
+						<View className="gap-2 my-2">
+							<Text className="text-sm font-medium text-foreground">
+								Selecione a Voltagem
+							</Text>
+							<View className="flex-row flex-wrap gap-2">
+								{Object.keys(BATTERY_CHARTS).map((key) => (
+									<Button
+										key={key}
+										size="sm"
+										variant={batteryType === key ? "primary" : "secondary"}
+										onPress={() => setBatteryType(key)}
+									>
+										<Button.Label>{BATTERY_CHARTS[key].label}</Button.Label>
+									</Button>
+								))}
+							</View>
+						</View>
+					)}
 					<TextField>
 						<Label>Odômetro Inicial (KM)</Label>
 						<BottomSheetInput
@@ -138,6 +165,18 @@ export function ScooterFormSheet({
 							variant="secondary"
 						/>
 					</TextField>
+
+					<View className="flex-row items-center justify-between mt-2 mb-2">
+						<Text className="text-sm font-medium text-foreground flex-1 pr-4">
+							Exibir aba de Manutenção para esta scooter?
+						</Text>
+						<Switch
+							value={showMaintenance}
+							onValueChange={setShowMaintenance}
+							trackColor={{ false: "#3f3f46", true: "#10b981" }}
+							thumbColor="#ffffff"
+						/>
+					</View>
 					<Button
 						variant="primary"
 						className="mt-4"

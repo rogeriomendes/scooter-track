@@ -1,24 +1,55 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { desc, eq } from "drizzle-orm";
-import { Button } from "heroui-native/button";
-import { Card } from "heroui-native/card";
-import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { MonthSelector } from "@/components/MonthSelector";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
-import { logs, scooters } from "@/db/schema";
-import { useAppStore } from "@/store/useAppStore";
-import { TripFormSheet } from "./components/TripFormSheet";
+import { logs } from "@/db/schema";
 import { useScooterData } from "@/hooks/useScooterData";
-import { useMemo } from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { eq } from "drizzle-orm";
+import { Button } from "heroui-native";
+import { Card } from "heroui-native/card";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { TripFormSheet } from "./components/TripFormSheet";
 
 export default function TripsScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
-	const { scooter, allLogs, refresh, isLoading } = useScooterData(activeScooterId);
-	const tripsList = useMemo(() => allLogs.filter(l => l.type === "trip"), [allLogs]);
+	const { scooter, allLogs, refresh, isLoading } =
+		useScooterData(activeScooterId);
+	const [currentMonth, setCurrentMonth] = useState(
+		new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+	);
+	const [page, setPage] = useState(1);
+	const itemsPerPage = 20;
+
+	const tripsList = useMemo(() => {
+		return allLogs.filter((l) => {
+			if (l.type !== "trip") return false;
+			const logDate = new Date(l.date);
+			return (
+				logDate.getMonth() === currentMonth.getMonth() &&
+				logDate.getFullYear() === currentMonth.getFullYear()
+			);
+		});
+	}, [allLogs, currentMonth]);
+
+	const displayedTrips = useMemo(
+		() => tripsList.slice(0, page * itemsPerPage),
+		[tripsList, page],
+	);
+
+	const minDate = useMemo(() => {
+		let oldest = scooter?.createdAt ? new Date(scooter.createdAt) : new Date();
+		for (const log of allLogs) {
+			const d = new Date(log.date);
+			if (d < oldest) oldest = d;
+		}
+		return oldest;
+	}, [allLogs, scooter]);
 
 	const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 	const [logToDelete, setLogToDelete] = useState<number | null>(null);
@@ -47,12 +78,10 @@ export default function TripsScreen() {
 
 	if (!activeScooterId || !scooter) {
 		return (
-			<ScreenWrapper className="p-6">
-				<Text className="text-xl font-bold text-foreground">Usos</Text>
-				<Text className="text-muted mt-4">
-					Nenhuma scooter ativa selecionada.
-				</Text>
-			</ScreenWrapper>
+			<EmptyScooterState
+				title="Usos"
+				description="Adicione uma scooter primeiro para registrar viagens."
+			/>
 		);
 	}
 
@@ -61,8 +90,9 @@ export default function TripsScreen() {
 			<View className="p-4 flex-row justify-between items-center">
 				<View>
 					<Text className="text-3xl font-bold text-foreground mb-1">Usos</Text>
-					<Text className="text-muted text-sm">
-						{tripsList.length} registros · {scooter.name}
+					<Text className="text-sm font-bold text-muted mt-1 uppercase tracking-wider">
+						{/* {tripsList.length} registros ·  */}
+						{scooter.name}
 					</Text>
 				</View>
 				<Button
@@ -79,8 +109,31 @@ export default function TripsScreen() {
 				</Button>
 			</View>
 
+			<View className="px-4">
+				<MonthSelector
+					currentDate={currentMonth}
+					minDate={minDate}
+					maxDate={new Date()}
+					onChange={(newDate) => {
+						setCurrentMonth(newDate);
+						setPage(1);
+					}}
+				/>
+			</View>
+
 			<FlatList
-				data={tripsList}
+				data={displayedTrips}
+				onEndReached={() => {
+					if (displayedTrips.length < tripsList.length) {
+						setPage((p) => p + 1);
+					}
+				}}
+				onEndReachedThreshold={0.5}
+				ListFooterComponent={
+					displayedTrips.length < tripsList.length ? (
+						<ActivityIndicator size="small" color="#10b981" className="py-4" />
+					) : null
+				}
 				keyExtractor={(item) => item.id.toString()}
 				contentContainerClassName="px-4 pb-10 gap-3"
 				ListEmptyComponent={
@@ -92,7 +145,8 @@ export default function TripsScreen() {
 							Nenhum uso registrado
 						</Text>
 						<Text className="text-muted text-center text-sm mt-1 px-10">
-							Clique no botão de + acima para adicionar sua primeira viagem com a scooter.
+							Clique no botão de + acima para adicionar sua primeira viagem com
+							a scooter.
 						</Text>
 					</View>
 				}

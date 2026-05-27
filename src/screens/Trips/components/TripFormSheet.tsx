@@ -1,14 +1,13 @@
-import { eq } from "drizzle-orm";
-import { BottomSheet, Label, TextField } from "heroui-native";
-import { Button } from "heroui-native/button";
-import { useEffect, useState } from "react";
-import { Keyboard } from "react-native";
-import * as Haptics from 'expo-haptics';
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs, type scooters } from "@/db/schema";
 import { calculateScooterStats } from "@/utils/stats";
+import { eq } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
+import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import { useEffect, useState } from "react";
+import { Keyboard } from "react-native";
 
 interface TripFormSheetProps {
 	isOpen: boolean;
@@ -76,7 +75,10 @@ export function TripFormSheet({
 
 		// Check for low battery to send notification
 		try {
-			const allLogs = await db.select().from(logs).where(eq(logs.scooterId, scooter.id));
+			const allLogs = await db
+				.select()
+				.from(logs)
+				.where(eq(logs.scooterId, scooter.id));
 			const stats = calculateScooterStats(scooter, allLogs);
 			if (stats && stats.currentCycleKm >= stats.estimatedAutonomy * 0.8) {
 				// To do: Implemented via local state/toast or EAS dev build
@@ -117,11 +119,16 @@ export function TripFormSheet({
 						/>
 					</TextField>
 					<TextField>
-						<Label>Voltagem Final (V)</Label>
+						<Label>
+							{scooter.trackingMode === "percent"
+								? "Nível da Bateria (%)"
+								: "Voltagem Final (V)"}
+						</Label>
 						<BottomSheetInput
 							placeholder={
-								BATTERY_CHARTS[scooter.batteryType]?.maxVoltage.toString() ||
-								"54.6"
+								scooter.trackingMode === "percent"
+									? "Ex: 85"
+									: BATTERY_CHARTS[scooter.batteryType]?.maxVoltage.toString() || "54.6"
 							}
 							keyboardType="numeric"
 							value={voltage}

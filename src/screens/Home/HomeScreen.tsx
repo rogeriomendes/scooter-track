@@ -12,6 +12,7 @@ import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Modal, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
 
 export default function DashboardScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
@@ -33,6 +34,7 @@ export default function DashboardScreen() {
 
 	const batteryPercent = useMemo(() => {
 		if (!scooter || !latestLog) return 100;
+		if (scooter.trackingMode === "percent") return latestLog.batteryLevel;
 		return calculateBatteryPercentage(
 			latestLog.batteryLevel,
 			scooter.batteryType,
@@ -61,15 +63,7 @@ export default function DashboardScreen() {
 	}
 
 	if (!activeScooterId || !scooter) {
-		return (
-			<ScreenWrapper className="p-6">
-				<Text className="text-xl font-bold text-foreground">Início</Text>
-				<Text className="text-muted mt-4">
-					Nenhuma scooter ativa selecionada. Vá em configurações para adicionar
-					uma scooter.
-				</Text>
-			</ScreenWrapper>
-		);
+		return <EmptyScooterState />;
 	}
 
 	return (
