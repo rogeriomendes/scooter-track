@@ -8,9 +8,11 @@
     "scheme": "scootertrack",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.scootertrack.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.scootertrack.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -34,11 +36,21 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-image",
+      "expo-sharing",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ec4cc3cc-864e-456d-b57e-71d03c5960c4"
+      }
+    },
+    "owner": "rogeriomendes"
   }
 }
