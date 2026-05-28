@@ -9,15 +9,21 @@ import { eq } from "drizzle-orm";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import { Button } from "heroui-native";
+import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { ScooterFormSheet } from "./components/ScooterFormSheet";
 
 export default function SettingsScreen() {
-	const { theme, setTheme, activeScooterId, setActiveScooterId, triggerRefresh } =
-		useAppStore();
+	const {
+		theme,
+		setTheme,
+		activeScooterId,
+		setActiveScooterId,
+		triggerRefresh,
+	} = useAppStore();
 
 	const [scootersList, setScootersList] = useState<
 		(typeof scooters.$inferSelect)[]
@@ -33,7 +39,6 @@ export default function SettingsScreen() {
 		const data = await db.select().from(scooters);
 		setScootersList(data);
 
-		// Auto-select scooter if there's only one and none is currently active
 		if (data.length === 1 && !activeScooterId) {
 			setActiveScooterId(data[0].id);
 		}
@@ -95,7 +100,6 @@ export default function SettingsScreen() {
 			const fileUri = result.assets[0].uri;
 			const dbPath = `${FileSystem.documentDirectory}SQLite/scootertrack.db`;
 
-			// Copy selected file to DB location
 			await FileSystem.copyAsync({
 				from: fileUri,
 				to: dbPath,
@@ -113,235 +117,272 @@ export default function SettingsScreen() {
 				Configurações
 			</Text>
 
-			{/* APARÊNCIA */}
-			<View className="mb-8">
-				<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider">
-					Aparência
+			{/* APARÊNCIA - Segmented Control */}
+			<Animated.View entering={FadeInDown.delay(100).springify()}>
+				<Text className="text-[10px] font-bold text-muted mb-2 uppercase tracking-widest ml-1">
+					Tema do Aplicativo
 				</Text>
-				<Card variant="secondary" className="border border-surface-secondary">
-					<View className="flex-row items-center justify-between mb-4">
-						<View className="flex-row items-center gap-3">
-							<View className="p-2 bg-surface rounded-xl">
-								<StyledIcon name="moon" size={20} className="text-foreground" />
-							</View>
-							<Text className="text-base font-bold text-foreground">
-								Tema Escuro
-							</Text>
-						</View>
-					</View>
-					<View className="flex-row gap-2">
-						<Button
-							className="flex-1"
-							variant={theme === "light" ? "primary" : "secondary"}
+				<Card
+					variant="secondary"
+					className="border border-surface-secondary bg-surface mb-8 p-1"
+				>
+					<View className="flex-row bg-surface-secondary/30 rounded-xl p-1">
+						<Pressable
+							className={`flex-1 py-2 rounded-lg flex-row justify-center items-center gap-2 ${
+								theme === "light" ? "bg-surface shadow-sm" : ""
+							}`}
 							onPress={() => setTheme("light")}
 						>
 							<StyledIcon
 								name="sun"
-								size={16}
-								className={
-									theme === "light" ? "text-white" : "text-default-foreground"
-								}
+								size={14}
+								className={theme === "light" ? "text-foreground" : "text-muted"}
 							/>
-							<Button.Label>Claro</Button.Label>
-						</Button>
-						<Button
-							className="flex-1"
-							variant={theme === "dark" ? "primary" : "secondary"}
+							<Text
+								className={`font-bold text-xs ${theme === "light" ? "text-foreground" : "text-muted"}`}
+							>
+								Claro
+							</Text>
+						</Pressable>
+
+						<Pressable
+							className={`flex-1 py-2 rounded-lg flex-row justify-center items-center gap-2 ${
+								theme === "dark" ? "bg-surface shadow-sm" : ""
+							}`}
 							onPress={() => setTheme("dark")}
 						>
 							<StyledIcon
 								name="moon"
-								size={16}
-								className={
-									theme === "dark" ? "text-white" : "text-default-foreground"
-								}
+								size={14}
+								className={theme === "dark" ? "text-foreground" : "text-muted"}
 							/>
-							<Button.Label>Escuro</Button.Label>
-						</Button>
-						<Button
-							className="flex-1"
-							variant={theme === "system" ? "primary" : "secondary"}
+							<Text
+								className={`font-bold text-xs ${theme === "dark" ? "text-foreground" : "text-muted"}`}
+							>
+								Escuro
+							</Text>
+						</Pressable>
+
+						<Pressable
+							className={`flex-1 py-2 rounded-lg flex-row justify-center items-center gap-2 ${
+								theme === "system" ? "bg-surface shadow-sm" : ""
+							}`}
 							onPress={() => setTheme("system")}
 						>
 							<StyledIcon
 								name="monitor"
-								size={16}
+								size={14}
 								className={
-									theme === "system" ? "text-white" : "text-default-foreground"
+									theme === "system" ? "text-foreground" : "text-muted"
 								}
 							/>
-							<Button.Label>Auto</Button.Label>
-						</Button>
+							<Text
+								className={`font-bold text-xs ${theme === "system" ? "text-foreground" : "text-muted"}`}
+							>
+								Auto
+							</Text>
+						</Pressable>
 					</View>
 				</Card>
-			</View>
+			</Animated.View>
 
 			{/* MINHAS SCOOTERS */}
-			<View className="mb-8">
-				<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider">
+			<Animated.View entering={FadeInDown.delay(200).springify()}>
+				<Text className="text-[10px] font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Minhas Scooters
 				</Text>
 
 				{scootersList.length === 0 ? (
-					<Text className="text-center text-muted mb-4">
+					<Text className="text-center text-muted mb-4 mt-2">
 						Nenhuma scooter cadastrada.
 					</Text>
 				) : (
-					<View className="gap-4 mb-4">
-						{scootersList.map((item) => (
-							<Card
-								key={item.id}
-								variant="secondary"
-								className={`border ${
-									activeScooterId === item.id
-										? "border-success bg-success-soft"
-										: "border-surface-secondary bg-surface"
-								}`}
-							>
-								<View className="flex-row justify-between items-start mb-4">
-									<View className="flex-row items-center gap-3">
-										<View
-											className={`p-3 rounded-2xl ${activeScooterId === item.id ? "bg-success" : "bg-surface-secondary"}`}
-										>
-											<StyledIcon
-												name="navigation"
-												size={24}
-												className={
-													activeScooterId === item.id
-														? "text-white"
-														: "text-default-foreground"
-												}
-											/>
-										</View>
-										<View>
-											<View className="flex-row items-center gap-2">
-												<Text className="text-xl font-bold text-foreground">
-													{item.name}
-												</Text>
-												{activeScooterId === item.id && (
-													<View className="bg-success px-2 py-0.5 rounded text-white">
-														<Text className="text-[10px] text-white font-bold">
-															ATIVA
-														</Text>
-													</View>
-												)}
+					<View className="gap-3 mb-4">
+						{scootersList.map((item) => {
+							const isActive = activeScooterId === item.id;
+							return (
+								<Card
+									key={item.id}
+									variant="secondary"
+									className={`border ${
+										isActive
+											? "border-success/50 bg-success/5 shadow-sm"
+											: "border-surface-secondary bg-surface"
+									}`}
+								>
+									<View className="flex-row justify-between items-start mb-4">
+										<View className="flex-row items-center gap-3">
+											<View
+												className={`p-3 rounded-2xl ${isActive ? "bg-success" : "bg-surface-secondary"}`}
+											>
+												<StyledIcon
+													name="navigation"
+													size={20}
+													className={isActive ? "text-white" : "text-muted"}
+												/>
 											</View>
-											<Text className="text-xs text-muted mt-1">
-												KM inicial: {item.initialKm} · Bateria:{" "}
-												{item.trackingMode === "percent"
-													? "Porcentagem (%)"
-													: BATTERY_CHARTS[item.batteryType]?.label ||
-														item.batteryType}
-											</Text>
+											<View>
+												<View className="flex-row items-center gap-2 mb-1">
+													<Text className="text-lg font-bold text-foreground">
+														{item.name}
+													</Text>
+													{isActive && (
+														<View className="bg-success/20 border border-success/30 px-2 py-0.5 rounded flex-row items-center gap-1">
+															<View className="w-1.5 h-1.5 rounded-full bg-success" />
+															<Text className="text-[9px] text-success font-black tracking-widest">
+																ATIVA
+															</Text>
+														</View>
+													)}
+												</View>
+												<Text className="text-[11px] text-muted font-medium">
+													{item.initialKm} km ·{" "}
+													{item.trackingMode === "percent"
+														? "Porcentagem (%)"
+														: "Voltagem (" +
+																BATTERY_CHARTS[item.batteryType]?.label ||
+															item.batteryType + ")"}
+												</Text>
+											</View>
 										</View>
+										{!isActive && (
+											<Button
+												size="sm"
+												variant="outline"
+												onPress={() => setActiveScooterId(item.id)}
+												className="border-surface-secondary"
+											>
+												<Button.Label className="text-xs font-bold">
+													Ativar
+												</Button.Label>
+											</Button>
+										)}
 									</View>
-									{activeScooterId !== item.id && (
+
+									<View className="flex-row gap-2 pt-3 border-t border-surface-secondary/50">
 										<Button
 											size="sm"
-											variant="outline"
-											onPress={() => setActiveScooterId(item.id)}
+											variant="tertiary"
+											onPress={() => handleEdit(item)}
+											className="flex-1"
 										>
-											<Button.Label>Ativar</Button.Label>
+											<StyledIcon
+												name="edit-2"
+												size={14}
+												className="text-foreground"
+											/>
+											<Button.Label className="text-foreground font-bold">
+												Editar
+											</Button.Label>
 										</Button>
-									)}
-								</View>
-
-								<View className="flex-row gap-2 pt-3 border-t border-surface-secondary">
-									<Button
-										size="sm"
-										variant="secondary"
-										onPress={() => handleEdit(item)}
-										className="flex-1"
-									>
-										<StyledIcon
-											name="edit-2"
-											size={14}
-											className="text-accent"
-										/>
-										<Button.Label>Editar</Button.Label>
-									</Button>
-									<Button
-										size="sm"
-										variant="danger-soft"
-										onPress={() => setScooterToDelete(item.id)}
-									>
-										<StyledIcon
-											name="trash-2"
-											size={14}
-											className="text-danger"
-										/>
-									</Button>
-								</View>
-							</Card>
-						))}
+										<Button
+											size="sm"
+											variant="secondary"
+											feedbackVariant="scale-ripple"
+											className="bg-danger/10 border border-danger/10"
+											onPress={() => setScooterToDelete(item.id)}
+										>
+											<StyledIcon
+												name="trash-2"
+												size={14}
+												className="text-danger"
+											/>
+										</Button>
+									</View>
+								</Card>
+							);
+						})}
 					</View>
 				)}
 
 				<Button
-					variant="outline"
-					className="w-full border-dashed border-2 border-success"
+					variant="secondary"
+					className="w-full bg-surface border border-success/30 shadow-sm mb-8"
 					onPress={() => {
 						setScooterToEdit(null);
 						setIsBottomSheetOpen(true);
 					}}
 				>
-					<StyledIcon name="plus" size={18} color="#17C964" />
-					<Text className="text-success font-bold">Adicionar scooter</Text>
+					<StyledIcon name="plus" size={18} className="text-success" />
+					<Button.Label className="text-success font-bold">
+						Adicionar Scooter
+					</Button.Label>
 				</Button>
-			</View>
+			</Animated.View>
 
 			{/* BACKUP E RESTAURAÇÃO */}
-			<View className="mb-8">
-				<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider">
-					Backup e Restauração
+			<Animated.View entering={FadeInDown.delay(300).springify()}>
+				<Text className="text-[10px] font-bold text-muted mb-2 uppercase tracking-widest ml-1">
+					Backup e Dados
 				</Text>
-				<Card variant="secondary" className="border border-surface-secondary">
-					<View className="flex-row gap-3 mb-3">
-						<Button variant="primary" className="flex-1" onPress={handleBackup}>
-							<StyledIcon name="upload" size={18} color="white" />
-							<Button.Label>Exportar</Button.Label>
+				<Card
+					variant="secondary"
+					className="border border-surface-secondary bg-surface mb-8"
+				>
+					<View className="flex-row gap-3 mb-4">
+						<Button
+							variant="primary"
+							className="flex-1 bg-info shadow-sm"
+							feedbackVariant="scale-ripple"
+							onPress={handleBackup}
+						>
+							<StyledIcon name="upload" size={16} color="white" />
+							<Button.Label className="text-white font-bold">
+								Exportar
+							</Button.Label>
 						</Button>
 						<Button
 							variant="outline"
-							className="flex-1 border-accent"
+							className="flex-1 border-surface-secondary bg-transparent"
 							onPress={handleRestore}
 						>
-							<StyledIcon name="download" size={18} color="#006FEE" />
-							<Text className="text-[#006FEE] font-bold">Restaurar</Text>
+							<StyledIcon
+								name="download"
+								size={16}
+								className="text-foreground"
+							/>
+							<Button.Label className="text-foreground font-bold">
+								Restaurar
+							</Button.Label>
 						</Button>
 					</View>
 					<Text className="text-xs text-muted">
-						Exporta todas as suas scooters, usos e recargas em formato de banco
-						de dados para segurança ou migração de aparelho.
+						Exporta todas as suas scooters, usos e recargas em um único arquivo
+						para segurança ou migração de aparelho.
 					</Text>
 				</Card>
-			</View>
+			</Animated.View>
 
 			{/* ZONA DE PERIGO */}
-			<View className="mb-8">
-				<Text className="text-xs font-bold text-[#f87171] mb-3 uppercase tracking-wider">
+			<Animated.View entering={FadeInDown.delay(400).springify()}>
+				<Text className="text-[10px] font-bold text-danger mb-2 uppercase tracking-widest ml-1">
 					Zona de Perigo
 				</Text>
 				<Card
 					variant="secondary"
-					className="border border-danger/30 bg-danger/5"
+					className="border border-danger/20 bg-danger/5"
 				>
 					<Button
 						variant="outline"
-						className="w-full border-danger"
+						className="w-full border-danger bg-transparent"
 						onPress={() => setIsClearAllDialogOpen(true)}
 					>
-						<StyledIcon name="trash-2" size={18} color="#f87171" />
-						<Text className="text-[#f87171] font-bold">
-							Apagar todos os dados
-						</Text>
+						<StyledIcon name="trash-2" size={16} className="text-danger" />
+						<Button.Label className="text-danger font-bold">
+							Apagar Todos os Dados
+						</Button.Label>
 					</Button>
+					<Text className="text-[10px] text-danger/80 text-center mt-3 font-medium uppercase tracking-wider">
+						Esta ação não pode ser desfeita.
+					</Text>
 				</Card>
-			</View>
+			</Animated.View>
 
-			<View className="items-center opacity-50 my-6">
-				<StyledIcon name="zap" size={24} color="#17C964" className="mb-2" />
-				<Text className="text-muted text-xs">ScooterTrack v1.0.0</Text>
+			<View className="items-center opacity-40 my-6">
+				<StyledIcon name="zap" size={20} color="#10b981" className="mb-2" />
+				<Text className="text-muted text-[10px] uppercase tracking-widest font-bold">
+					ScooterTrack v1.0.0
+				</Text>
 			</View>
 
 			<ScooterFormSheet
@@ -361,7 +402,7 @@ export default function SettingsScreen() {
 					if (!open) setScooterToDelete(null);
 				}}
 				title="Excluir Scooter"
-				description="Tem certeza? Todos os usos e recargas desta scooter também serão perdidos."
+				description="Tem certeza? Todos os usos e recargas desta scooter também serão perdidos permanentemente."
 				onCancel={() => setScooterToDelete(null)}
 				onConfirm={() =>
 					scooterToDelete && executeDeleteScooter(scooterToDelete)
@@ -373,7 +414,7 @@ export default function SettingsScreen() {
 				isOpen={isClearAllDialogOpen}
 				onOpenChange={setIsClearAllDialogOpen}
 				title="Apagar todos os dados"
-				description="CUIDADO: Você está prestes a apagar todas as scooters e registros. Deseja continuar?"
+				description="CUIDADO: Você está prestes a apagar todas as scooters, usos e recargas. Essa ação remove seus dados permanentemente."
 				confirmText="Apagar TUDO"
 				onCancel={() => setIsClearAllDialogOpen(false)}
 				onConfirm={executeClearAll}
