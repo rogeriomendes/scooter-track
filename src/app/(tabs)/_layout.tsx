@@ -1,18 +1,19 @@
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
-import Feather from "@expo/vector-icons/Feather";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import { useThemeColor } from "heroui-native";
-import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
 	const { scooter } = useScooterData(activeScooterId);
+	const { bottom } = useSafeAreaInsets();
 
 	const backgroundColor = useThemeColor("background") as unknown as string;
 	const surfaceColor = useThemeColor("surface") as unknown as string;
 	const border = useThemeColor("border") as unknown as string;
-	const accentColor = useThemeColor("success") as unknown as string; // Screenshots use Green as active color!
+	const accentColor = useThemeColor("success") as unknown as string;
 	const mutedColor = useThemeColor("muted") as unknown as string;
 	const foregroundColor = useThemeColor("foreground") as unknown as string;
 
@@ -28,6 +29,9 @@ export default function TabLayout() {
 					borderTopColor: border,
 					elevation: 0,
 					borderTopWidth: 1,
+					height: 55 + bottom,
+					paddingBottom: 15 + bottom,
+					paddingTop: 5,
 				},
 				headerStyle: {
 					backgroundColor: backgroundColor,
@@ -45,14 +49,12 @@ export default function TabLayout() {
 				name="index"
 				options={{
 					title: "Dashboard",
-					tabBarIcon: ({ color, size, focused }) => (
-						<View
-							className={
-								focused ? "bg-success/20 py-1.5 px-4 rounded-full" : ""
-							}
-						>
-							<Feather name="activity" color={color} size={size} />
-						</View>
+					tabBarIcon: ({ color, focused }) => (
+						<Ionicons
+							name={focused ? "home" : "home-outline"}
+							color={color}
+							size={20}
+						/>
 					),
 				}}
 			/>
@@ -60,14 +62,12 @@ export default function TabLayout() {
 				name="trips"
 				options={{
 					title: "Usos",
-					tabBarIcon: ({ color, size, focused }) => (
-						<View
-							className={
-								focused ? "bg-success/20 py-1.5 px-4 rounded-full" : ""
-							}
-						>
-							<Feather name="map" color={color} size={size} />
-						</View>
+					tabBarIcon: ({ color, focused }) => (
+						<Ionicons
+							name={focused ? "map" : "map-outline"}
+							color={color}
+							size={20}
+						/>
 					),
 				}}
 			/>
@@ -75,14 +75,12 @@ export default function TabLayout() {
 				name="charges"
 				options={{
 					title: "Recargas",
-					tabBarIcon: ({ color, size, focused }) => (
-						<View
-							className={
-								focused ? "bg-success/20 py-1.5 px-4 rounded-full" : ""
-							}
-						>
-							<Feather name="zap" color={color} size={size} />
-						</View>
+					tabBarIcon: ({ color, focused }) => (
+						<Ionicons
+							name={focused ? "flash" : "flash-outline"}
+							color={color}
+							size={20}
+						/>
 					),
 				}}
 			/>
@@ -90,14 +88,12 @@ export default function TabLayout() {
 				name="reports"
 				options={{
 					title: "Gráficos",
-					tabBarIcon: ({ color, size, focused }) => (
-						<View
-							className={
-								focused ? "bg-success/20 py-1.5 px-4 rounded-full" : ""
-							}
-						>
-							<Feather name="bar-chart-2" color={color} size={size} />
-						</View>
+					tabBarIcon: ({ color, focused }) => (
+						<Ionicons
+							name={focused ? "stats-chart" : "stats-chart-outline"}
+							color={color}
+							size={20}
+						/>
 					),
 				}}
 			/>
@@ -106,14 +102,12 @@ export default function TabLayout() {
 				options={{
 					title: "Manut.",
 					href: scooter && scooter.showMaintenance ? undefined : null,
-					tabBarIcon: ({ color, size, focused }) => (
-						<View
-							className={
-								focused ? "bg-success/20 py-1.5 px-4 rounded-full" : ""
-							}
-						>
-							<Feather name="tool" color={color} size={size} />
-						</View>
+					tabBarIcon: ({ color, focused }) => (
+						<Ionicons
+							name={focused ? "build" : "build-outline"}
+							color={color}
+							size={20}
+						/>
 					),
 				}}
 			/>
@@ -121,14 +115,12 @@ export default function TabLayout() {
 				name="settings"
 				options={{
 					title: "Config.",
-					tabBarIcon: ({ color, size, focused }) => (
-						<View
-							className={
-								focused ? "bg-success/20 py-1.5 px-4 rounded-full" : ""
-							}
-						>
-							<Feather name="settings" color={color} size={size} />
-						</View>
+					tabBarIcon: ({ color, focused }) => (
+						<Ionicons
+							name={focused ? "settings" : "settings-outline"}
+							color={color}
+							size={20}
+						/>
 					),
 				}}
 			/>

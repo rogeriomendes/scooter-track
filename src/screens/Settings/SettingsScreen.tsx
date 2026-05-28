@@ -327,9 +327,7 @@ export default function SettingsScreen() {
 							onPress={handleBackup}
 						>
 							<StyledIcon name="upload" size={16} color="white" />
-							<Button.Label className="text-white font-bold">
-								Exportar
-							</Button.Label>
+							<Button.Label className="text-white">Exportar</Button.Label>
 						</Button>
 						<Button
 							variant="outline"
@@ -341,9 +339,7 @@ export default function SettingsScreen() {
 								size={16}
 								className="text-foreground"
 							/>
-							<Button.Label className="text-foreground font-bold">
-								Restaurar
-							</Button.Label>
+							<Button.Label className="text-foreground">Restaurar</Button.Label>
 						</Button>
 					</View>
 					<Text className="text-xs text-muted">
@@ -368,7 +364,7 @@ export default function SettingsScreen() {
 						onPress={() => setIsClearAllDialogOpen(true)}
 					>
 						<StyledIcon name="trash-2" size={16} className="text-danger" />
-						<Button.Label className="text-danger font-bold">
+						<Button.Label className="text-danger">
 							Apagar Todos os Dados
 						</Button.Label>
 					</Button>
