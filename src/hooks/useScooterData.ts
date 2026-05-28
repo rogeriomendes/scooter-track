@@ -1,10 +1,10 @@
 import { db } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
+import { useAppStore } from "@/store/useAppStore";
 import { calculateScooterStats } from "@/utils/stats";
 import { desc, eq } from "drizzle-orm";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 
 export function useScooterData(activeScooterId: number | null) {
 	const [scooter, setScooter] = useState<typeof scooters.$inferSelect | null>(

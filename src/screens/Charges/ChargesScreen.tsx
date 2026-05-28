@@ -114,7 +114,7 @@ export default function ChargesScreen() {
 			<View className="flex-row gap-3 px-4 mb-4">
 				<Card
 					variant="secondary"
-					className="flex-1 items-center justify-center py-4 bg-surface border border-surface-secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary"
 				>
 					<StyledIcon name="zap" size={20} className="mb-2 text-info" />
 					<Text className="text-xl font-bold text-foreground">
@@ -124,7 +124,7 @@ export default function ChargesScreen() {
 				</Card>
 				<Card
 					variant="secondary"
-					className="flex-1 items-center justify-center py-4 bg-surface border border-surface-secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary"
 				>
 					<StyledIcon
 						name="navigation"
@@ -132,13 +132,14 @@ export default function ChargesScreen() {
 						className="mb-2 text-success"
 					/>
 					<Text className="text-xl font-bold text-foreground">
-						{stats?.averageCycleKm.toFixed(1) || "0.0"}
+						{stats?.averageCycleKm.toFixed(1) || "0.0"}{" "}
+						<Text className="font-normal text-muted text-xs">km</Text>
 					</Text>
-					<Text className="text-xs text-muted">Km médio/ciclo</Text>
+					<Text className="text-xs text-muted">médio/ciclo</Text>
 				</Card>
 				<Card
 					variant="secondary"
-					className="flex-1 items-center justify-center py-4 bg-surface border border-surface-secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary"
 				>
 					<StyledIcon
 						name="trending-up"
@@ -146,7 +147,8 @@ export default function ChargesScreen() {
 						className="mb-2 text-warning"
 					/>
 					<Text className="text-xl font-bold text-foreground">
-						{stats?.bestCycleKm.toFixed(1) || "0.0"}
+						{stats?.bestCycleKm.toFixed(1) || "0.0"}{" "}
+						<Text className="font-normal text-muted text-xs">km</Text>
 					</Text>
 					<Text className="text-xs text-muted">Melhor ciclo</Text>
 				</Card>
