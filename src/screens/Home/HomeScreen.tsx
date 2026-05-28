@@ -249,12 +249,8 @@ export default function DashboardScreen() {
 						className="flex-1 bg-surface border border-surface-secondary p-4 shadow-sm justify-center"
 					>
 						<View className="flex-row items-center gap-3">
-							<View className="bg-success/10 p-3 rounded-xl">
-								<StyledIcon
-									name="navigation"
-									size={18}
-									className="text-success"
-								/>
+							<View className="bg-success/10 p-3 rounded-xl border border-success/20">
+								<StyledIcon name="map" size={18} className="text-success" />
 							</View>
 							<View className="flex-1 justify-center">
 								<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -275,8 +271,8 @@ export default function DashboardScreen() {
 						className="flex-1 bg-surface border border-surface-secondary p-4 shadow-sm justify-center"
 					>
 						<View className="flex-row items-center gap-3">
-							<View className="bg-info/10 p-3 rounded-xl">
-								<StyledIcon name="target" size={18} className="text-info" />
+							<View className="bg-info/10 p-3 rounded-xl border border-info/20">
+								<StyledIcon name="zap" size={18} className="text-info" />
 							</View>
 							<View className="flex-1 justify-center">
 								<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -305,7 +301,7 @@ export default function DashboardScreen() {
 						className="flex-1"
 						onPress={() => router.push("/(tabs)/trips")}
 					>
-						<StyledIcon name="play" size={20} className="text-white" />
+						<StyledIcon name="map" size={20} className="text-white" />
 						<Button.Label className="text-white">Registrar Uso</Button.Label>
 					</Button>
 
@@ -356,9 +352,9 @@ export default function DashboardScreen() {
 							>
 								<View className="flex-row items-center justify-between">
 									<View className="flex-row items-center gap-3">
-										<View className="bg-success/10 p-2 rounded-full">
+										<View className="bg-success/10 p-2 rounded-xl border border-success/20">
 											<StyledIcon
-												name="navigation"
+												name="map"
 												size={16}
 												className="text-success"
 											/>
