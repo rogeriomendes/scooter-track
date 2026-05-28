@@ -76,8 +76,13 @@ export default function ReportsScreen() {
 	const chartStats = useMemo(() => {
 		if (viewMode === "day") {
 			const total = tripsOnly.reduce((sum, t) => sum + t.distance, 0);
-			const uniqueDays = new Set(tripsOnly.map(t => format(new Date(t.date), "yyyy-MM-dd"))).size;
-			const maxTrip = tripsOnly.length > 0 ? Math.max(...tripsOnly.map(t => t.distance)) : 0;
+			const uniqueDays = new Set(
+				tripsOnly.map((t) => format(new Date(t.date), "yyyy-MM-dd")),
+			).size;
+			const maxTrip =
+				tripsOnly.length > 0
+					? Math.max(...tripsOnly.map((t) => t.distance))
+					: 0;
 			const avg = uniqueDays > 0 ? total / uniqueDays : 0;
 			return {
 				mainValue: total,
@@ -87,11 +92,12 @@ export default function ReportsScreen() {
 				maxValue: maxTrip,
 				maxLabel: "MAIOR VIAGEM (KM)",
 				countValue: uniqueDays,
-				countLabel: "DIAS ATIVOS"
+				countLabel: "DIAS ATIVOS",
 			};
 		} else {
 			const cyclesCount = stats?.cycles.length || 0;
-			const totalCyclesDist = stats?.cycles.reduce((sum: number, c: any) => sum + c.distance, 0) || 0;
+			const totalCyclesDist =
+				stats?.cycles.reduce((sum: number, c: any) => sum + c.distance, 0) || 0;
 			const avg = cyclesCount > 0 ? totalCyclesDist / cyclesCount : 0;
 			const max = stats?.bestCycleKm || 0;
 			return {
@@ -102,7 +108,7 @@ export default function ReportsScreen() {
 				maxValue: max,
 				maxLabel: "MELHOR CICLO (KM)",
 				countValue: cyclesCount,
-				countLabel: "CICLOS FECHADOS"
+				countLabel: "CICLOS FECHADOS",
 			};
 		}
 	}, [tripsOnly, stats, viewMode]);
@@ -127,17 +133,29 @@ export default function ReportsScreen() {
 	return (
 		<ScreenWrapper scrollable contentContainerClassName="p-4 pb-20">
 			<View className="mb-6">
-				<Animated.Text entering={FadeInDown.delay(100).springify()} className="text-3xl font-bold text-foreground mb-1">
+				<Animated.Text
+					entering={FadeInDown.delay(100).springify()}
+					className="text-3xl font-bold text-foreground mb-1"
+				>
 					Insights
 				</Animated.Text>
-				<Animated.Text entering={FadeInDown.delay(200).springify()} className="text-xs font-bold text-muted uppercase tracking-wider">
+				<Animated.Text
+					entering={FadeInDown.delay(200).springify()}
+					className="text-xs font-bold text-muted uppercase tracking-wider"
+				>
 					{scooter.name}
 				</Animated.Text>
 			</View>
 
 			{/* TOGGLE SEGMENTADO */}
-			<Animated.View entering={FadeInDown.delay(300).springify()} className="mb-6">
-				<Card variant="secondary" className="border border-surface-secondary bg-surface p-1">
+			<Animated.View
+				entering={FadeInDown.delay(300).springify()}
+				className="mb-6"
+			>
+				<Card
+					variant="secondary"
+					className="border border-surface-secondary bg-surface p-1"
+				>
 					<View className="flex-row bg-surface-secondary/40 rounded-xl p-1">
 						<Pressable
 							onPress={() => setViewMode("day")}
@@ -145,7 +163,9 @@ export default function ReportsScreen() {
 								viewMode === "day" ? "bg-surface shadow-sm" : ""
 							}`}
 						>
-							<Text className={`text-xs font-black uppercase tracking-widest ${viewMode === "day" ? "text-success" : "text-muted"}`}>
+							<Text
+								className={`text-xs font-black uppercase tracking-widest ${viewMode === "day" ? "text-success" : "text-muted"}`}
+							>
 								Por Dia
 							</Text>
 						</Pressable>
@@ -156,7 +176,9 @@ export default function ReportsScreen() {
 								viewMode === "cycle" ? "bg-surface shadow-sm" : ""
 							}`}
 						>
-							<Text className={`text-xs font-black uppercase tracking-widest ${viewMode === "cycle" ? "text-success" : "text-muted"}`}>
+							<Text
+								className={`text-xs font-black uppercase tracking-widest ${viewMode === "cycle" ? "text-success" : "text-muted"}`}
+							>
 								Por Ciclo
 							</Text>
 						</Pressable>
@@ -166,7 +188,10 @@ export default function ReportsScreen() {
 
 			{/* GRÁFICO NEON */}
 			<Animated.View entering={FadeInDown.delay(400).springify()}>
-				<Card variant="secondary" className="mb-6 border border-surface-secondary bg-surface overflow-hidden p-0 pt-6 pb-2">
+				<Card
+					variant="secondary"
+					className="mb-6 border border-surface-secondary bg-surface overflow-hidden p-0 pt-6 pb-2"
+				>
 					<View className="px-6 mb-4">
 						<Text className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">
 							Evolução de Distância
@@ -175,9 +200,9 @@ export default function ReportsScreen() {
 							{chartData.length > 0 ? "Últimos Registros" : "Sem dados"}
 						</Text>
 					</View>
-					
+
 					{chartData.length > 0 ? (
-						<View className="ml-[-10]">
+						<View className="ml-2">
 							<LineChart
 								areaChart
 								curved
@@ -199,9 +224,17 @@ export default function ReportsScreen() {
 								yAxisThickness={0}
 								rulesType="dashed"
 								rulesColor={gridColor}
-								yAxisTextStyle={{ color: mutedColor, fontSize: 10, fontWeight: "bold" }}
+								yAxisTextStyle={{
+									color: mutedColor,
+									fontSize: 10,
+									fontWeight: "bold",
+								}}
 								xAxisColor="transparent"
-								xAxisLabelTextStyle={{ color: mutedColor, fontSize: 10, fontWeight: "bold" }}
+								xAxisLabelTextStyle={{
+									color: mutedColor,
+									fontSize: 10,
+									fontWeight: "bold",
+								}}
 								pointerConfig={{
 									pointerStripHeight: 160,
 									pointerStripColor: primaryLineColor,
@@ -229,8 +262,14 @@ export default function ReportsScreen() {
 						</View>
 					) : (
 						<View className="h-40 items-center justify-center">
-							<StyledIcon name="activity" size={32} className="text-muted opacity-30 mb-2" />
-							<Text className="text-muted text-xs font-bold uppercase tracking-widest">Gráfico Indisponível</Text>
+							<StyledIcon
+								name="activity"
+								size={32}
+								className="text-muted opacity-30 mb-2"
+							/>
+							<Text className="text-muted text-xs font-bold uppercase tracking-widest">
+								Gráfico Indisponível
+							</Text>
 						</View>
 					)}
 				</Card>
@@ -262,7 +301,7 @@ export default function ReportsScreen() {
 						</Text>
 					</Card>
 				</View>
-				
+
 				<View className="flex-row gap-3">
 					<Card
 						variant="secondary"
