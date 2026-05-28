@@ -151,84 +151,54 @@ export default function TripsScreen() {
 			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD) */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="flex-col gap-3 px-4 mb-4 mt-2"
+				className="flex-row gap-3 px-4 mb-4 mt-2"
 			>
-				<View className="flex-row gap-3">
-					<Card
-						variant="secondary"
-						className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-					>
-						<StyledIcon name="map" size={18} className="mb-2 text-info" />
-						<View className="flex-row items-baseline gap-1">
-							<Text className="text-xl font-black text-foreground">
-								{dashboardStats.totalKm.toFixed(1)}
-							</Text>
-							<Text className="font-bold text-muted text-[10px]">km</Text>
-						</View>
-						<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
-							Total no Mês
+				<Card
+					variant="secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
+				>
+					<StyledIcon name="map" size={18} className="mb-2 text-info" />
+					<View className="flex-row items-baseline gap-1">
+						<Text className="text-xl font-black text-foreground">
+							{dashboardStats.totalKm.toFixed(1)}
 						</Text>
-					</Card>
-					<Card
-						variant="secondary"
-						className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-					>
-						<StyledIcon
-							name="bar-chart-2"
-							size={18}
-							className="mb-2 text-primary"
-						/>
-						<View className="flex-row items-baseline gap-1">
-							<Text className="text-xl font-black text-foreground">
-								{dashboardStats.avgKm.toFixed(1)}
-							</Text>
-							<Text className="font-bold text-muted text-[10px]">km/dia</Text>
-						</View>
-						<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
-							Média de Uso
+					</View>
+					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-1">
+						Total
+					</Text>
+				</Card>
+				<Card
+					variant="secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
+				>
+					<StyledIcon
+						name="bar-chart-2"
+						size={18}
+						className="mb-2 text-primary"
+					/>
+					<View className="flex-row items-baseline gap-1">
+						<Text className="text-xl font-black text-foreground">
+							{dashboardStats.avgKm.toFixed(1)}
 						</Text>
-					</Card>
-				</View>
-				<View className="flex-row gap-3">
-					<Card
-						variant="secondary"
-						className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-					>
-						<StyledIcon
-							name="trending-up"
-							size={18}
-							className="mb-2 text-warning"
-						/>
-						<View className="flex-row items-baseline gap-1">
-							<Text className="text-xl font-black text-foreground">
-								{dashboardStats.maxKm.toFixed(1)}
-							</Text>
-							<Text className="font-bold text-muted text-[10px]">km</Text>
-						</View>
-						<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
-							Maior Uso
+					</View>
+					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-1">
+						Média/Dia
+					</Text>
+				</Card>
+				<Card
+					variant="secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
+				>
+					<StyledIcon name="calendar" size={18} className="mb-2 text-success" />
+					<View className="flex-row items-baseline gap-1">
+						<Text className="text-xl font-black text-foreground">
+							{dashboardStats.activeDays}
 						</Text>
-					</Card>
-					<Card
-						variant="secondary"
-						className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-					>
-						<StyledIcon
-							name="calendar"
-							size={18}
-							className="mb-2 text-success"
-						/>
-						<View className="flex-row items-baseline gap-1">
-							<Text className="text-xl font-black text-foreground">
-								{dashboardStats.activeDays}
-							</Text>
-							<Text className="font-bold text-muted text-[10px]">dias</Text>
-						</View>
-						<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
-							Dias Ativos
-						</Text>
-					</Card>
-				</View>
+					</View>
+					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-1">
+						Dias Uso
+					</Text>
+				</Card>
 			</Animated.View>
 
 			{/* SELETOR DE MÊS */}

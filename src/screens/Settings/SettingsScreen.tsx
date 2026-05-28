@@ -113,7 +113,7 @@ export default function SettingsScreen() {
 
 	return (
 		<ScreenWrapper scrollable contentContainerClassName="p-4 pb-10">
-			<Text className="text-3xl font-bold text-foreground mb-6">
+			<Text className="text-3xl font-bold text-foreground mb-4">
 				Configurações
 			</Text>
 

@@ -114,7 +114,7 @@ export default function DashboardScreen() {
 		<ScreenWrapper scrollable contentContainerClassName="p-4 pb-10">
 			{/* HEADER - HERO SECTION (PAINEL DO VEÍCULO) */}
 			<Animated.View entering={FadeInDown.delay(100).springify()}>
-				<View className="mb-6 rounded-3xl bg-surface border border-surface-secondary overflow-hidden shadow-2xl">
+				<View className="mb-6 rounded-3xl bg-surface border border-surface-secondary overflow-hidden shadow-xl">
 					{/* Gradient Background Subtle Glow */}
 					<LinearGradient
 						colors={["rgba(16, 185, 129, 0.1)", "rgba(0,0,0,0)"]}
@@ -147,7 +147,7 @@ export default function DashboardScreen() {
 						</View>
 
 						{/* Bateria Gigante */}
-						<View className="items-center mb-6 w-full relative">
+						<View className="items-center mb-4 w-full relative">
 							{/* Texto com "Glow" Fake via text shadow na fonte (React Native não suporta box-shadow em texto tão fácil, então usamos cor forte) */}
 							<Text
 								className="text-7xl font-black tracking-tighter"
@@ -243,7 +243,7 @@ export default function DashboardScreen() {
 				</View>
 
 				{/* Segunda Linha de Cards (Odômetro e Eficiência) */}
-				<View className="flex-row gap-3 mb-6">
+				<View className="flex-row gap-3 mb-4">
 					<Card
 						variant="secondary"
 						className="flex-1 bg-surface border border-surface-secondary p-4 shadow-sm justify-center"
@@ -295,7 +295,7 @@ export default function DashboardScreen() {
 				<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
 					Ações
 				</Text>
-				<View className="gap-3 mb-6 flex-row w-full">
+				<View className="gap-3 mb-4 flex-row w-full">
 					<Button
 						variant="primary"
 						className="flex-1"

@@ -132,7 +132,7 @@ export default function ReportsScreen() {
 
 	return (
 		<ScreenWrapper scrollable contentContainerClassName="p-4 pb-20">
-			<View className="mb-6">
+			<View className="mb-4">
 				<Animated.Text
 					entering={FadeInDown.delay(100).springify()}
 					className="text-3xl font-bold text-foreground mb-1"
@@ -150,7 +150,7 @@ export default function ReportsScreen() {
 			{/* TOGGLE SEGMENTADO */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="mb-6"
+				className="mb-4"
 			>
 				<Card
 					variant="secondary"
@@ -190,7 +190,7 @@ export default function ReportsScreen() {
 			<Animated.View entering={FadeInDown.delay(400).springify()}>
 				<Card
 					variant="secondary"
-					className="mb-6 border border-surface-secondary bg-surface overflow-hidden p-0 pt-6 pb-2"
+					className="mb-4 border border-surface-secondary bg-surface overflow-hidden p-0 pt-6 pb-2"
 				>
 					<View className="px-6 mb-4">
 						<Text className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">
