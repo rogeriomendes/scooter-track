@@ -38,3 +38,5 @@ minimumReleaseAgeExclude:
   - expo@56.0.5
   - '@expo/metro-runtime@56.0.13'
   - heroui-native@1.0.4
+  - expo-modules-autolinking@56.0.14
+  - expo@56.0.6
