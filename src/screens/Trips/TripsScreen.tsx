@@ -174,7 +174,7 @@ export default function TripsScreen() {
 					<StyledIcon
 						name="bar-chart-2"
 						size={18}
-						className="mb-2 text-primary"
+						className="mb-2 text-foreground"
 					/>
 					<View className="flex-row items-baseline gap-1">
 						<Text className="text-xl font-black text-foreground">

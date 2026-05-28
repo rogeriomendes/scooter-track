@@ -296,7 +296,7 @@ export default function ReportsScreen() {
 						<Text className="text-[9px] font-black text-muted uppercase tracking-widest mb-2">
 							{chartStats.avgLabel}
 						</Text>
-						<Text className="text-3xl font-black text-primary">
+						<Text className="text-3xl font-black text-foreground">
 							{chartStats.avgValue.toFixed(1)}
 						</Text>
 					</Card>
