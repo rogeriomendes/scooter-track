@@ -66,7 +66,7 @@ export default function TabLayout() {
 								focused ? "bg-success/20 py-1.5 px-4 rounded-full" : ""
 							}
 						>
-							<Feather name="navigation" color={color} size={size} />
+							<Feather name="map" color={color} size={size} />
 						</View>
 					),
 				}}
