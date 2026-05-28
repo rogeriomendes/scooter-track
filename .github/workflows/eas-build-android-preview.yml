@@ -39,7 +39,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --config.minimum-release-age=0
 
       - name: 🚀 Build Locally on GitHub Runner (Android)
         run: eas build --profile preview --platform android --local --non-interactive
