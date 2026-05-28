@@ -14,12 +14,14 @@ import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { ChargeFormSheet } from "./components/ChargeFormSheet";
 
 export default function ChargesScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
 	const { scooter, allLogs, refresh, stats, isLoading } =
 		useScooterData(activeScooterId);
+	
 	const [currentMonth, setCurrentMonth] = useState(
 		new Date(new Date().getFullYear(), new Date().getMonth(), 1),
 	);
@@ -87,74 +89,68 @@ export default function ChargesScreen() {
 
 	return (
 		<ScreenWrapper>
-			<View className="p-4 flex-row justify-between items-center">
-				<View>
-					<Text className="text-3xl font-bold text-foreground mb-1">
-						Recargas
-					</Text>
-					<Text className="text-sm font-bold text-muted mt-1 uppercase tracking-wider">
-						{/* {chargesList.length} registros ·  */}
-						{scooter.name}
-					</Text>
-				</View>
-				<Button
-					size="md"
-					isIconOnly
-					variant="primary"
-					className="rounded-full shadow-lg"
-					onPress={() => {
-						setLogToEdit(null);
-						setIsBottomSheetOpen(true);
-					}}
-				>
-					<StyledIcon name="plus" size={24} color="white" />
-				</Button>
+			{/* CABEÇALHO */}
+			<View className="px-4 pt-4 pb-2">
+				<Animated.Text entering={FadeInDown.delay(100).springify()} className="text-3xl font-bold text-foreground mb-1">
+					Recargas
+				</Animated.Text>
+				<Animated.Text entering={FadeInDown.delay(200).springify()} className="text-xs font-bold text-muted uppercase tracking-wider">
+					{scooter.name}
+				</Animated.Text>
 			</View>
 
-			<View className="flex-row gap-3 px-4 mb-4">
+			{/* ESTATÍSTICAS RÁPIDAS */}
+			<Animated.View entering={FadeInDown.delay(300).springify()} className="flex-row gap-3 px-4 mb-4 mt-2">
 				<Card
 					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
 				>
-					<StyledIcon name="zap" size={20} className="mb-2 text-info" />
-					<Text className="text-xl font-bold text-foreground">
+					<StyledIcon name="zap" size={18} className="mb-2 text-info" />
+					<Text className="text-xl font-black text-foreground">
 						{chargesList.length}
 					</Text>
-					<Text className="text-xs text-muted">Recargas</Text>
+					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">Mês Atual</Text>
 				</Card>
+				
 				<Card
 					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
 				>
 					<StyledIcon
 						name="navigation"
-						size={20}
+						size={18}
 						className="mb-2 text-success"
 					/>
-					<Text className="text-xl font-bold text-foreground">
-						{stats?.averageCycleKm.toFixed(1) || "0.0"}{" "}
-						<Text className="font-normal text-muted text-xs">km</Text>
-					</Text>
-					<Text className="text-xs text-muted">médio/ciclo</Text>
+					<View className="flex-row items-baseline gap-1">
+						<Text className="text-xl font-black text-foreground">
+							{stats?.averageCycleKm.toFixed(1) || "0.0"}
+						</Text>
+						<Text className="font-bold text-muted text-[10px]">km</Text>
+					</View>
+					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">Média/Ciclo</Text>
 				</Card>
+				
 				<Card
 					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary"
+					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
 				>
 					<StyledIcon
 						name="trending-up"
-						size={20}
+						size={18}
 						className="mb-2 text-warning"
 					/>
-					<Text className="text-xl font-bold text-foreground">
-						{stats?.bestCycleKm.toFixed(1) || "0.0"}{" "}
-						<Text className="font-normal text-muted text-xs">km</Text>
-					</Text>
-					<Text className="text-xs text-muted">Melhor ciclo</Text>
+					<View className="flex-row items-baseline gap-1">
+						<Text className="text-xl font-black text-foreground">
+							{stats?.bestCycleKm.toFixed(1) || "0.0"}
+						</Text>
+						<Text className="font-bold text-muted text-[10px]">km</Text>
+					</View>
+					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">Melhor Ciclo</Text>
 				</Card>
-			</View>
+			</Animated.View>
 
-			<View className="px-4">
+			{/* SELETOR DE MÊS (Chips) */}
+			<Animated.View entering={FadeInDown.delay(400).springify()} className="pl-4 pr-0">
 				<MonthSelector
 					currentDate={currentMonth}
 					minDate={minDate}
@@ -164,8 +160,9 @@ export default function ChargesScreen() {
 						setPage(1);
 					}}
 				/>
-			</View>
+			</Animated.View>
 
+			{/* LISTA DE RECARGAS */}
 			<FlatList
 				data={displayedCharges}
 				onEndReached={() => {
@@ -180,9 +177,10 @@ export default function ChargesScreen() {
 					) : null
 				}
 				keyExtractor={(item) => item.id.toString()}
-				contentContainerClassName="px-4 pb-10 gap-3"
+				contentContainerClassName="px-4 pb-24 gap-3 pt-2"
+				showsVerticalScrollIndicator={false}
 				ListEmptyComponent={
-					<View className="items-center justify-center mt-20 opacity-60">
+					<View className="items-center justify-center mt-10 opacity-60">
 						<View className="bg-surface-secondary p-4 rounded-full mb-4">
 							<StyledIcon name="zap" size={48} className="text-muted" />
 						</View>
@@ -190,78 +188,113 @@ export default function ChargesScreen() {
 							Nenhuma recarga registrada
 						</Text>
 						<Text className="text-muted text-center text-sm mt-1 px-10">
-							Sempre que recarregar a bateria, adicione aqui para manter o
-							controle de consumo.
+							Sempre que recarregar a bateria, adicione aqui para manter o controle.
 						</Text>
 					</View>
 				}
-				renderItem={({ item }) => (
-					<Card variant="secondary" className="border border-surface-secondary">
-						<View className="flex-row items-center justify-between">
-							<View className="flex-row items-center gap-4">
-								<View className="p-3 bg-surface rounded-2xl">
-									<StyledIcon name="zap" size={24} className="text-info" />
+				renderItem={({ item, index }) => {
+					const cycle = stats?.cycles.find((c) => c.chargeLog.id === item.id);
+					const autonomia = cycle ? cycle.distance.toFixed(1) : "0.0";
+					
+					return (
+						<Animated.View entering={FadeInRight.delay(index * 100).springify()}>
+							<Card variant="secondary" className="border border-surface-secondary bg-surface shadow-sm py-4">
+								<View className="flex-row items-center justify-between mb-3">
+									<View className="flex-row items-center gap-3">
+										<View className="bg-info/10 p-3 rounded-xl border border-info/20">
+											<StyledIcon name="zap" size={20} className="text-info" />
+										</View>
+										<View>
+											<Text className="text-xl font-black text-foreground">
+												{item.batteryLevel}
+												<Text className="text-sm font-bold text-muted">
+													{scooter.trackingMode === "percent" ? "%" : "V"}
+												</Text>
+											</Text>
+											<Text className="text-[10px] text-muted font-bold uppercase tracking-widest mt-0.5">
+												{format(item.date, "dd MMM • HH:mm", { locale: ptBR })}
+											</Text>
+										</View>
+									</View>
+									
+									<View className="flex-row gap-2">
+										<Button
+											size="sm"
+											isIconOnly
+											variant="secondary"
+											className="bg-surface-secondary/50 border-transparent rounded-xl"
+											onPress={() => handleEdit(item)}
+										>
+											<StyledIcon name="edit-2" size={14} className="text-foreground" />
+										</Button>
+										<Button
+											size="sm"
+											isIconOnly
+											variant="secondary"
+											className="bg-danger/10 border-transparent rounded-xl"
+											onPress={() => setLogToDelete(item.id)}
+										>
+											<StyledIcon name="trash-2" size={14} className="text-danger" />
+										</Button>
+									</View>
 								</View>
-								<View>
-									<Text className="text-base font-bold text-foreground">
-										{stats?.cycles
-											.find((c) => c.chargeLog.id === item.id)
-											?.distance.toFixed(1) || "0.0"}{" "}
-										km rodados
-									</Text>
-									<Text className="text-xs text-muted mt-1">
-										{format(item.date, "dd/MM/yyyy, HH:mm", { locale: ptBR })}
-									</Text>
-									<Text className="text-xs text-muted mt-0.5">
-										Voltagem: {item.batteryLevel}V{" "}
-										{item.notes ? `· ${item.notes}` : ""}
-									</Text>
+								
+								<View className="bg-surface-secondary/30 rounded-xl p-3 flex-row items-center justify-between">
+									<View className="flex-row items-center gap-2">
+										<StyledIcon name="navigation" size={14} className="text-success" />
+										<Text className="text-xs font-bold text-muted">Autonomia Recup.</Text>
+									</View>
+									<View className="flex-row items-baseline gap-1">
+										<Text className="text-sm font-black text-success">
+											{autonomia}
+										</Text>
+										<Text className="text-[10px] font-bold text-success/80">km</Text>
+									</View>
 								</View>
-							</View>
-
-							<View className="flex-row gap-2">
-								<Button
-									size="sm"
-									isIconOnly
-									variant="secondary"
-									onPress={() => handleEdit(item)}
-								>
-									<StyledIcon name="edit-2" size={18} className="text-accent" />
-								</Button>
-								<Button
-									size="sm"
-									isIconOnly
-									variant="secondary"
-									onPress={() => setLogToDelete(item.id)}
-								>
-									<StyledIcon
-										name="trash-2"
-										size={18}
-										className="text-danger"
-									/>
-								</Button>
-							</View>
-						</View>
-					</Card>
-				)}
+								
+								{item.notes ? (
+									<View className="mt-3 px-1">
+										<Text className="text-xs text-muted italic">"{item.notes}"</Text>
+									</View>
+								) : null}
+							</Card>
+						</Animated.View>
+					);
+				}}
 			/>
+
+			{/* FLOATING ACTION BUTTON (FAB) */}
+			<Animated.View entering={FadeInDown.delay(500).springify()} className="absolute bottom-6 right-6">
+				<Button
+					size="lg"
+					isIconOnly
+					variant="primary"
+					className="rounded-full shadow-lg bg-success border-0 h-16 w-16 shadow-success/40"
+					style={{ elevation: 10, shadowColor: "#10b981", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 12 }}
+					onPress={() => {
+						setLogToEdit(null);
+						setIsBottomSheetOpen(true);
+					}}
+				>
+					<StyledIcon name="plus" size={28} color="white" />
+				</Button>
+			</Animated.View>
 
 			<ChargeFormSheet
 				isOpen={isBottomSheetOpen}
 				onOpenChange={setIsBottomSheetOpen}
-				scooter={scooter}
 				onSaved={refresh}
 				editItem={logToEdit}
+				scooter={scooter}
 			/>
 
-			{/* Delete Confirmation Dialog */}
 			<ConfirmDialog
 				isOpen={logToDelete !== null}
 				onOpenChange={(open) => {
 					if (!open) setLogToDelete(null);
 				}}
 				title="Excluir Recarga"
-				description="Tem certeza que deseja excluir este registro de recarga? Essa ação não pode ser desfeita."
+				description="Tem certeza? A exclusão afeta os cálculos de autonomia da scooter."
 				onCancel={() => setLogToDelete(null)}
 				onConfirm={() => logToDelete && handleDelete(logToDelete)}
 			/>

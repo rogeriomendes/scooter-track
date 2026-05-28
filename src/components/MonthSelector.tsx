@@ -1,15 +1,6 @@
-import { StyledIcon } from "@/components/StyledIcon";
-import {
-	addMonths,
-	format,
-	isAfter,
-	isBefore,
-	startOfMonth,
-	subMonths,
-} from "date-fns";
+import { eachMonthOfInterval, format, isAfter, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Button } from "heroui-native";
-import { Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 interface MonthSelectorProps {
 	currentDate: Date;
@@ -24,71 +15,47 @@ export function MonthSelector({
 	minDate,
 	maxDate,
 }: MonthSelectorProps) {
-	const currentStart = startOfMonth(currentDate);
+	const start = minDate ? startOfMonth(minDate) : subMonths(startOfMonth(new Date()), 6);
+	const end = maxDate ? startOfMonth(maxDate) : startOfMonth(new Date());
 
-	const prevMonth = subMonths(currentStart, 1);
-	const nextMonth = addMonths(currentStart, 1);
+	// Fallback de segurança caso minDate > maxDate
+	const safeStart = isAfter(start, end) ? end : start;
 
-	// Check if prev/next are out of bounds
-	const isPrevDisabled = minDate
-		? isBefore(prevMonth, startOfMonth(minDate))
-		: false;
-	const isNextDisabled = maxDate
-		? isAfter(nextMonth, startOfMonth(maxDate))
-		: false;
-
-	const handlePrevious = () => {
-		if (!isPrevDisabled) onChange(prevMonth);
-	};
-
-	const handleNext = () => {
-		if (!isNextDisabled) onChange(nextMonth);
-	};
+	const months = eachMonthOfInterval({ start: safeStart, end });
+	
+	// Mostrar meses mais recentes primeiro
+	const reversedMonths = [...months].reverse();
 
 	return (
-		<View className="flex-row items-center justify-between bg-surface p-2 rounded-2xl border border-surface-secondary mb-4">
-			<Button
-				size="sm"
-				isIconOnly
-				variant="ghost"
-				onPress={handlePrevious}
-				className="rounded-full"
-				isDisabled={isPrevDisabled}
+		<View className="mb-4">
+			<ScrollView 
+				horizontal 
+				showsHorizontalScrollIndicator={false} 
+				contentContainerClassName="gap-2"
 			>
-				<StyledIcon
-					name="chevron-left"
-					size={20}
-					className={
-						isPrevDisabled ? "text-muted opacity-50" : "text-foreground"
-					}
-				/>
-			</Button>
-
-			<View className="items-center px-4">
-				<Text className="text-sm font-black text-foreground uppercase tracking-widest">
-					{format(currentDate, "MMMM", { locale: ptBR })}
-				</Text>
-				<Text className="text-xs text-muted font-bold">
-					{format(currentDate, "yyyy")}
-				</Text>
-			</View>
-
-			<Button
-				size="sm"
-				isIconOnly
-				variant="ghost"
-				onPress={handleNext}
-				className="rounded-full"
-				isDisabled={isNextDisabled}
-			>
-				<StyledIcon
-					name="chevron-right"
-					size={20}
-					className={
-						isNextDisabled ? "text-muted opacity-50" : "text-foreground"
-					}
-				/>
-			</Button>
+				{reversedMonths.map((month) => {
+					const isSelected = month.getTime() === startOfMonth(currentDate).getTime();
+					return (
+						<Pressable
+							key={month.getTime()}
+							onPress={() => onChange(month)}
+							className={`px-4 py-2 rounded-full border shadow-sm ${
+								isSelected
+									? "bg-success border-success shadow-success/20"
+									: "bg-surface border-surface-secondary"
+							}`}
+						>
+							<Text
+								className={`text-xs font-bold capitalize tracking-wider ${
+									isSelected ? "text-white" : "text-muted"
+								}`}
+							>
+								{format(month, "MMM yy", { locale: ptBR })}
+							</Text>
+						</Pressable>
+					);
+				})}
+			</ScrollView>
 		</View>
 	);
 }
