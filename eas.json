@@ -1,7 +1,8 @@
 {
 	"cli": {
 		"version": ">= 14.7.1",
-		"appVersionSource": "remote"
+		"appVersionSource": "remote",
+		"packageManager": "pnpm"
 	},
 	"build": {
 		"development": {
