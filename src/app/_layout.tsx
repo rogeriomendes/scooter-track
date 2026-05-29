@@ -3,6 +3,7 @@ import migrations from "@/drizzle/migrations";
 import { useAppStore } from "@/store/useAppStore";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
 	DarkTheme,
 	DefaultTheme,
@@ -50,6 +51,7 @@ export default function RootLayout() {
 
 	return (
 		<ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+			<StatusBar style={isDark ? "light" : "dark"} />
 			<GestureHandlerRootView style={{ flex: 1 }}>
 				<HeroUINativeProvider>
 					<Stack screenOptions={{ headerShown: false }}>
