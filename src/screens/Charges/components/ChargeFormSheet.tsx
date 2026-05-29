@@ -6,13 +6,14 @@ import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
 import { BottomSheet, Button, Label, TextField } from "heroui-native";
 import { useEffect, useState } from "react";
-import { Keyboard } from "react-native";
+import { Keyboard, View } from "react-native";
 
 interface ChargeFormSheetProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 	onSaved: () => void;
 	scooter: typeof scooters.$inferSelect;
+	onDeleteRequest?: (id: number) => void;
 	editItem?: typeof logs.$inferSelect | null;
 }
 
@@ -21,6 +22,7 @@ export function ChargeFormSheet({
 	onOpenChange,
 	onSaved,
 	scooter,
+	onDeleteRequest,
 	editItem,
 }: ChargeFormSheetProps) {
 	const [voltage, setVoltage] = useState("");
@@ -81,7 +83,6 @@ export function ChargeFormSheet({
 				<BottomSheet.Content
 					keyboardBehavior="interactive"
 					keyboardBlurBehavior="restore"
-					className="gap-4"
 				>
 					<BottomSheet.Title className="text-xl font-bold text-foreground mb-4">
 						{editItem ? "Editar Recarga" : "Registrar Recarga"}
@@ -97,7 +98,9 @@ export function ChargeFormSheet({
 							placeholder={
 								scooter.trackingMode === "percent"
 									? "Ex: 100"
-									: BATTERY_CHARTS[scooter.batteryType]?.maxVoltage.toString() || "54.6"
+									: BATTERY_CHARTS[
+											scooter.batteryType
+										]?.maxVoltage.toString() || "54.6"
 							}
 							keyboardType="numeric"
 							value={voltage}
@@ -114,11 +117,28 @@ export function ChargeFormSheet({
 							variant="secondary"
 						/>
 					</TextField>
-					<Button variant="primary" className="mt-4" onPress={handleSaveCharge}>
-						<Button.Label>
-							{editItem ? "Salvar Alterações" : "Salvar Registro"}
-						</Button.Label>
-					</Button>
+					<View className="flex-row gap-2 mt-4 w-full">
+						<Button
+							variant="primary"
+							className="flex-1"
+							onPress={handleSaveCharge}
+						>
+							<Button.Label>
+								{editItem ? "Salvar" : "Salvar Registro"}
+							</Button.Label>
+						</Button>
+
+						{editItem && onDeleteRequest && (
+							<Button
+								variant="secondary"
+								className="flex-1 bg-danger/10 border border-danger/10"
+								feedbackVariant="scale-ripple"
+								onPress={() => onDeleteRequest(editItem.id)}
+							>
+								<Button.Label className="text-danger">Excluir</Button.Label>
+							</Button>
+						)}
+					</View>
 				</BottomSheet.Content>
 			</BottomSheet.Portal>
 		</BottomSheet>

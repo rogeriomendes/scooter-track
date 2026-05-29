@@ -13,7 +13,13 @@ import { eq } from "drizzle-orm";
 import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, SectionList, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	Pressable,
+	SectionList,
+	Text,
+	View,
+} from "react-native";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { TripFormSheet } from "./components/TripFormSheet";
 
@@ -157,7 +163,7 @@ export default function TripsScreen() {
 					variant="secondary"
 					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
 				>
-					<StyledIcon name="map" size={18} className="mb-2 text-info" />
+					<StyledIcon name="map-pin" size={18} className="mb-2 text-info" />
 					<View className="flex-row items-baseline gap-1">
 						<Text className="text-xl font-black text-foreground">
 							{dashboardStats.totalKm.toFixed(1)}
@@ -260,82 +266,48 @@ export default function TripsScreen() {
 					<Animated.View entering={FadeInRight.delay(index * 50).springify()}>
 						<Card
 							variant="secondary"
-							className="border border-surface-secondary bg-surface shadow-sm py-4"
+							className="border border-surface-secondary bg-surface shadow-sm p-0"
 						>
-							<View className="flex-row items-center justify-between mb-3">
-								<View className="flex-row items-center gap-3">
-									<View className="bg-success/10 p-3 rounded-xl border border-success/20">
-										<StyledIcon name="map" size={20} className="text-success" />
-									</View>
-									<View>
-										<View className="flex-row items-baseline gap-1">
-											<Text className="text-xl font-black text-foreground">
-												{item.distance.toFixed(1)}
-											</Text>
-											<Text className="font-bold text-muted text-[10px]">
-												km
-											</Text>
+							<Pressable 
+								className="py-4 px-4" 
+								onPress={() => handleEdit(item)}
+							>
+								<View className="flex-row items-start justify-between">
+									<View className="flex-row items-start gap-3 flex-1">
+										<View className="bg-success/10 p-2.5 rounded-xl border border-success/20 mt-0.5">
+											<StyledIcon name="map-pin" size={18} className="text-success" />
 										</View>
-										<Text className="text-[10px] text-muted font-bold uppercase tracking-widest mt-0.5 capitalize">
+										<View className="flex-1">
+											<View className="flex-row items-baseline gap-1">
+												<Text className="text-lg font-black text-foreground">
+													{item.distance.toFixed(1)}
+												</Text>
+												<Text className="font-bold text-muted text-xs">km</Text>
+											</View>
+											<View className="flex-row items-center gap-1.5 mt-0.5">
+												<StyledIcon name="battery" size={10} className="text-muted" />
+												<Text className="text-xs font-bold text-muted">
+													Bateria final: <Text className="text-foreground">{item.batteryLevel}{scooter.trackingMode === "percent" ? "%" : "V"}</Text>
+												</Text>
+											</View>
+										</View>
+									</View>
+									
+									<View className="items-end">
+										<Text className="text-[10px] text-muted font-bold uppercase tracking-widest capitalize">
 											{format(item.date, "HH:mm", { locale: ptBR })}
 										</Text>
 									</View>
 								</View>
 
-								<View className="flex-row gap-2">
-									<Button
-										size="sm"
-										isIconOnly
-										variant="secondary"
-										className="bg-surface-secondary/50 border-transparent rounded-xl"
-										onPress={() => handleEdit(item)}
-									>
-										<StyledIcon
-											name="edit-2"
-											size={14}
-											className="text-foreground"
-										/>
-									</Button>
-									<Button
-										size="sm"
-										isIconOnly
-										variant="secondary"
-										className="bg-danger/10 border-transparent rounded-xl"
-										onPress={() => setLogToDelete(item.id)}
-									>
-										<StyledIcon
-											name="trash-2"
-											size={14}
-											className="text-danger"
-										/>
-									</Button>
-								</View>
-							</View>
-							<View className="bg-surface-secondary/30 rounded-xl p-3 flex-row items-center justify-between">
-								<View className="flex-row items-center gap-2">
-									<StyledIcon
-										name="battery"
-										size={14}
-										className="text-success"
-									/>
-									<Text className="text-xs font-bold text-muted">
-										Bateria no fim
-									</Text>
-								</View>
-								<Text className="text-sm font-black text-success">
-									{item.batteryLevel}
-									<Text className="text-[10px] font-bold text-success/80">
-										{scooter.trackingMode === "percent" ? "%" : "V"}
-									</Text>
-								</Text>
-							</View>
-							{item.notes ? (
-								<View className="mt-3 px-1">
-									<Text className="text-xs text-muted italic">
-										"{item.notes}"
-									</Text>
-								</View>
-							) : null}
+								{item.notes ? (
+									<View className="mt-3 pl-[46px]">
+										<Text className="text-xs text-muted italic">
+											"{item.notes}"
+										</Text>
+									</View>
+								) : null}
+							</Pressable>
 						</Card>
 					</Animated.View>
 				)}
@@ -371,6 +343,10 @@ export default function TripsScreen() {
 				isOpen={isBottomSheetOpen}
 				onOpenChange={setIsBottomSheetOpen}
 				onSaved={refresh}
+				onDeleteRequest={(id) => {
+					setIsBottomSheetOpen(false);
+					setLogToDelete(id);
+				}}
 				editItem={logToEdit}
 				scooter={scooter}
 			/>

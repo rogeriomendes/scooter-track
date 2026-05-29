@@ -13,6 +13,7 @@ interface ScooterFormSheetProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 	onSaved: () => void;
+	onDeleteRequest?: (id: number) => void;
 	editItem?: typeof scooters.$inferSelect | null;
 }
 
@@ -20,6 +21,7 @@ export function ScooterFormSheet({
 	isOpen,
 	onOpenChange,
 	onSaved,
+	onDeleteRequest,
 	editItem,
 }: ScooterFormSheetProps) {
 	const [name, setName] = useState("");
@@ -107,7 +109,6 @@ export function ScooterFormSheet({
 				<BottomSheet.Content
 					keyboardBehavior="interactive"
 					keyboardBlurBehavior="restore"
-					className="gap-4"
 				>
 					<BottomSheet.Title className="text-xl font-bold text-foreground mb-4">
 						{editItem ? "Editar Scooter" : "Adicionar Scooter"}
@@ -177,15 +178,27 @@ export function ScooterFormSheet({
 							thumbColor="#ffffff"
 						/>
 					</View>
-					<Button
-						variant="primary"
-						className="mt-4"
-						onPress={handleSaveScooter}
-					>
-						<Button.Label>
-							{editItem ? "Salvar Alterações" : "Salvar"}
-						</Button.Label>
-					</Button>
+					<View className="flex-row gap-2 mt-4 w-full">
+						{editItem && onDeleteRequest && (
+							<Button
+								variant="secondary"
+								className="flex-1 bg-danger/10 border border-danger/10"
+								feedbackVariant="scale-ripple"
+								onPress={() => onDeleteRequest(editItem.id)}
+							>
+								<Button.Label className="text-danger">Excluir</Button.Label>
+							</Button>
+						)}
+						<Button
+							variant="primary"
+							className="flex-1"
+							onPress={handleSaveScooter}
+						>
+							<Button.Label>
+								{editItem ? "Salvar" : "Salvar Scooter"}
+							</Button.Label>
+						</Button>
+					</View>
 				</BottomSheet.Content>
 			</BottomSheet.Portal>
 		</BottomSheet>

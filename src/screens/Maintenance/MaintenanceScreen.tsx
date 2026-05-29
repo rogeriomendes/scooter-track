@@ -10,7 +10,13 @@ import { eq } from "drizzle-orm";
 import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	FlatList,
+	Pressable,
+	Text,
+	View,
+} from "react-native";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { MaintenanceFormSheet } from "./components/MaintenanceFormSheet";
 
@@ -56,16 +62,6 @@ export function MaintenanceScreen() {
 		await db.delete(maintenance).where(eq(maintenance.id, id));
 		refresh();
 		setItemToDelete(null);
-	};
-
-	const handleResetWear = async (item: typeof maintenance.$inferSelect) => {
-		const currentTotalKm = stats?.totalKm || 0;
-		await db
-			.update(maintenance)
-			.set({ lastMaintenanceKm: currentTotalKm })
-			.where(eq(maintenance.id, item.id));
-		refresh();
-		setItemToReset(null);
 	};
 
 	if (isLoading) {
@@ -237,105 +233,61 @@ export function MaintenanceScreen() {
 						<Animated.View entering={FadeInRight.delay(index * 50).springify()}>
 							<Card
 								variant="secondary"
-								className={`border ${bgGlow} bg-surface shadow-sm py-4 mb-3`}
+								className={`border ${bgGlow} bg-surface shadow-sm mb-3 p-0`}
 							>
 								{/* BACKGROUND PROGRESS BAR LAYER */}
 								<View className="absolute bottom-0 left-0 right-0 h-1 bg-surface-secondary/50">
 									<View
 										className={`h-full ${barColor}`}
-										style={{ width: `${wearPercentage}%` }}
+										style={{ width: `${100 - wearPercentage}%` }}
 									/>
 								</View>
 
-								<View className="flex-row items-center justify-between mb-4">
-									<View className="flex-row items-center gap-3">
-										<View
-											className={`p-2 rounded-xl bg-surface-secondary/30 ${isCritical || isWarning ? "border border-transparent" : "border border-surface-secondary"}`}
-										>
-											<StyledIcon name="tool" size={18} className={iconColor} />
-										</View>
-										<View>
-											<Text className="text-base font-black text-foreground">
-												{item.name}
-											</Text>
-											<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-0.5">
-												A CADA {item.intervalKm} KM
-											</Text>
-										</View>
-									</View>
-
-									<View className="flex-row gap-2">
-										<Button
-											size="sm"
-											isIconOnly
-											variant="secondary"
-											className="bg-surface-secondary/50 border-transparent rounded-xl"
-											onPress={() => {
-												setItemToEdit(item);
-												setIsBottomSheetOpen(true);
-											}}
-										>
-											<StyledIcon
-												name="edit-2"
-												size={14}
-												className="text-foreground"
-											/>
-										</Button>
-										<Button
-											size="sm"
-											isIconOnly
-											variant="secondary"
-											className="bg-surface-secondary/50 border-transparent rounded-xl"
-											onPress={() => setItemToReset(item)}
-										>
-											<StyledIcon
-												name="refresh-cw"
-												size={14}
-												className={statusColor}
-											/>
-										</Button>
-										<Button
-											size="sm"
-											isIconOnly
-											variant="secondary"
-											className="bg-danger/10 border-transparent rounded-xl"
-											onPress={() => setItemToDelete(item.id)}
-										>
-											<StyledIcon
-												name="trash-2"
-												size={14}
-												className="text-danger"
-											/>
-										</Button>
-									</View>
-								</View>
-
-								<View className="flex-row items-baseline justify-between mt-2">
-									<View>
-										<View className="flex-row items-baseline gap-1">
-											<Text className={`text-4xl font-black ${statusColor}`}>
-												{remainingKm.toFixed(0)}
-											</Text>
-											<Text
-												className={`text-xs font-black uppercase tracking-widest ${statusColor} opacity-70`}
+								<Pressable
+									className="px-4 py-4"
+									onPress={() => {
+										setItemToEdit(item);
+										setIsBottomSheetOpen(true);
+									}}
+								>
+									<View className="flex-row items-start justify-between">
+										<View className="flex-row items-start gap-3 flex-1">
+											<View
+												className={`p-2.5 rounded-xl bg-surface-secondary/30 mt-0.5 ${isCritical || isWarning ? "border border-transparent" : "border border-surface-secondary"}`}
 											>
-												KM
+												<StyledIcon
+													name="tool"
+													size={18}
+													className={iconColor}
+												/>
+											</View>
+											<View className="flex-1">
+												<View className="flex-row items-baseline gap-1">
+													<Text className="text-lg font-black text-foreground" numberOfLines={1}>
+														{item.name}
+													</Text>
+												</View>
+												<View className="flex-row items-center gap-1.5 mt-0.5">
+													<Text className={`text-xs font-bold ${statusColor}`}>
+														Restam {remainingKm.toFixed(0)} km
+													</Text>
+													<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
+														• A CADA {item.intervalKm} KM
+													</Text>
+												</View>
+											</View>
+										</View>
+
+										<View className="items-end pl-2">
+											<Text className={`text-sm font-black ${statusColor}`}>
+												{wearPercentage.toFixed(0)}%
+											</Text>
+											<Text className="text-[9px] font-bold text-muted uppercase tracking-wider mt-0.5">
+												Desgaste
 											</Text>
 										</View>
-										<Text className="text-[10px] font-bold text-muted uppercase tracking-widest">
-											Restantes
-										</Text>
 									</View>
-
-									<View className="items-end justify-end">
-										<Text className={`text-xs font-black ${statusColor}`}>
-											{wearPercentage.toFixed(0)}%
-										</Text>
-										<Text className="text-[9px] font-bold text-muted uppercase tracking-wider">
-											Desgaste
-										</Text>
-									</View>
-								</View>
+								</Pressable>
 							</Card>
 						</Animated.View>
 					);
@@ -372,6 +324,10 @@ export function MaintenanceScreen() {
 				isOpen={isBottomSheetOpen}
 				onOpenChange={setIsBottomSheetOpen}
 				onSaved={refresh}
+				onDeleteRequest={(id) => {
+					setIsBottomSheetOpen(false);
+					setItemToDelete(id);
+				}}
 				editItem={itemToEdit}
 				scooter={scooter}
 				currentTotalKm={stats?.totalKm || 0}
@@ -386,17 +342,6 @@ export function MaintenanceScreen() {
 				description="Tem certeza? Você perderá o histórico de manutenção deste item."
 				onCancel={() => setItemToDelete(null)}
 				onConfirm={() => itemToDelete && handleDelete(itemToDelete)}
-			/>
-
-			<ConfirmDialog
-				isOpen={itemToReset !== null}
-				onOpenChange={(open) => {
-					if (!open) setItemToReset(null);
-				}}
-				title="Trocou a peça?"
-				description={`Isso vai zerar o desgaste de "${itemToReset?.name}" e iniciar uma nova contagem. Deseja prosseguir?`}
-				onCancel={() => setItemToReset(null)}
-				onConfirm={() => itemToReset && handleResetWear(itemToReset)}
 			/>
 		</ScreenWrapper>
 	);

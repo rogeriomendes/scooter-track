@@ -9,13 +9,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
-import { useMemo } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
 
 export default function DashboardScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
 	const router = useRouter();
+	const [isPickerOpen, setIsPickerOpen] = useState(false);
 
 	const { scooter, allLogs, stats, totalScooters, isLoading } =
 		useScooterData(activeScooterId);
@@ -123,18 +125,23 @@ export default function DashboardScreen() {
 
 					<View className="p-4 items-center">
 						<View className="flex-row items-center justify-between w-full mb-4">
-							<View className="flex-row items-center gap-1 flex-1">
+							<Pressable
+								className="flex-row items-center gap-2 flex-1 py-1"
+								onPress={() => totalScooters > 1 && setIsPickerOpen(true)}
+							>
 								<Text className="text-xl font-bold text-foreground uppercase">
 									{scooter.name}
 								</Text>
 								{totalScooters > 1 && (
+									// <View className="bg-surface-secondary rounded-full p-1 ml-1">
 									<StyledIcon
 										name="chevron-down"
 										size={16}
 										className="text-success"
 									/>
+									// </View>
 								)}
-							</View>
+							</Pressable>
 							<Button
 								size="sm"
 								isIconOnly
@@ -250,7 +257,7 @@ export default function DashboardScreen() {
 					>
 						<View className="flex-row items-center gap-3">
 							<View className="bg-success/10 p-3 rounded-xl border border-success/20">
-								<StyledIcon name="map" size={18} className="text-success" />
+								<StyledIcon name="map-pin" size={18} className="text-success" />
 							</View>
 							<View className="flex-1 justify-center">
 								<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -301,7 +308,7 @@ export default function DashboardScreen() {
 						className="flex-1"
 						onPress={() => router.push("/(tabs)/trips")}
 					>
-						<StyledIcon name="map" size={20} className="text-white" />
+						<StyledIcon name="map-pin" size={20} className="text-white" />
 						<Button.Label className="text-white">Registrar Uso</Button.Label>
 					</Button>
 
@@ -354,7 +361,7 @@ export default function DashboardScreen() {
 									<View className="flex-row items-center gap-3">
 										<View className="bg-success/10 p-2 rounded-xl border border-success/20">
 											<StyledIcon
-												name="map"
+												name="map-pin"
 												size={16}
 												className="text-success"
 											/>
@@ -382,6 +389,11 @@ export default function DashboardScreen() {
 					)}
 				</View>
 			</Animated.View>
+
+			<ScooterPickerSheet
+				isOpen={isPickerOpen}
+				onOpenChange={setIsPickerOpen}
+			/>
 		</ScreenWrapper>
 	);
 }

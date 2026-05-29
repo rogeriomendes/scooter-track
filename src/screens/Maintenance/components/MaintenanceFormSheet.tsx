@@ -5,13 +5,14 @@ import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
 import { BottomSheet, Button, Label, TextField } from "heroui-native";
 import { useEffect, useState } from "react";
-import { Keyboard } from "react-native";
+import { Keyboard, View } from "react-native";
 
 interface MaintenanceFormSheetProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 	onSaved: () => void;
 	scooter: typeof scooters.$inferSelect;
+	onDeleteRequest?: (id: number) => void;
 	editItem?: typeof maintenance.$inferSelect | null;
 	currentTotalKm: number;
 }
@@ -21,6 +22,7 @@ export function MaintenanceFormSheet({
 	onOpenChange,
 	onSaved,
 	scooter,
+	onDeleteRequest,
 	editItem,
 	currentTotalKm,
 }: MaintenanceFormSheetProps) {
@@ -85,7 +87,6 @@ export function MaintenanceFormSheet({
 				<BottomSheet.Content
 					keyboardBehavior="interactive"
 					keyboardBlurBehavior="restore"
-					className="gap-4"
 				>
 					<BottomSheet.Title className="text-xl font-bold text-foreground mb-4">
 						{editItem ? "Editar Manutenção" : "Adicionar Peça"}
@@ -129,11 +130,28 @@ export function MaintenanceFormSheet({
 						</Button>
 					)}
 
-					<Button variant="primary" className="mt-4" onPress={handleSave}>
-						<Button.Label>
-							{editItem ? "Salvar Alterações" : "Adicionar"}
-						</Button.Label>
-					</Button>
+					<View className="flex-row gap-2 mt-4 w-full">
+						<Button
+							variant="primary"
+							className="flex-1"
+							onPress={handleSave}
+						>
+							<Button.Label>
+								{editItem ? "Salvar" : "Adicionar"}
+							</Button.Label>
+						</Button>
+
+						{editItem && onDeleteRequest && (
+							<Button
+								variant="secondary"
+								className="flex-1 bg-danger/10 border border-danger/10"
+								feedbackVariant="scale-ripple"
+								onPress={() => onDeleteRequest(editItem.id)}
+							>
+								<Button.Label className="text-danger">Excluir</Button.Label>
+							</Button>
+						)}
+					</View>
 				</BottomSheet.Content>
 			</BottomSheet.Portal>
 		</BottomSheet>

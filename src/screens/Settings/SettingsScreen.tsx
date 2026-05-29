@@ -210,7 +210,10 @@ export default function SettingsScreen() {
 											: "border-surface-secondary bg-surface"
 									}`}
 								>
-									<View className="flex-row justify-between items-start mb-4">
+									<Pressable 
+										className="flex-row justify-between items-center" 
+										onPress={() => handleEdit(item)}
+									>
 										<View className="flex-row items-center gap-3">
 											<View
 												className={`p-3 rounded-2xl ${isActive ? "bg-success" : "bg-surface-secondary"}`}
@@ -257,38 +260,7 @@ export default function SettingsScreen() {
 												</Button.Label>
 											</Button>
 										)}
-									</View>
-
-									<View className="flex-row gap-2 pt-3 border-t border-surface-secondary/50">
-										<Button
-											size="sm"
-											variant="tertiary"
-											onPress={() => handleEdit(item)}
-											className="flex-1"
-										>
-											<StyledIcon
-												name="edit-2"
-												size={14}
-												className="text-foreground"
-											/>
-											<Button.Label className="text-foreground font-bold">
-												Editar
-											</Button.Label>
-										</Button>
-										<Button
-											size="sm"
-											variant="secondary"
-											feedbackVariant="scale-ripple"
-											className="bg-danger/10 border border-danger/10"
-											onPress={() => setScooterToDelete(item.id)}
-										>
-											<StyledIcon
-												name="trash-2"
-												size={14}
-												className="text-danger"
-											/>
-										</Button>
-									</View>
+									</Pressable>
 								</Card>
 							);
 						})}
@@ -387,6 +359,10 @@ export default function SettingsScreen() {
 				onSaved={() => {
 					fetchScooters();
 					triggerRefresh();
+				}}
+				onDeleteRequest={(id) => {
+					setIsBottomSheetOpen(false);
+					setScooterToDelete(id);
 				}}
 				editItem={scooterToEdit}
 			/>
