@@ -6,6 +6,8 @@ import { db } from "@/db/client";
 import { maintenance } from "@/db/schema";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
+import { addMonths, differenceInDays, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
@@ -39,23 +41,74 @@ export function MaintenanceScreen() {
 	const healthStats = useMemo(() => {
 		let itemsInRisk = 0;
 		let nextItem: typeof maintenance.$inferSelect | null = null;
-		let minRemainingKm = Infinity;
+		let highestWear = -1;
+		let nextItemInfo = { primary: "", secondary: "" };
 
 		const currentTotalKm = stats?.totalKm || 0;
 
 		for (const item of maintenanceList) {
+			const itemType = item.type || "km";
+
 			const wornKm = currentTotalKm - item.lastMaintenanceKm;
 			const remainingKm = Math.max(0, item.intervalKm - wornKm);
-			const wearPercentage = (wornKm / item.intervalKm) * 100;
+			let wearPercentageKm = item.intervalKm > 0 ? (wornKm / item.intervalKm) * 100 : 0;
+
+			let wearPercentageMonths = 0;
+			let remainingDaysMonths = 0;
+			if (item.lastMaintenanceDate && item.intervalMonths) {
+				const nextDate = addMonths(item.lastMaintenanceDate, item.intervalMonths);
+				const totalDays = differenceInDays(nextDate, item.lastMaintenanceDate) || 1;
+				const daysPassed = differenceInDays(new Date(), item.lastMaintenanceDate);
+				remainingDaysMonths = Math.max(0, totalDays - daysPassed);
+				wearPercentageMonths = (daysPassed / totalDays) * 100;
+			}
+
+			let wearPercentageFixedDate = 0;
+			let remainingDaysFixedDate = 0;
+			if (item.targetDate && item.createdAt) {
+				const totalDays = differenceInDays(item.targetDate, item.createdAt) || 1;
+				const daysPassed = differenceInDays(new Date(), item.createdAt);
+				remainingDaysFixedDate = Math.max(0, totalDays - daysPassed);
+				wearPercentageFixedDate = (daysPassed / totalDays) * 100;
+			}
+
+			let wearPercentage = 0;
+			let pInfo = "";
+			let sInfo = "";
+
+			if (itemType === "km") {
+				wearPercentage = wearPercentageKm;
+				pInfo = `${remainingKm.toFixed(0)}`;
+				sInfo = "km restantes";
+			} else if (itemType === "months") {
+				wearPercentage = wearPercentageMonths;
+				pInfo = `${remainingDaysMonths}`;
+				sInfo = "dias restantes";
+			} else if (itemType === "date") {
+				wearPercentage = wearPercentageFixedDate;
+				pInfo = `${remainingDaysFixedDate}`;
+				sInfo = "dias restantes";
+			} else if (itemType === "mixed") {
+				wearPercentage = Math.max(wearPercentageKm, wearPercentageMonths);
+				if (wearPercentageKm > wearPercentageMonths) {
+					pInfo = `${remainingKm.toFixed(0)}`;
+					sInfo = "km restantes";
+				} else {
+					pInfo = `${remainingDaysMonths}`;
+					sInfo = "dias restantes";
+				}
+			}
 
 			if (wearPercentage >= 70) itemsInRisk++;
-			if (remainingKm < minRemainingKm) {
-				minRemainingKm = remainingKm;
+			
+			if (wearPercentage > highestWear) {
+				highestWear = wearPercentage;
 				nextItem = item;
+				nextItemInfo = { primary: pInfo, secondary: sInfo };
 			}
 		}
 
-		return { itemsInRisk, nextItem, minRemainingKm };
+		return { itemsInRisk, nextItem, nextItemInfo };
 	}, [maintenanceList, stats]);
 
 	const handleDelete = async (id: number) => {
@@ -102,7 +155,7 @@ export function MaintenanceScreen() {
 			<FlatList
 				data={maintenanceList}
 				keyExtractor={(item) => item.id.toString()}
-				contentContainerClassName="px-4 pb-24 pt-2 gap-3"
+				contentContainerClassName="px-4 pb-24 pt-2"
 				showsVerticalScrollIndicator={false}
 				ListHeaderComponent={
 					maintenanceList.length > 0 ? (
@@ -164,10 +217,10 @@ export function MaintenanceScreen() {
 											</Text>
 											<View className="flex-row items-baseline gap-1">
 												<Text className="text-xl font-black text-foreground">
-													{healthStats.minRemainingKm.toFixed(0)}
+													{healthStats.nextItemInfo?.primary}
 												</Text>
 												<Text className="text-[10px] font-bold text-muted">
-													km restantes
+													{healthStats.nextItemInfo?.secondary}
 												</Text>
 											</View>
 										</>
@@ -204,9 +257,70 @@ export function MaintenanceScreen() {
 				}
 				renderItem={({ item, index }) => {
 					const currentTotalKm = stats?.totalKm || 0;
+					const itemType = item.type || "km";
+
+					// KM logic
 					const wornKm = currentTotalKm - item.lastMaintenanceKm;
 					const remainingKm = Math.max(0, item.intervalKm - wornKm);
-					let wearPercentage = (wornKm / item.intervalKm) * 100;
+					const wearPercentageKm =
+						item.intervalKm > 0 ? (wornKm / item.intervalKm) * 100 : 0;
+
+					// Months logic
+					let wearPercentageMonths = 0;
+					let remainingDaysMonths = 0;
+					if (item.lastMaintenanceDate && item.intervalMonths) {
+						const nextDate = addMonths(
+							item.lastMaintenanceDate,
+							item.intervalMonths,
+						);
+						const totalDays =
+							differenceInDays(nextDate, item.lastMaintenanceDate) || 1;
+						const daysPassed = differenceInDays(
+							new Date(),
+							item.lastMaintenanceDate,
+						);
+						remainingDaysMonths = Math.max(0, totalDays - daysPassed);
+						wearPercentageMonths = (daysPassed / totalDays) * 100;
+					}
+
+					// Date (Fixed) logic
+					let wearPercentageFixedDate = 0;
+					let remainingDaysFixedDate = 0;
+					if (item.targetDate && item.createdAt) {
+						const totalDays =
+							differenceInDays(item.targetDate, item.createdAt) || 1;
+						const daysPassed = differenceInDays(new Date(), item.createdAt);
+						remainingDaysFixedDate = Math.max(0, totalDays - daysPassed);
+						wearPercentageFixedDate = (daysPassed / totalDays) * 100;
+					}
+
+					let wearPercentage = 0;
+					let primaryInfo = "";
+					let secondaryInfo = "";
+
+					if (itemType === "km") {
+						wearPercentage = wearPercentageKm;
+						primaryInfo = `Restam ${remainingKm.toFixed(0)} km`;
+						secondaryInfo = `A CADA ${item.intervalKm} KM`;
+					} else if (itemType === "months") {
+						wearPercentage = wearPercentageMonths;
+						primaryInfo = `Faltam ${remainingDaysMonths} dias`;
+						secondaryInfo = `A CADA ${item.intervalMonths} MESES`;
+					} else if (itemType === "date") {
+						wearPercentage = wearPercentageFixedDate;
+						primaryInfo = `Faltam ${remainingDaysFixedDate} dias`;
+						secondaryInfo = `VENCE EM ${format(item.targetDate || new Date(), "dd/MM/yyyy", { locale: ptBR })}`;
+					} else if (itemType === "mixed") {
+						wearPercentage = Math.max(wearPercentageKm, wearPercentageMonths);
+						if (wearPercentageKm > wearPercentageMonths) {
+							primaryInfo = `Restam ${remainingKm.toFixed(0)} km`;
+							secondaryInfo = `OU ${remainingDaysMonths} DIAS`;
+						} else {
+							primaryInfo = `Faltam ${remainingDaysMonths} dias`;
+							secondaryInfo = `OU ${remainingKm.toFixed(0)} KM`;
+						}
+					}
+
 					wearPercentage = Math.min(100, Math.max(0, wearPercentage));
 
 					const isCritical = wearPercentage >= 90;
@@ -263,16 +377,19 @@ export function MaintenanceScreen() {
 											</View>
 											<View className="flex-1">
 												<View className="flex-row items-baseline gap-1">
-													<Text className="text-lg font-black text-foreground" numberOfLines={1}>
+													<Text
+														className="text-lg font-black text-foreground"
+														numberOfLines={1}
+													>
 														{item.name}
 													</Text>
 												</View>
 												<View className="flex-row items-center gap-1.5 mt-0.5">
 													<Text className={`text-xs font-bold ${statusColor}`}>
-														Restam {remainingKm.toFixed(0)} km
+														{primaryInfo}
 													</Text>
 													<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
-														• A CADA {item.intervalKm} KM
+														• {secondaryInfo}
 													</Text>
 												</View>
 											</View>

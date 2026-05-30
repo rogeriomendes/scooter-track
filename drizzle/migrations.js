@@ -4,13 +4,19 @@ import journal from './meta/_journal.json';
 import m0000 from './0000_sudden_luminals.sql';
 import m0001 from './0001_slippery_big_bertha.sql';
 import m0002 from './0002_grey_fallen_one.sql';
+import m0003 from './0003_broken_captain_stacy.sql';
+import m0004 from './0004_magenta_eternity.sql';
+import m0005 from './0005_red_iron_lad.sql';
 
   export default {
     journal,
     migrations: {
       m0000,
 m0001,
-m0002
+m0002,
+m0003,
+m0004,
+m0005
     }
   }
   

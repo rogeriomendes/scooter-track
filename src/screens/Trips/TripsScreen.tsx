@@ -3,6 +3,7 @@ import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { MonthSelector } from "@/components/MonthSelector";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
+import { calculateBatteryPercentage } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs } from "@/db/schema";
 import { useScooterData } from "@/hooks/useScooterData";
@@ -288,6 +289,11 @@ export default function TripsScreen() {
 												<StyledIcon name="battery" size={10} className="text-muted" />
 												<Text className="text-xs font-bold text-muted">
 													Bateria final: <Text className="text-foreground">{item.batteryLevel}{scooter.trackingMode === "percent" ? "%" : "V"}</Text>
+													{scooter.trackingMode === "voltage" && (
+														<Text className="font-bold text-muted text-xs ml-1">
+															{" "}({calculateBatteryPercentage(item.batteryLevel, scooter.batteryType)}%)
+														</Text>
+													)}
 												</Text>
 											</View>
 										</View>

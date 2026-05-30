@@ -3,6 +3,7 @@ import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { MonthSelector } from "@/components/MonthSelector";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
+import { calculateBatteryPercentage } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs } from "@/db/schema";
 import { useScooterData } from "@/hooks/useScooterData";
@@ -246,6 +247,11 @@ export default function ChargesScreen() {
 													<Text className="font-bold text-muted text-xs">
 														{scooter.trackingMode === "percent" ? "%" : "V"}
 													</Text>
+													{scooter.trackingMode === "voltage" && (
+														<Text className="font-bold text-muted text-xs ml-1">
+															({calculateBatteryPercentage(item.batteryLevel, scooter.batteryType)}%)
+														</Text>
+													)}
 												</View>
 												<View className="flex-row items-center gap-1.5 mt-0.5">
 													<StyledIcon name="navigation" size={10} className="text-success" />

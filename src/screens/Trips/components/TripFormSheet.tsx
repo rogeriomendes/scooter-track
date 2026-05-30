@@ -6,8 +6,11 @@ import { calculateScooterStats } from "@/utils/stats";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
 import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useEffect, useState } from "react";
-import { Keyboard, View } from "react-native";
+import { Keyboard, View, Pressable, Text, Platform } from "react-native";
 
 interface TripFormSheetProps {
 	isOpen: boolean;
@@ -29,6 +32,9 @@ export function TripFormSheet({
 	const [distance, setDistance] = useState("");
 	const [voltage, setVoltage] = useState("");
 	const [notes, setNotes] = useState("");
+	const [date, setDate] = useState(new Date());
+	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [showTimePicker, setShowTimePicker] = useState(false);
 
 	// When editItem changes or modal opens, populate the fields
 	useEffect(() => {
@@ -37,13 +43,29 @@ export function TripFormSheet({
 				setDistance(editItem.distance.toString());
 				setVoltage(editItem.batteryLevel.toString());
 				setNotes(editItem.notes || "");
+				setDate(editItem.date);
 			} else {
 				setDistance("");
 				setVoltage("");
 				setNotes("");
+				setDate(new Date());
 			}
 		}
 	}, [isOpen, editItem]);
+
+	const onChangeDate = (event: any, selectedDate?: Date) => {
+		setShowDatePicker(Platform.OS === "ios");
+		if (selectedDate) {
+			setDate(selectedDate);
+		}
+	};
+
+	const onChangeTime = (event: any, selectedDate?: Date) => {
+		setShowTimePicker(Platform.OS === "ios");
+		if (selectedDate) {
+			setDate(selectedDate);
+		}
+	};
 
 	const handleSaveTrip = async () => {
 		if (!voltage || !distance) return;
@@ -56,6 +78,7 @@ export function TripFormSheet({
 					distance: parseFloat(distance),
 					batteryLevel: parseFloat(voltage),
 					notes,
+					date,
 				})
 				.where(eq(logs.id, editItem.id));
 		} else {
@@ -65,7 +88,7 @@ export function TripFormSheet({
 				distance: parseFloat(distance),
 				batteryLevel: parseFloat(voltage),
 				notes,
-				date: new Date(),
+				date,
 			});
 		}
 
@@ -109,6 +132,31 @@ export function TripFormSheet({
 						{editItem ? "Editar Uso" : "Registrar Uso"}
 					</BottomSheet.Title>
 
+					<View className="flex-row gap-2">
+						<TextField className="flex-1">
+							<Label>Data</Label>
+							<Pressable 
+								onPress={() => setShowDatePicker(true)}
+								className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+							>
+								<Text className="text-foreground text-base">
+									{format(date, "dd/MM/yyyy", { locale: ptBR })}
+								</Text>
+							</Pressable>
+						</TextField>
+						<TextField className="flex-1">
+							<Label>Hora</Label>
+							<Pressable 
+								onPress={() => setShowTimePicker(true)}
+								className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+							>
+								<Text className="text-foreground text-base">
+									{format(date, "HH:mm", { locale: ptBR })}
+								</Text>
+							</Pressable>
+						</TextField>
+					</View>
+
 					<TextField>
 						<Label>Distância Percorrida (km)</Label>
 						<BottomSheetInput
@@ -149,16 +197,6 @@ export function TripFormSheet({
 						/>
 					</TextField>
 					<View className="flex-row gap-2 mt-4 w-full">
-						<Button
-							variant="primary"
-							className="flex-1"
-							onPress={handleSaveTrip}
-						>
-							<Button.Label>
-								{editItem ? "Salvar" : "Salvar Registro"}
-							</Button.Label>
-						</Button>
-
 						{editItem && onDeleteRequest && (
 							<Button
 								variant="secondary"
@@ -169,9 +207,36 @@ export function TripFormSheet({
 								<Button.Label className="text-danger">Excluir</Button.Label>
 							</Button>
 						)}
+						<Button
+							variant="primary"
+							className="flex-1"
+							onPress={handleSaveTrip}
+						>
+							<Button.Label>
+								{editItem ? "Salvar" : "Salvar Registro"}
+							</Button.Label>
+						</Button>
 					</View>
 				</BottomSheet.Content>
 			</BottomSheet.Portal>
+			{showDatePicker && (
+				<DateTimePicker
+					value={date}
+					mode="date"
+					is24Hour={true}
+					onValueChange={onChangeDate}
+					onDismiss={() => setShowDatePicker(false)}
+				/>
+			)}
+			{showTimePicker && (
+				<DateTimePicker
+					value={date}
+					mode="time"
+					is24Hour={true}
+					onValueChange={onChangeTime}
+					onDismiss={() => setShowTimePicker(false)}
+				/>
+			)}
 		</BottomSheet>
 	);
 }

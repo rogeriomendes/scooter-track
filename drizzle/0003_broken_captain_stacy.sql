@@ -1,0 +1,1 @@
+ALTER TABLE `scooters` ADD `purchaseDate` integer;

@@ -210,8 +210,8 @@ export default function SettingsScreen() {
 											: "border-surface-secondary bg-surface"
 									}`}
 								>
-									<Pressable 
-										className="flex-row justify-between items-center" 
+									<Pressable
+										className="flex-row justify-between items-center"
 										onPress={() => handleEdit(item)}
 									>
 										<View className="flex-row items-center gap-3">
@@ -346,7 +346,7 @@ export default function SettingsScreen() {
 				</Card>
 			</Animated.View>
 
-			<View className="items-center opacity-40 my-6">
+			<View className="items-center opacity-40 my-8">
 				<StyledIcon name="zap" size={20} color="#10b981" className="mb-2" />
 				<Text className="text-muted text-[10px] uppercase tracking-widest font-bold">
 					ScooterTrack v1.0.0

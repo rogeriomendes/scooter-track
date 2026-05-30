@@ -12,6 +12,7 @@ export const scooters = sqliteTable("scooters", {
 	showMaintenance: integer("showMaintenance", { mode: "boolean" })
 		.notNull()
 		.default(true),
+	purchaseDate: integer("purchaseDate", { mode: "timestamp" }),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });
 
@@ -33,8 +34,14 @@ export const maintenance = sqliteTable("maintenance", {
 		.notNull()
 		.references(() => scooters.id, { onDelete: "cascade" }),
 	name: text("name").notNull(),
-	intervalKm: real("intervalKm").notNull(), // Interval for this maintenance (e.g., 1000km)
+	type: text("type", { enum: ["km", "months", "date", "mixed"] })
+		.notNull()
+		.default("km"),
+	intervalKm: real("intervalKm").notNull().default(0), // Interval for this maintenance (e.g., 1000km)
 	lastMaintenanceKm: real("lastMaintenanceKm").notNull().default(0), // Scooter's total KM when this was last performed
+	intervalMonths: integer("intervalMonths"), // Interval in months
+	lastMaintenanceDate: integer("lastMaintenanceDate", { mode: "timestamp" }), // Last time it was performed
+	targetDate: integer("targetDate", { mode: "timestamp" }), // Target fixed date for 'date' mode
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });
 

@@ -22,6 +22,27 @@
       "when": 1779919159489,
       "tag": "0002_grey_fallen_one",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1780143147734,
+      "tag": "0003_broken_captain_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1780145612491,
+      "tag": "0004_magenta_eternity",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1780146723940,
+      "tag": "0005_red_iron_lad",
+      "breakpoints": true
     }
   ]
 }

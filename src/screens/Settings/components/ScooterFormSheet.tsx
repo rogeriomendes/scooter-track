@@ -6,8 +6,11 @@ import { useAppStore } from "@/store/useAppStore";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
 import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useEffect, useState } from "react";
-import { Keyboard, Switch, Text, View } from "react-native";
+import { Keyboard, Switch, Text, View, Pressable, Platform } from "react-native";
 
 interface ScooterFormSheetProps {
 	isOpen: boolean;
@@ -31,6 +34,8 @@ export function ScooterFormSheet({
 	);
 	const [showMaintenance, setShowMaintenance] = useState(true);
 	const [initialKm, setInitialKm] = useState("0");
+	const [purchaseDate, setPurchaseDate] = useState<Date>(new Date());
+	const [showDatePicker, setShowDatePicker] = useState(false);
 
 	const { setActiveScooterId } = useAppStore();
 
@@ -42,15 +47,24 @@ export function ScooterFormSheet({
 				setTrackingMode(editItem.trackingMode as "voltage" | "percent");
 				setShowMaintenance(editItem.showMaintenance);
 				setInitialKm(editItem.initialKm.toString());
+				setPurchaseDate(editItem.purchaseDate || new Date());
 			} else {
 				setName("");
 				setBatteryType("60V");
 				setTrackingMode("voltage");
 				setShowMaintenance(true);
 				setInitialKm("0");
+				setPurchaseDate(new Date());
 			}
 		}
 	}, [isOpen, editItem]);
+
+	const onChangeDate = (event: any, selectedDate?: Date) => {
+		setShowDatePicker(Platform.OS === "ios");
+		if (selectedDate) {
+			setPurchaseDate(selectedDate);
+		}
+	};
 
 	const handleSaveScooter = async () => {
 		if (!name.trim()) return;
@@ -65,6 +79,7 @@ export function ScooterFormSheet({
 					trackingMode,
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
+					purchaseDate,
 				})
 				.where(eq(scooters.id, editItem.id));
 		} else {
@@ -76,6 +91,7 @@ export function ScooterFormSheet({
 					trackingMode,
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
+					purchaseDate,
 					createdAt: new Date(),
 				})
 				.returning();
@@ -167,6 +183,18 @@ export function ScooterFormSheet({
 						/>
 					</TextField>
 
+					<TextField>
+						<Label>Data de Compra</Label>
+						<Pressable 
+							onPress={() => setShowDatePicker(true)}
+							className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+						>
+							<Text className="text-foreground text-base">
+								{format(purchaseDate, "dd/MM/yyyy", { locale: ptBR })}
+							</Text>
+						</Pressable>
+					</TextField>
+
 					<View className="flex-row items-center justify-between mt-2 mb-2">
 						<Text className="text-sm font-medium text-foreground flex-1 pr-4">
 							Exibir aba de Manutenção para esta scooter?
@@ -201,6 +229,15 @@ export function ScooterFormSheet({
 					</View>
 				</BottomSheet.Content>
 			</BottomSheet.Portal>
+			{showDatePicker && (
+				<DateTimePicker
+					value={purchaseDate}
+					mode="date"
+					is24Hour={true}
+					onValueChange={onChangeDate}
+					onDismiss={() => setShowDatePicker(false)}
+				/>
+			)}
 		</BottomSheet>
 	);
 }
