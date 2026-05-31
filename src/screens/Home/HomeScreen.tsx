@@ -2,6 +2,7 @@ import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { calculateBatteryPercentage } from "@/constants/batteryCharts";
+import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
 import { differenceInDays, format } from "date-fns";
@@ -19,8 +20,10 @@ export default function DashboardScreen() {
 	const router = useRouter();
 	const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-	const { scooter, allLogs, stats, totalScooters, isLoading } =
+	const { scooter, allLogs, maintenanceList, stats, totalScooters, isLoading } =
 		useScooterData(activeScooterId);
+
+	const healthStats = useMaintenanceHealth(maintenanceList, stats);
 
 	const latestLog = useMemo(
 		() => (allLogs.length > 0 ? allLogs[0] : null),
@@ -325,8 +328,55 @@ export default function DashboardScreen() {
 				</View>
 			</Animated.View>
 
-			{/* ÚLTIMOS USOS */}
-			<Animated.View entering={FadeInDown.delay(400).springify()}>
+			{/* PRÓXIMA REVISÃO (Só exibe se a scooter tiver manutenção ativada e houver item próximo) */}
+			{scooter?.showMaintenance &&
+				healthStats.nextItem &&
+				healthStats.isPriorityActive && (
+					<Animated.View entering={FadeInDown.delay(300).springify()}>
+						<Pressable onPress={() => router.push("/(tabs)/maintenance")}>
+							<Card
+								variant="secondary"
+								className="bg-warning/10 border border-warning/30 p-4 mb-4 flex-row items-center"
+							>
+								<View className="bg-warning/20 p-3 rounded-full mr-4">
+									<StyledIcon
+										name="alert-triangle"
+										size={24}
+										className="text-warning"
+									/>
+								</View>
+								<View className="flex-1">
+									<Text className="text-xs font-bold text-warning uppercase tracking-wider mb-1">
+										Atenção: Revisão Próxima
+									</Text>
+									<Text className="text-base font-bold text-foreground">
+										{healthStats.nextItem.name}
+									</Text>
+									<Text className="text-sm text-muted">
+										Faltam {healthStats.nextItemInfo.primary}{" "}
+										{healthStats.nextItemInfo.secondary}
+									</Text>
+								</View>
+								<StyledIcon
+									name="chevron-right"
+									size={20}
+									className="text-muted"
+								/>
+							</Card>
+						</Pressable>
+					</Animated.View>
+				)}
+
+			{/* HISTÓRICO RECENTE */}
+			<Animated.View
+				entering={FadeInDown.delay(
+					scooter?.showMaintenance &&
+						healthStats.nextItem &&
+						healthStats.isPriorityActive
+						? 400
+						: 300,
+				).springify()}
+			>
 				<View className="flex-row justify-between items-center mb-3 ml-1">
 					<Text className="text-xs font-bold text-muted uppercase tracking-wider">
 						Últimos Usos

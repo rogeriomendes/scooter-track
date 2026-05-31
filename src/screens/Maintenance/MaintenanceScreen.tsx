@@ -4,6 +4,7 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
 import { maintenance } from "@/db/schema";
+import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
 import { addMonths, differenceInDays, format } from "date-fns";
@@ -11,7 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
@@ -34,82 +35,8 @@ export function MaintenanceScreen() {
 	>(null);
 
 	const [itemToDelete, setItemToDelete] = useState<number | null>(null);
-	const [itemToReset, setItemToReset] = useState<
-		typeof maintenance.$inferSelect | null
-	>(null);
 
-	const healthStats = useMemo(() => {
-		let itemsInRisk = 0;
-		let nextItem: typeof maintenance.$inferSelect | null = null;
-		let highestWear = -1;
-		let nextItemInfo = { primary: "", secondary: "" };
-
-		const currentTotalKm = stats?.totalKm || 0;
-
-		for (const item of maintenanceList) {
-			const itemType = item.type || "km";
-
-			const wornKm = currentTotalKm - item.lastMaintenanceKm;
-			const remainingKm = Math.max(0, item.intervalKm - wornKm);
-			let wearPercentageKm = item.intervalKm > 0 ? (wornKm / item.intervalKm) * 100 : 0;
-
-			let wearPercentageMonths = 0;
-			let remainingDaysMonths = 0;
-			if (item.lastMaintenanceDate && item.intervalMonths) {
-				const nextDate = addMonths(item.lastMaintenanceDate, item.intervalMonths);
-				const totalDays = differenceInDays(nextDate, item.lastMaintenanceDate) || 1;
-				const daysPassed = differenceInDays(new Date(), item.lastMaintenanceDate);
-				remainingDaysMonths = Math.max(0, totalDays - daysPassed);
-				wearPercentageMonths = (daysPassed / totalDays) * 100;
-			}
-
-			let wearPercentageFixedDate = 0;
-			let remainingDaysFixedDate = 0;
-			if (item.targetDate && item.createdAt) {
-				const totalDays = differenceInDays(item.targetDate, item.createdAt) || 1;
-				const daysPassed = differenceInDays(new Date(), item.createdAt);
-				remainingDaysFixedDate = Math.max(0, totalDays - daysPassed);
-				wearPercentageFixedDate = (daysPassed / totalDays) * 100;
-			}
-
-			let wearPercentage = 0;
-			let pInfo = "";
-			let sInfo = "";
-
-			if (itemType === "km") {
-				wearPercentage = wearPercentageKm;
-				pInfo = `${remainingKm.toFixed(0)}`;
-				sInfo = "km restantes";
-			} else if (itemType === "months") {
-				wearPercentage = wearPercentageMonths;
-				pInfo = `${remainingDaysMonths}`;
-				sInfo = "dias restantes";
-			} else if (itemType === "date") {
-				wearPercentage = wearPercentageFixedDate;
-				pInfo = `${remainingDaysFixedDate}`;
-				sInfo = "dias restantes";
-			} else if (itemType === "mixed") {
-				wearPercentage = Math.max(wearPercentageKm, wearPercentageMonths);
-				if (wearPercentageKm > wearPercentageMonths) {
-					pInfo = `${remainingKm.toFixed(0)}`;
-					sInfo = "km restantes";
-				} else {
-					pInfo = `${remainingDaysMonths}`;
-					sInfo = "dias restantes";
-				}
-			}
-
-			if (wearPercentage >= 70) itemsInRisk++;
-			
-			if (wearPercentage > highestWear) {
-				highestWear = wearPercentage;
-				nextItem = item;
-				nextItemInfo = { primary: pInfo, secondary: sInfo };
-			}
-		}
-
-		return { itemsInRisk, nextItem, nextItemInfo };
-	}, [maintenanceList, stats]);
+	const healthStats = useMaintenanceHealth(maintenanceList, stats);
 
 	const handleDelete = async (id: number) => {
 		await db.delete(maintenance).where(eq(maintenance.id, id));
@@ -286,10 +213,13 @@ export function MaintenanceScreen() {
 					// Date (Fixed) logic
 					let wearPercentageFixedDate = 0;
 					let remainingDaysFixedDate = 0;
-					if (item.targetDate && item.createdAt) {
+					if (item.targetDate && item.lastMaintenanceDate) {
 						const totalDays =
-							differenceInDays(item.targetDate, item.createdAt) || 1;
-						const daysPassed = differenceInDays(new Date(), item.createdAt);
+							differenceInDays(item.targetDate, item.lastMaintenanceDate) || 1;
+						const daysPassed = differenceInDays(
+							new Date(),
+							item.lastMaintenanceDate,
+						);
 						remainingDaysFixedDate = Math.max(0, totalDays - daysPassed);
 						wearPercentageFixedDate = (daysPassed / totalDays) * 100;
 					}

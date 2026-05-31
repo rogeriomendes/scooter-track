@@ -1,14 +1,21 @@
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { db } from "@/db/client";
 import { maintenance, type scooters } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import * as Haptics from "expo-haptics";
-import { BottomSheet, Button, Label, TextField } from "heroui-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { eq } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
+import { BottomSheet, Button, Label, TextField } from "heroui-native";
 import { useEffect, useState } from "react";
-import { Keyboard, View, Pressable, Text, Platform, ScrollView } from "react-native";
+import {
+	Keyboard,
+	Platform,
+	Pressable,
+	ScrollView,
+	Text,
+	View,
+} from "react-native";
 
 interface MaintenanceFormSheetProps {
 	isOpen: boolean;
@@ -33,8 +40,10 @@ export function MaintenanceFormSheet({
 	const [type, setType] = useState<"km" | "months" | "date" | "mixed">("km");
 	const [intervalKm, setIntervalKm] = useState("");
 	const [intervalMonths, setIntervalMonths] = useState("");
+	const [lastDate, setLastDate] = useState(new Date());
+	const [showLastDatePicker, setShowLastDatePicker] = useState(false);
 	const [targetDate, setTargetDate] = useState(new Date());
-	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [showTargetDatePicker, setShowTargetDatePicker] = useState(false);
 	const [resetWear, setResetWear] = useState(false);
 
 	useEffect(() => {
@@ -42,8 +51,13 @@ export function MaintenanceFormSheet({
 			if (editItem) {
 				setName(editItem.name);
 				setType(editItem.type as any);
-				setIntervalKm(editItem.intervalKm ? editItem.intervalKm.toString() : "");
-				setIntervalMonths(editItem.intervalMonths ? editItem.intervalMonths.toString() : "");
+				setIntervalKm(
+					editItem.intervalKm ? editItem.intervalKm.toString() : "",
+				);
+				setIntervalMonths(
+					editItem.intervalMonths ? editItem.intervalMonths.toString() : "",
+				);
+				setLastDate(editItem.lastMaintenanceDate || new Date());
 				setTargetDate(editItem.targetDate || new Date());
 				setResetWear(false);
 			} else {
@@ -51,16 +65,24 @@ export function MaintenanceFormSheet({
 				setType("km");
 				setIntervalKm("");
 				setIntervalMonths("");
+				setLastDate(new Date());
 				setTargetDate(new Date());
 				setResetWear(false);
 			}
 		}
 	}, [isOpen, editItem]);
 
-	const onChangeDate = (event: any, selectedDate?: Date) => {
-		setShowDatePicker(Platform.OS === "ios");
+	const onChangeTargetDate = (event: any, selectedDate?: Date) => {
+		setShowTargetDatePicker(Platform.OS === "ios");
 		if (selectedDate) {
 			setTargetDate(selectedDate);
+		}
+	};
+
+	const onChangeLastDate = (event: any, selectedDate?: Date) => {
+		setShowLastDatePicker(Platform.OS === "ios");
+		if (selectedDate) {
+			setLastDate(selectedDate);
 		}
 	};
 
@@ -75,15 +97,20 @@ export function MaintenanceFormSheet({
 		const dataToSave = {
 			name,
 			type,
-			intervalKm: type === "km" || type === "mixed" ? parseFloat(intervalKm) || 0 : 0,
-			intervalMonths: type === "months" || type === "mixed" ? parseInt(intervalMonths) || 0 : null,
+			intervalKm:
+				type === "km" || type === "mixed" ? parseFloat(intervalKm) || 0 : 0,
+			intervalMonths:
+				type === "months" || type === "mixed"
+					? parseInt(intervalMonths) || 0
+					: null,
 			targetDate: type === "date" ? targetDate : null,
+			...(type !== "km" ? { lastMaintenanceDate: lastDate } : {}),
 			...(resetWear || !editItem
-				? { 
-					lastMaintenanceKm: currentTotalKm,
-					lastMaintenanceDate: new Date(),
-				} 
-				: {}), // Se não resetar, mantém as datas/KMs originais.
+				? {
+						lastMaintenanceKm: currentTotalKm,
+						...(type === "km" ? { lastMaintenanceDate: new Date() } : {}),
+					}
+				: {}),
 		};
 
 		if (editItem) {
@@ -139,16 +166,32 @@ export function MaintenanceFormSheet({
 						<View className="my-2">
 							<Label className="mb-2">Tipo de Controle</Label>
 							<View className="flex-row flex-wrap gap-2">
-								<Button size="sm" variant={type === "km" ? "primary" : "secondary"} onPress={() => setType("km")}>
+								<Button
+									size="sm"
+									variant={type === "km" ? "primary" : "secondary"}
+									onPress={() => setType("km")}
+								>
 									<Button.Label>Por KM</Button.Label>
 								</Button>
-								<Button size="sm" variant={type === "months" ? "primary" : "secondary"} onPress={() => setType("months")}>
+								<Button
+									size="sm"
+									variant={type === "months" ? "primary" : "secondary"}
+									onPress={() => setType("months")}
+								>
 									<Button.Label>Por Meses</Button.Label>
 								</Button>
-								<Button size="sm" variant={type === "date" ? "primary" : "secondary"} onPress={() => setType("date")}>
+								<Button
+									size="sm"
+									variant={type === "date" ? "primary" : "secondary"}
+									onPress={() => setType("date")}
+								>
 									<Button.Label>Data Fixa</Button.Label>
 								</Button>
-								<Button size="sm" variant={type === "mixed" ? "primary" : "secondary"} onPress={() => setType("mixed")}>
+								<Button
+									size="sm"
+									variant={type === "mixed" ? "primary" : "secondary"}
+									onPress={() => setType("mixed")}
+								>
 									<Button.Label>Misto</Button.Label>
 								</Button>
 							</View>
@@ -180,11 +223,25 @@ export function MaintenanceFormSheet({
 							</TextField>
 						)}
 
+						{type !== "km" && (
+							<TextField>
+								<Label>Data de Início</Label>
+								<Pressable
+									onPress={() => setShowLastDatePicker(true)}
+									className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+								>
+									<Text className="text-foreground text-base">
+										{format(lastDate, "dd/MM/yyyy", { locale: ptBR })}
+									</Text>
+								</Pressable>
+							</TextField>
+						)}
+
 						{type === "date" && (
 							<TextField>
 								<Label>Data de Vencimento</Label>
-								<Pressable 
-									onPress={() => setShowDatePicker(true)}
+								<Pressable
+									onPress={() => setShowTargetDatePicker(true)}
 									className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
 								>
 									<Text className="text-foreground text-base">
@@ -229,13 +286,22 @@ export function MaintenanceFormSheet({
 					</ScrollView>
 				</BottomSheet.Content>
 			</BottomSheet.Portal>
-			{showDatePicker && (
+			{showTargetDatePicker && (
 				<DateTimePicker
 					value={targetDate}
 					mode="date"
 					is24Hour={true}
-					onValueChange={onChangeDate}
-					onDismiss={() => setShowDatePicker(false)}
+					onValueChange={onChangeTargetDate}
+					onDismiss={() => setShowTargetDatePicker(false)}
+				/>
+			)}
+			{showLastDatePicker && (
+				<DateTimePicker
+					value={lastDate}
+					mode="date"
+					is24Hour={true}
+					onValueChange={onChangeLastDate}
+					onDismiss={() => setShowLastDatePicker(false)}
 				/>
 			)}
 		</BottomSheet>
