@@ -16,11 +16,21 @@ import { useRouter } from "expo-router";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	Image,
+	Pressable,
+	Text,
+	useColorScheme,
+	View,
+} from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BatteryArc } from "./components/BatteryArc";
 import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
 
 export default function DashboardScreen() {
+	const colorScheme = useColorScheme();
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
 	const router = useRouter();
 	const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -34,6 +44,7 @@ export default function DashboardScreen() {
 	const healthStats = useMaintenanceHealth(maintenanceList, stats);
 	const triggerRefresh = useAppStore((s) => s.triggerRefresh);
 	const setActiveScooterId = useAppStore((s) => s.setActiveScooterId);
+	const insets = useSafeAreaInsets();
 
 	const executeDeleteScooter = async (id: number) => {
 		await db.delete(logs).where(eq(logs.scooterId, id));
@@ -133,329 +144,278 @@ export default function DashboardScreen() {
 		return <EmptyScooterState />;
 	}
 
+	const bottomGradientColor = colorScheme === "dark" ? "#050605" : "#f4f5f4";
+
 	return (
-		<ScreenWrapper scrollable contentContainerClassName="p-4 pb-10">
-			{/* HEADER - HERO SECTION (PAINEL DO VEÍCULO) */}
-			<Animated.View entering={FadeInDown.delay(100).springify()}>
-				<View className="mb-6 rounded-3xl bg-surface border border-surface-secondary overflow-hidden shadow-xl">
-					{/* Gradient Background Subtle Glow */}
-					<LinearGradient
-						colors={["rgba(16, 185, 129, 0.1)", "rgba(0,0,0,0)"]}
-						className="absolute w-full h-full"
-					/>
+		<ScreenWrapper
+			scrollable
+			contentContainerClassName="pb-10"
+			style={{ paddingTop: 0 }}
+		>
+			{/* HEADER - HERO SECTION EDGE-TO-EDGE */}
+			<View
+				className="relative w-full overflow-hidden"
+				style={{ paddingBottom: 24 }}
+			>
+				{/* Background Image / Gradient */}
+				<Image
+					source={require("../../../assets/images/hero_scooter.png")}
+					className="absolute w-full h-[400px] opacity-20"
+					resizeMode="cover"
+					style={{ top: 0 }}
+				/>
+				<LinearGradient
+					colors={["rgba(16, 185, 129, 0.15)", bottomGradientColor]}
+					className="absolute w-full h-full"
+				/>
 
-					<View className="p-4 items-center">
-						<View className="flex-row items-center justify-between w-full mb-4">
-							<Pressable
-								className="flex-row items-center gap-2 flex-1 py-1"
-								onPress={() => setIsPickerOpen(true)}
-							>
-								<Text className="text-xl font-bold text-foreground uppercase">
-									{scooter.name}
-								</Text>
-								<StyledIcon
-									name="chevron-down"
-									size={16}
-									className="text-success"
-								/>
-							</Pressable>
-							<Button
-								size="sm"
-								isIconOnly
-								variant="secondary"
-								className="rounded-full bg-surface-secondary border-transparent"
-								onPress={() => {
-									setIsAddingNew(false);
-									setIsFormOpen(true);
-								}}
-							>
-								<StyledIcon name="edit-2" size={18} className="text-muted" />
-							</Button>
-						</View>
-
-						{/* Bateria Gigante */}
-						<View className="items-center mb-4 w-full relative">
-							{/* Texto com "Glow" Fake via text shadow na fonte (React Native não suporta box-shadow em texto tão fácil, então usamos cor forte) */}
-							<Text
-								className="text-7xl font-black tracking-tighter"
-								style={{
-									color: batteryStyles.color,
-									textShadowColor: batteryStyles.glow,
-									textShadowRadius: 20,
-									textShadowOffset: { width: 0, height: 4 },
-								}}
-							>
-								{batteryPercent}%
+				<View style={{ paddingTop: insets.top + 10, paddingHorizontal: 16 }}>
+					{/* Header Row */}
+					<View className="flex-row items-center justify-between w-full mb-6 z-10">
+						<Pressable
+							className="flex-row items-center gap-2 flex-1 py-1"
+							onPress={() => setIsPickerOpen(true)}
+						>
+							<Text className="text-xl font-bold text-foreground uppercase tracking-widest">
+								{scooter.name}
 							</Text>
-
-							{/* Status Dinâmico */}
-							<View className="flex-row items-center gap-2 mt-2 bg-default-soft px-3 py-1.5 rounded-full">
-								<StyledIcon
-									name={smartStatus.icon}
-									size={14}
-									className={smartStatus.color}
-								/>
-								<Text className="text-xs font-bold text-foreground">
-									{smartStatus.text}
-								</Text>
-							</View>
-						</View>
-
-						{/* Barra de Bateria Espessa */}
-						<View className="w-full h-6 bg-surface-secondary rounded-full overflow-hidden mb-4 border border-default-soft">
-							<LinearGradient
-								colors={batteryStyles.gradient}
-								start={{ x: 0, y: 0 }}
-								end={{ x: 1, y: 0 }}
-								className="h-full rounded-full"
-								style={{ width: `${batteryPercent}%` }}
+							<StyledIcon
+								name="chevron-down"
+								size={16}
+								className="text-success"
 							/>
-						</View>
+						</Pressable>
+						<Button
+							size="sm"
+							isIconOnly
+							variant="secondary"
+							className="rounded-full bg-surface-secondary/50 backdrop-blur-md border-transparent"
+							onPress={() => {
+								setIsAddingNew(false);
+								setIsFormOpen(true);
+							}}
+						>
+							<StyledIcon name="edit-2" size={18} className="text-white" />
+						</Button>
+					</View>
 
-						{/* Autonomia Restante */}
-						<View className="flex-row items-center justify-between w-full px-2">
-							<View className="flex-row items-center gap-1.5">
-								<StyledIcon name="award" size={14} className="text-info" />
-								<Text className="text-xs text-muted font-medium">
-									Autonomia Estimada
-								</Text>
-							</View>
+					{/* Arc Battery Indicator */}
+					<View className="items-center w-full z-10 mb-2">
+						<BatteryArc
+							percentage={batteryPercent}
+							color={batteryStyles.color}
+							glowColor={batteryStyles.glow}
+							statusIcon={smartStatus.icon}
+							statusText={smartStatus.text}
+							statusColor={smartStatus.color}
+						/>
 
-							<Text className="text-sm font-bold text-foreground">
-								≈ {stats?.estimatedAutonomy.toFixed(0) || "--"} km
+						{/* Autonomia Estimada Centralizada Abaixo do Arco */}
+						<View className="mt-8 flex-row items-center gap-2">
+							<StyledIcon name="award" size={14} className="text-info" />
+							<Text className="text-sm text-foreground font-bold tracking-wider">
+								≈ {stats?.estimatedAutonomy.toFixed(0) || "--"} km restantes
 							</Text>
 						</View>
 					</View>
 				</View>
-			</Animated.View>
 
-			{/* GRID STATS (Resumo do Dia/Ciclo) */}
-			<Animated.View entering={FadeInDown.delay(200).springify()}>
-				<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
-					Uso Atual
-				</Text>
-				<View className="flex-row gap-3 mb-3">
-					<Card
-						variant="secondary"
-						className="flex-1 bg-surface border border-surface-secondary py-5 shadow-sm"
-					>
-						<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">
-							KM DO CICLO
-						</Text>
-						<View className="flex-row items-baseline gap-1">
-							<Text className="text-3xl font-black text-foreground">
-								{stats?.currentCycleKm.toFixed(1) || "0.0"}
+				{/* INDICADORES LIMPOS (2 Linhas de Estatísticas) */}
+				<View className="items-center mt-4 px-4 z-10 gap-y-2 w-full">
+					{/* Primeira Linha: Carga e Ciclo */}
+					<View className="flex-row justify-center items-center w-full">
+						<View className="flex-1 flex-row items-center justify-end gap-1.5">
+							<StyledIcon name="clock" size={14} className="text-info" />
+							<Text className="text-xs font-bold text-muted uppercase">
+								Carga: <Text className="text-foreground">{lastChargeText}</Text>
 							</Text>
-							<Text className="text-xs font-bold text-muted">km</Text>
 						</View>
-						<Text className="text-[10px] text-muted mt-1">
-							Desde a última carga
-						</Text>
-					</Card>
 
-					<Card
-						variant="secondary"
-						className="flex-1 bg-surface border border-surface-secondary py-5 shadow-sm"
-					>
-						<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">
-							ÚLTIMA CARGA
-						</Text>
-						<Text className="text-2xl font-black text-info">
-							{lastChargeText}
-						</Text>
-						<Text className="text-[10px] text-muted mt-2">
-							{stats?.chargesCount || 0} recargas no total
-						</Text>
-					</Card>
-				</View>
+						<View className="w-8 items-center">
+							<Text className="text-muted/50">•</Text>
+						</View>
 
-				{/* Segunda Linha de Cards (Odômetro e Eficiência) */}
-				<View className="flex-row gap-3 mb-4">
-					<Card
-						variant="secondary"
-						className="flex-1 bg-surface border border-surface-secondary p-4 shadow-sm justify-center"
-					>
-						<View className="flex-row items-center gap-3">
-							<View className="bg-success/10 p-3 rounded-xl border border-success/20">
-								<StyledIcon name="map-pin" size={18} className="text-success" />
-							</View>
-							<View className="flex-1 justify-center">
-								<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
-									Odômetro
+						<View className="flex-1 flex-row items-center justify-start gap-1.5">
+							<StyledIcon name="activity" size={14} className="text-success" />
+							<Text className="text-xs font-bold text-muted uppercase">
+								Ciclo:{" "}
+								<Text className="text-foreground">
+									{stats?.currentCycleKm.toFixed(1) || "0.0"}km
 								</Text>
-								<View className="flex-row items-baseline gap-1">
-									<Text className="text-xl font-black text-foreground leading-tight">
-										{stats?.totalKm.toFixed(0) || "0"}
-									</Text>
-									<Text className="text-[10px] font-bold text-muted">km</Text>
-								</View>
-							</View>
+							</Text>
 						</View>
-					</Card>
+					</View>
 
-					<Card
-						variant="secondary"
-						className="flex-1 bg-surface border border-surface-secondary p-4 shadow-sm justify-center"
-					>
-						<View className="flex-row items-center gap-3">
-							<View className="bg-info/10 p-3 rounded-xl border border-info/20">
-								<StyledIcon name="zap" size={18} className="text-info" />
-							</View>
-							<View className="flex-1 justify-center">
-								<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
-									Eficiência
+					{/* Segunda Linha: Total e Eficiência */}
+					<View className="flex-row justify-center items-center w-full">
+						<View className="flex-1 flex-row items-center justify-end gap-1.5">
+							<StyledIcon name="map-pin" size={14} className="text-primary" />
+							<Text className="text-xs font-bold text-muted uppercase">
+								Total:{" "}
+								<Text className="text-foreground">
+									{stats?.totalKm.toFixed(0) || "0"}km
 								</Text>
-								<View className="flex-row items-baseline gap-1">
-									<Text className="text-xl font-black text-foreground leading-tight">
-										{stats?.averageCycleKm.toFixed(1) || "0.0"}
-									</Text>
-									<Text className="text-[10px] font-bold text-muted">km/c</Text>
-								</View>
-							</View>
+							</Text>
 						</View>
-					</Card>
+
+						<View className="w-8 items-center">
+							<Text className="text-muted/50">•</Text>
+						</View>
+
+						<View className="flex-1 flex-row items-center justify-start gap-1.5">
+							<StyledIcon name="zap" size={14} className="text-warning" />
+							<Text className="text-xs font-bold text-muted uppercase">
+								Efic:{" "}
+								<Text className="text-foreground">
+									{stats?.averageCycleKm.toFixed(1) || "0.0"}km/c
+								</Text>
+							</Text>
+						</View>
+					</View>
 				</View>
-			</Animated.View>
+			</View>
 
-			{/* AÇÕES RÁPIDAS (Hierarquia Clara de CTAs) */}
-			<Animated.View entering={FadeInDown.delay(300).springify()}>
-				<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
-					Ações
-				</Text>
-				<View className="gap-3 mb-4 flex-row w-full">
-					<Button
-						variant="primary"
-						className="flex-1"
-						onPress={() => router.push("/(tabs)/trips")}
-					>
-						<StyledIcon name="map-pin" size={20} className="text-white" />
-						<Button.Label className="text-white">Registrar Uso</Button.Label>
-					</Button>
-
-					<Button
-						variant="secondary"
-						className="flex-1"
-						onPress={() => router.push("/(tabs)/charges")}
-					>
-						<StyledIcon name="zap" size={20} className="text-foreground" />
-						<Button.Label className="text-foreground">
-							Registrar Recarga
-						</Button.Label>
-					</Button>
-				</View>
-			</Animated.View>
-
-			{/* PRÓXIMA REVISÃO (Só exibe se a scooter tiver manutenção ativada e houver item próximo) */}
-			{scooter?.showMaintenance &&
-				healthStats.nextItem &&
-				healthStats.isPriorityActive && (
-					<Animated.View entering={FadeInDown.delay(300).springify()}>
-						<Pressable onPress={() => router.push("/(tabs)/maintenance")}>
-							<Card
-								variant="secondary"
-								className="bg-warning/10 border border-warning/30 p-4 mb-4 flex-row items-center"
-							>
-								<View className="bg-warning/20 p-3 rounded-full mr-4">
-									<StyledIcon
-										name="alert-triangle"
-										size={24}
-										className="text-warning"
-									/>
-								</View>
-								<View className="flex-1">
-									<Text className="text-xs font-bold text-warning uppercase tracking-wider mb-1">
-										Atenção: Revisão Próxima
-									</Text>
-									<Text className="text-base font-bold text-foreground">
-										{healthStats.nextItem.name}
-									</Text>
-									<Text className="text-sm text-muted">
-										Faltam {healthStats.nextItemInfo.primary}{" "}
-										{healthStats.nextItemInfo.secondary}
-									</Text>
-								</View>
-								<StyledIcon
-									name="chevron-right"
-									size={20}
-									className="text-muted"
-								/>
-							</Card>
-						</Pressable>
-					</Animated.View>
-				)}
-
-			{/* HISTÓRICO RECENTE */}
-			<Animated.View
-				entering={FadeInDown.delay(
-					scooter?.showMaintenance &&
-						healthStats.nextItem &&
-						healthStats.isPriorityActive
-						? 400
-						: 300,
-				).springify()}
-			>
-				<View className="flex-row justify-between items-center mb-3 ml-1">
-					<Text className="text-xs font-bold text-muted uppercase tracking-wider">
-						Últimos Usos
+			<View className="px-4 mt-4">
+				{/* AÇÕES RÁPIDAS (Hierarquia Clara de CTAs) */}
+				<Animated.View entering={FadeInDown.delay(300).springify()}>
+					<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
+						Ações
 					</Text>
-					{recentTrips.length > 0 && (
+					<View className="gap-3 mb-4 flex-row w-full">
 						<Button
-							size="sm"
-							variant="secondary"
-							className="bg-transparent border-0 px-0 h-auto"
+							variant="primary"
+							className="flex-1"
 							onPress={() => router.push("/(tabs)/trips")}
 						>
-							<Button.Label className="text-success text-xs font-bold">
-								Ver todos
+							<StyledIcon name="map-pin" size={20} className="text-white" />
+							<Button.Label className="text-white">Registrar Uso</Button.Label>
+						</Button>
+
+						<Button
+							variant="secondary"
+							className="flex-1"
+							onPress={() => router.push("/(tabs)/charges")}
+						>
+							<StyledIcon name="zap" size={20} className="text-foreground" />
+							<Button.Label className="text-foreground">
+								Registrar Recarga
 							</Button.Label>
 						</Button>
-					)}
-				</View>
+					</View>
+				</Animated.View>
 
-				<View className="gap-3 mb-4">
-					{recentTrips.length === 0 ? (
-						<Text className="text-center text-muted mt-2">
-							Nenhum uso registrado recentemente.
-						</Text>
-					) : (
-						recentTrips.map((trip) => (
-							<Card
-								key={trip.id}
-								variant="secondary"
-								className="bg-surface border border-surface-secondary shadow-sm"
-							>
-								<View className="flex-row items-center justify-between">
-									<View className="flex-row items-center gap-3">
-										<View className="bg-success/10 p-2 rounded-xl border border-success/20">
-											<StyledIcon
-												name="map-pin"
-												size={16}
-												className="text-success"
-											/>
-										</View>
-										<View>
-											<Text className="text-base font-bold text-foreground">
-												{trip.distance} km
-											</Text>
-											<Text className="text-[10px] text-muted">
-												{format(trip.date, "dd/MM/yyyy")}
-											</Text>
-										</View>
+				{/* PRÓXIMA REVISÃO (Só exibe se a scooter tiver manutenção ativada e houver item próximo) */}
+				{scooter?.showMaintenance &&
+					healthStats.nextItem &&
+					healthStats.isPriorityActive && (
+						<Animated.View entering={FadeInDown.delay(300).springify()}>
+							<Pressable onPress={() => router.push("/(tabs)/maintenance")}>
+								<Card
+									variant="secondary"
+									className="bg-warning/10 border border-warning/30 p-4 mb-4 flex-row items-center"
+								>
+									<View className="bg-warning/20 p-3 rounded-full mr-4">
+										<StyledIcon
+											name="alert-triangle"
+											size={24}
+											className="text-warning"
+										/>
 									</View>
-									{trip.notes ? (
-										<Text
-											className="text-xs text-muted flex-1 text-right ml-4"
-											numberOfLines={1}
-										>
-											{trip.notes}
+									<View className="flex-1">
+										<Text className="text-xs font-bold text-warning uppercase tracking-wider mb-1">
+											Atenção: Revisão Próxima
 										</Text>
-									) : null}
-								</View>
-							</Card>
-						))
+										<Text className="text-base font-bold text-foreground">
+											{healthStats.nextItem.name}
+										</Text>
+										<Text className="text-sm text-muted">
+											Faltam {healthStats.nextItemInfo.primary}{" "}
+											{healthStats.nextItemInfo.secondary}
+										</Text>
+									</View>
+									<StyledIcon
+										name="chevron-right"
+										size={20}
+										className="text-muted"
+									/>
+								</Card>
+							</Pressable>
+						</Animated.View>
 					)}
-				</View>
-			</Animated.View>
+
+				{/* HISTÓRICO RECENTE */}
+				<Animated.View
+					entering={FadeInDown.delay(
+						scooter?.showMaintenance &&
+							healthStats.nextItem &&
+							healthStats.isPriorityActive
+							? 400
+							: 300,
+					).springify()}
+				>
+					<View className="flex-row justify-between items-center mb-3 ml-1">
+						<Text className="text-xs font-bold text-muted uppercase tracking-wider">
+							Últimos Usos
+						</Text>
+						{recentTrips.length > 0 && (
+							<Button
+								size="sm"
+								variant="secondary"
+								className="bg-transparent border-0 px-0 h-auto"
+								onPress={() => router.push("/(tabs)/trips")}
+							>
+								<Button.Label className="text-success text-xs font-bold">
+									Ver todos
+								</Button.Label>
+							</Button>
+						)}
+					</View>
+
+					<View className="gap-3 mb-4">
+						{recentTrips.length === 0 ? (
+							<Text className="text-center text-muted mt-2">
+								Nenhum uso registrado recentemente.
+							</Text>
+						) : (
+							recentTrips.map((trip) => (
+								<Card
+									key={trip.id}
+									variant="secondary"
+									className="bg-surface border border-surface-secondary shadow-sm"
+								>
+									<View className="flex-row items-center justify-between">
+										<View className="flex-row items-center gap-3">
+											<View className="bg-success/10 p-2 rounded-xl border border-success/20">
+												<StyledIcon
+													name="map-pin"
+													size={16}
+													className="text-success"
+												/>
+											</View>
+											<View>
+												<Text className="text-base font-bold text-foreground">
+													{trip.distance} km
+												</Text>
+												<Text className="text-[10px] text-muted">
+													{format(trip.date, "dd/MM/yyyy")}
+												</Text>
+											</View>
+										</View>
+										{trip.notes ? (
+											<Text
+												className="text-xs text-muted flex-1 text-right ml-4"
+												numberOfLines={1}
+											>
+												{trip.notes}
+											</Text>
+										) : null}
+									</View>
+								</Card>
+							))
+						)}
+					</View>
+				</Animated.View>
+			</View>
 
 			<ScooterPickerSheet
 				isOpen={isPickerOpen}
