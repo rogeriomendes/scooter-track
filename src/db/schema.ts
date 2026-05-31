@@ -12,7 +12,11 @@ export const scooters = sqliteTable("scooters", {
 	showMaintenance: integer("showMaintenance", { mode: "boolean" })
 		.notNull()
 		.default(true),
+	motorPower: integer("motorPower").default(0), // watts
 	purchaseDate: integer("purchaseDate", { mode: "timestamp" }),
+	serialNumber: text("serialNumber"),
+	motorNumber: text("motorNumber"),
+	invoicePdfPath: text("invoicePdfPath"),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });
 

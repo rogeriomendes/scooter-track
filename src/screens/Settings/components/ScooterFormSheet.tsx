@@ -10,7 +10,11 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useEffect, useState } from "react";
-import { Keyboard, Switch, Text, View, Pressable, Platform } from "react-native";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+import { Keyboard, Switch, Text, View, Pressable, Platform, Alert } from "react-native";
+import { StyledIcon } from "@/components/StyledIcon";
 
 interface ScooterFormSheetProps {
 	isOpen: boolean;
@@ -36,6 +40,9 @@ export function ScooterFormSheet({
 	const [initialKm, setInitialKm] = useState("0");
 	const [purchaseDate, setPurchaseDate] = useState<Date>(new Date());
 	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [serialNumber, setSerialNumber] = useState("");
+	const [motorNumber, setMotorNumber] = useState("");
+	const [invoicePdfPath, setInvoicePdfPath] = useState<string | null>(null);
 
 	const { setActiveScooterId } = useAppStore();
 
@@ -48,6 +55,9 @@ export function ScooterFormSheet({
 				setShowMaintenance(editItem.showMaintenance);
 				setInitialKm(editItem.initialKm.toString());
 				setPurchaseDate(editItem.purchaseDate || new Date());
+				setSerialNumber(editItem.serialNumber || "");
+				setMotorNumber(editItem.motorNumber || "");
+				setInvoicePdfPath(editItem.invoicePdfPath || null);
 			} else {
 				setName("");
 				setBatteryType("60V");
@@ -55,6 +65,9 @@ export function ScooterFormSheet({
 				setShowMaintenance(true);
 				setInitialKm("0");
 				setPurchaseDate(new Date());
+				setSerialNumber("");
+				setMotorNumber("");
+				setInvoicePdfPath(null);
 			}
 		}
 	}, [isOpen, editItem]);
@@ -64,6 +77,55 @@ export function ScooterFormSheet({
 		if (selectedDate) {
 			setPurchaseDate(selectedDate);
 		}
+	};
+
+	const pickInvoicePdf = async () => {
+		try {
+			const result = await DocumentPicker.getDocumentAsync({
+				type: "application/pdf",
+				copyToCacheDirectory: false,
+			});
+
+			if (!result.canceled && result.assets && result.assets.length > 0) {
+				const pickedFile = result.assets[0];
+				
+				// Copiar para a pasta segura do app
+				const fileName = `invoice_${Date.now()}_${pickedFile.name}`;
+				const destPath = `${FileSystem.documentDirectory}${fileName}`;
+				
+				await FileSystem.copyAsync({
+					from: pickedFile.uri,
+					to: destPath
+				});
+
+				setInvoicePdfPath(destPath);
+			}
+		} catch (error) {
+			Alert.alert("Erro", "Não foi possível selecionar o PDF.");
+		}
+	};
+
+	const viewInvoicePdf = async () => {
+		if (invoicePdfPath) {
+			try {
+				const canShare = await Sharing.isAvailableAsync();
+				if (canShare) {
+					await Sharing.shareAsync(invoicePdfPath, {
+						mimeType: "application/pdf",
+						dialogTitle: "Nota Fiscal",
+					});
+				} else {
+					Alert.alert("Erro", "Compartilhamento/Visualização não disponível neste dispositivo.");
+				}
+			} catch (error) {
+				Alert.alert("Erro", "Não foi possível abrir o PDF.");
+			}
+		}
+	};
+
+	const removeInvoicePdf = () => {
+		// Ideally we would delete from FileSystem here, but simple nullification works for now
+		setInvoicePdfPath(null);
 	};
 
 	const handleSaveScooter = async () => {
@@ -80,6 +142,9 @@ export function ScooterFormSheet({
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
 					purchaseDate,
+					serialNumber,
+					motorNumber,
+					invoicePdfPath,
 				})
 				.where(eq(scooters.id, editItem.id));
 		} else {
@@ -92,6 +157,9 @@ export function ScooterFormSheet({
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
 					purchaseDate,
+					serialNumber,
+					motorNumber,
+					invoicePdfPath,
 					createdAt: new Date(),
 				})
 				.returning();
@@ -106,8 +174,10 @@ export function ScooterFormSheet({
 			}
 		}
 
-		setName("");
 		setInitialKm("0");
+		setSerialNumber("");
+		setMotorNumber("");
+		setInvoicePdfPath(null);
 		onOpenChange(false);
 		onSaved();
 	};
@@ -194,6 +264,55 @@ export function ScooterFormSheet({
 							</Text>
 						</Pressable>
 					</TextField>
+
+					<TextField>
+						<Label>Número de Série / Chassi (Opcional)</Label>
+						<BottomSheetInput
+							placeholder="Ex: 9AABCD1234..."
+							value={serialNumber}
+							onChangeText={setSerialNumber}
+							variant="secondary"
+							autoCapitalize="characters"
+						/>
+					</TextField>
+
+					<TextField>
+						<Label>Número do Motor (Opcional)</Label>
+						<BottomSheetInput
+							placeholder="Ex: 60V1000W..."
+							value={motorNumber}
+							onChangeText={setMotorNumber}
+							variant="secondary"
+							autoCapitalize="characters"
+						/>
+					</TextField>
+
+					<View className="mt-2 mb-2">
+						<Label className="mb-2">Nota Fiscal (PDF)</Label>
+						{invoicePdfPath ? (
+							<View className="flex-row items-center bg-surface-secondary p-3 rounded-xl">
+								<StyledIcon name="file-text" size={24} className="text-primary mr-3" />
+								<View className="flex-1">
+									<Text className="text-foreground font-bold text-sm">Nota Fiscal Anexada</Text>
+								</View>
+								<View className="flex-row gap-2">
+									<Pressable onPress={viewInvoicePdf} className="p-2 bg-primary/20 rounded-lg">
+										<StyledIcon name="eye" size={16} className="text-primary" />
+									</Pressable>
+									<Pressable onPress={removeInvoicePdf} className="p-2 bg-danger/20 rounded-lg">
+										<StyledIcon name="trash-2" size={16} className="text-danger" />
+									</Pressable>
+								</View>
+							</View>
+						) : (
+							<Button variant="secondary" className="border border-dashed border-muted/30" onPress={pickInvoicePdf}>
+								<View className="flex-row items-center gap-2">
+									<StyledIcon name="upload" size={18} className="text-foreground" />
+									<Button.Label>Anexar Arquivo PDF</Button.Label>
+								</View>
+							</Button>
+						)}
+					</View>
 
 					<View className="flex-row items-center justify-between mt-2 mb-2">
 						<Text className="text-sm font-medium text-foreground flex-1 pr-4">

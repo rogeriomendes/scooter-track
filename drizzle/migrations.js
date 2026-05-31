@@ -7,6 +7,7 @@ import m0002 from './0002_grey_fallen_one.sql';
 import m0003 from './0003_broken_captain_stacy.sql';
 import m0004 from './0004_magenta_eternity.sql';
 import m0005 from './0005_red_iron_lad.sql';
+import m0006 from './0006_clear_catseye.sql';
 
   export default {
     journal,
@@ -16,7 +17,8 @@ m0001,
 m0002,
 m0003,
 m0004,
-m0005
+m0005,
+m0006
     }
   }
   
