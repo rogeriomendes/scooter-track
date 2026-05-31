@@ -1,7 +1,7 @@
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
-import { ScooterFormSheet } from "@/screens/Settings/components/ScooterFormSheet";
-import { Button } from "heroui-native";
+import { ScooterFormSheet } from "@/components/ScooterFormSheet";
+import { Button } from "heroui-native/button";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";

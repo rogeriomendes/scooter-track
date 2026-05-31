@@ -1,11 +1,16 @@
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScooterFormSheet } from "@/components/ScooterFormSheet";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { calculateBatteryPercentage } from "@/constants/batteryCharts";
+import { db } from "@/db/client";
+import { logs, scooters } from "@/db/schema";
 import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
 import { differenceInDays, format } from "date-fns";
+import { eq } from "drizzle-orm";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Button } from "heroui-native/button";
@@ -19,11 +24,24 @@ export default function DashboardScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
 	const router = useRouter();
 	const [isPickerOpen, setIsPickerOpen] = useState(false);
+	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [isAddingNew, setIsAddingNew] = useState(false);
+	const [scooterToDelete, setScooterToDelete] = useState<number | null>(null);
 
 	const { scooter, allLogs, maintenanceList, stats, totalScooters, isLoading } =
 		useScooterData(activeScooterId);
 
 	const healthStats = useMaintenanceHealth(maintenanceList, stats);
+	const triggerRefresh = useAppStore((s) => s.triggerRefresh);
+	const setActiveScooterId = useAppStore((s) => s.setActiveScooterId);
+
+	const executeDeleteScooter = async (id: number) => {
+		await db.delete(logs).where(eq(logs.scooterId, id));
+		await db.delete(scooters).where(eq(scooters.id, id));
+		if (activeScooterId === id) setActiveScooterId(null);
+		triggerRefresh();
+		setScooterToDelete(null);
+	};
 
 	const latestLog = useMemo(
 		() => (allLogs.length > 0 ? allLogs[0] : null),
@@ -130,29 +148,28 @@ export default function DashboardScreen() {
 						<View className="flex-row items-center justify-between w-full mb-4">
 							<Pressable
 								className="flex-row items-center gap-2 flex-1 py-1"
-								onPress={() => totalScooters > 1 && setIsPickerOpen(true)}
+								onPress={() => setIsPickerOpen(true)}
 							>
 								<Text className="text-xl font-bold text-foreground uppercase">
 									{scooter.name}
 								</Text>
-								{totalScooters > 1 && (
-									// <View className="bg-surface-secondary rounded-full p-1 ml-1">
-									<StyledIcon
-										name="chevron-down"
-										size={16}
-										className="text-success"
-									/>
-									// </View>
-								)}
+								<StyledIcon
+									name="chevron-down"
+									size={16}
+									className="text-success"
+								/>
 							</Pressable>
 							<Button
 								size="sm"
 								isIconOnly
 								variant="secondary"
 								className="rounded-full bg-surface-secondary border-transparent"
-								onPress={() => router.push("/(tabs)/settings")}
+								onPress={() => {
+									setIsAddingNew(false);
+									setIsFormOpen(true);
+								}}
 							>
-								<StyledIcon name="settings" size={18} className="text-muted" />
+								<StyledIcon name="edit-2" size={18} className="text-muted" />
 							</Button>
 						</View>
 
@@ -443,6 +460,36 @@ export default function DashboardScreen() {
 			<ScooterPickerSheet
 				isOpen={isPickerOpen}
 				onOpenChange={setIsPickerOpen}
+				onAddRequest={() => {
+					setIsPickerOpen(false);
+					setIsAddingNew(true);
+					setIsFormOpen(true);
+				}}
+			/>
+
+			<ScooterFormSheet
+				isOpen={isFormOpen}
+				onOpenChange={setIsFormOpen}
+				editItem={isAddingNew ? null : scooter}
+				onSaved={() => triggerRefresh()}
+				onDeleteRequest={(id) => {
+					setIsFormOpen(false);
+					setScooterToDelete(id);
+				}}
+			/>
+
+			{/* Excluir Scooter Dialog */}
+			<ConfirmDialog
+				isOpen={scooterToDelete !== null}
+				onOpenChange={(open) => {
+					if (!open) setScooterToDelete(null);
+				}}
+				title="Excluir Scooter"
+				description="Tem certeza? Todos os usos e recargas desta scooter também serão perdidos permanentemente."
+				onCancel={() => setScooterToDelete(null)}
+				onConfirm={() =>
+					scooterToDelete && executeDeleteScooter(scooterToDelete)
+				}
 			/>
 		</ScreenWrapper>
 	);

@@ -9,11 +9,13 @@ import { Pressable, Text, View } from "react-native";
 interface ScooterPickerSheetProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
+	onAddRequest?: () => void;
 }
 
 export function ScooterPickerSheet({
 	isOpen,
 	onOpenChange,
+	onAddRequest,
 }: ScooterPickerSheetProps) {
 	const { activeScooterId, setActiveScooterId } = useAppStore();
 	const [scootersList, setScootersList] = useState<
@@ -90,6 +92,22 @@ export function ScooterPickerSheet({
 							</Pressable>
 						);
 					})}
+
+					{onAddRequest && (
+						<Pressable
+							onPress={onAddRequest}
+							className="flex-row items-center justify-center p-4 mt-2 rounded-2xl border border-dashed border-muted/30 bg-transparent active:bg-surface-secondary/50"
+						>
+							<StyledIcon
+								name="plus"
+								size={18}
+								className="text-foreground mr-2"
+							/>
+							<Text className="text-base font-bold text-foreground">
+								Adicionar Nova Scooter
+							</Text>
+						</Pressable>
+					)}
 				</BottomSheet.Content>
 			</BottomSheet.Portal>
 		</BottomSheet>

@@ -1,20 +1,28 @@
 import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
-import { eq } from "drizzle-orm";
-import * as Haptics from "expo-haptics";
-import { BottomSheet, Button, Label, TextField } from "heroui-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useEffect, useState } from "react";
+import { eq } from "drizzle-orm";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
-import { Keyboard, Switch, Text, View, Pressable, Platform, Alert } from "react-native";
-import { StyledIcon } from "@/components/StyledIcon";
+import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import { useEffect, useState } from "react";
+import {
+	Alert,
+	Keyboard,
+	Platform,
+	Pressable,
+	Switch,
+	Text,
+	View,
+} from "react-native";
 
 interface ScooterFormSheetProps {
 	isOpen: boolean;
@@ -88,14 +96,14 @@ export function ScooterFormSheet({
 
 			if (!result.canceled && result.assets && result.assets.length > 0) {
 				const pickedFile = result.assets[0];
-				
+
 				// Copiar para a pasta segura do app
 				const fileName = `invoice_${Date.now()}_${pickedFile.name}`;
 				const destPath = `${FileSystem.documentDirectory}${fileName}`;
-				
+
 				await FileSystem.copyAsync({
 					from: pickedFile.uri,
-					to: destPath
+					to: destPath,
 				});
 
 				setInvoicePdfPath(destPath);
@@ -115,7 +123,10 @@ export function ScooterFormSheet({
 						dialogTitle: "Nota Fiscal",
 					});
 				} else {
-					Alert.alert("Erro", "Compartilhamento/Visualização não disponível neste dispositivo.");
+					Alert.alert(
+						"Erro",
+						"Compartilhamento/Visualização não disponível neste dispositivo.",
+					);
 				}
 			} catch (error) {
 				Alert.alert("Erro", "Não foi possível abrir o PDF.");
@@ -255,7 +266,7 @@ export function ScooterFormSheet({
 
 					<TextField>
 						<Label>Data de Compra</Label>
-						<Pressable 
+						<Pressable
 							onPress={() => setShowDatePicker(true)}
 							className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
 						>
@@ -291,23 +302,47 @@ export function ScooterFormSheet({
 						<Label className="mb-2">Nota Fiscal (PDF)</Label>
 						{invoicePdfPath ? (
 							<View className="flex-row items-center bg-surface-secondary p-3 rounded-xl">
-								<StyledIcon name="file-text" size={24} className="text-primary mr-3" />
+								<StyledIcon
+									name="file-text"
+									size={24}
+									className="text-primary mr-3"
+								/>
 								<View className="flex-1">
-									<Text className="text-foreground font-bold text-sm">Nota Fiscal Anexada</Text>
+									<Text className="text-foreground font-bold text-sm">
+										Nota Fiscal Anexada
+									</Text>
 								</View>
 								<View className="flex-row gap-2">
-									<Pressable onPress={viewInvoicePdf} className="p-2 bg-primary/20 rounded-lg">
+									<Pressable
+										onPress={viewInvoicePdf}
+										className="p-2 bg-primary/20 rounded-lg"
+									>
 										<StyledIcon name="eye" size={16} className="text-primary" />
 									</Pressable>
-									<Pressable onPress={removeInvoicePdf} className="p-2 bg-danger/20 rounded-lg">
-										<StyledIcon name="trash-2" size={16} className="text-danger" />
+									<Pressable
+										onPress={removeInvoicePdf}
+										className="p-2 bg-danger/20 rounded-lg"
+									>
+										<StyledIcon
+											name="trash-2"
+											size={16}
+											className="text-danger"
+										/>
 									</Pressable>
 								</View>
 							</View>
 						) : (
-							<Button variant="secondary" className="border border-dashed border-muted/30" onPress={pickInvoicePdf}>
+							<Button
+								variant="secondary"
+								className="border border-dashed border-muted/30"
+								onPress={pickInvoicePdf}
+							>
 								<View className="flex-row items-center gap-2">
-									<StyledIcon name="upload" size={18} className="text-foreground" />
+									<StyledIcon
+										name="upload"
+										size={18}
+										className="text-foreground"
+									/>
 									<Button.Label>Anexar Arquivo PDF</Button.Label>
 								</View>
 							</Button>
