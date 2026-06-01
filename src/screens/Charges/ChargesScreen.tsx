@@ -11,7 +11,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
-import { Button } from "heroui-native";
+import { Button, Separator } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import {
@@ -115,60 +115,96 @@ export default function ChargesScreen() {
 			{/* ESTATÍSTICAS RÁPIDAS */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="flex-row gap-3 px-4 mb-4 mt-2"
+				className="flex-row items-center px-4 mb-4 mt-2"
 			>
-				<Card
-					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-				>
-					<StyledIcon name="zap" size={18} className="mb-2 text-info" />
-					<Text className="text-xl font-black text-foreground">
-						{chargesList.length}
-					</Text>
-					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
+				{/* MES ATUAL */}
+				<View className="flex-1 items-center justify-center py-2">
+					<StyledIcon name="zap" size={16} className="mb-2 text-info" />
+					<View className="flex-row items-baseline gap-1">
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
+							{chargesList.length}
+						</Text>
+					</View>
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
 						Mês Atual
 					</Text>
-				</Card>
+				</View>
 
-				<Card
-					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-				>
+				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+
+				{/* MEDIA/CICLO */}
+				<View className="flex-1 items-center justify-center py-2">
 					<StyledIcon
 						name="navigation"
-						size={18}
+						size={16}
 						className="mb-2 text-success"
 					/>
 					<View className="flex-row items-baseline gap-1">
-						<Text className="text-xl font-black text-foreground">
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
 							{stats?.averageCycleKm.toFixed(1) || "0.0"}
 						</Text>
 						<Text className="font-bold text-muted text-[10px]">km</Text>
 					</View>
-					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
 						Média/Ciclo
 					</Text>
-				</Card>
+				</View>
 
-				<Card
-					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-				>
+				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+
+				{/* MELHOR CICLO */}
+				<View className="flex-1 items-center justify-center py-2">
 					<StyledIcon
 						name="trending-up"
-						size={18}
+						size={16}
 						className="mb-2 text-warning"
 					/>
 					<View className="flex-row items-baseline gap-1">
-						<Text className="text-xl font-black text-foreground">
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
 							{stats?.bestCycleKm.toFixed(1) || "0.0"}
 						</Text>
 						<Text className="font-bold text-muted text-[10px]">km</Text>
 					</View>
-					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
 						Melhor Ciclo
 					</Text>
-				</Card>
+				</View>
+
+				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+
+				{/* PIOR CICLO */}
+				<View className="flex-1 items-center justify-center py-2">
+					<StyledIcon
+						name="trending-down"
+						size={16}
+						className="mb-2 text-danger"
+					/>
+					<View className="flex-row items-baseline gap-1">
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
+							{stats?.worstCycleKm.toFixed(1) || "0.0"}
+						</Text>
+						<Text className="font-bold text-muted text-[10px]">km</Text>
+					</View>
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
+						Pior Ciclo
+					</Text>
+				</View>
 			</Animated.View>
 
 			{/* SELETOR DE MÊS (Chips) */}
@@ -230,14 +266,18 @@ export default function ChargesScreen() {
 								variant="secondary"
 								className="border border-surface-secondary bg-surface shadow-sm p-0"
 							>
-								<Pressable 
-									className="py-4 px-4" 
+								<Pressable
+									className="py-4 px-4"
 									onPress={() => handleEdit(item)}
 								>
 									<View className="flex-row items-start justify-between">
 										<View className="flex-row items-start gap-3 flex-1">
 											<View className="bg-info/10 p-2.5 rounded-xl border border-info/20 mt-0.5">
-												<StyledIcon name="zap" size={18} className="text-info" />
+												<StyledIcon
+													name="zap"
+													size={18}
+													className="text-info"
+												/>
 											</View>
 											<View className="flex-1">
 												<View className="flex-row items-baseline gap-1">
@@ -249,29 +289,43 @@ export default function ChargesScreen() {
 													</Text>
 													{scooter.trackingMode === "voltage" && (
 														<Text className="font-bold text-muted text-xs ml-1">
-															({calculateBatteryPercentage(item.batteryLevel, scooter.batteryType)}%)
+															(
+															{calculateBatteryPercentage(
+																item.batteryLevel,
+																scooter.batteryType,
+															)}
+															%)
 														</Text>
 													)}
 												</View>
 												<View className="flex-row items-center gap-1.5 mt-0.5">
-													<StyledIcon name="navigation" size={10} className="text-success" />
+													<StyledIcon
+														name="navigation"
+														size={10}
+														className="text-success"
+													/>
 													<Text className="text-xs font-bold text-muted">
-														Recuperou: <Text className="text-success">+{autonomia} km</Text>
+														Recuperou:{" "}
+														<Text className="text-success">
+															+{autonomia} km
+														</Text>
 													</Text>
 												</View>
 											</View>
 										</View>
-										
+
 										<View className="items-end">
 											<Text className="text-[10px] text-muted font-bold uppercase tracking-widest">
 												{format(item.date, "dd MMM • HH:mm", { locale: ptBR })}
 											</Text>
 										</View>
 									</View>
-									
+
 									{item.notes ? (
-										<View className="mt-3 pl-[46px]">
-											<Text className="text-xs text-muted italic">"{item.notes}"</Text>
+										<View className="mt-3 pl-11.5">
+											<Text className="text-xs text-muted italic">
+												"{item.notes}"
+											</Text>
 										</View>
 									) : null}
 								</Pressable>

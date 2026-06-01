@@ -6,7 +6,7 @@ type BatteryArcProps = {
 	percentage: number;
 	color: string;
 	glowColor: string;
-	statusIcon: any;
+	statusIcon: StyledIcon;
 	statusText: string;
 	statusColor: string;
 };

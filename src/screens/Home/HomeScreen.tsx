@@ -163,7 +163,7 @@ export default function DashboardScreen() {
 				{/* Background Image / Gradient */}
 				<Image
 					source={require("../../../assets/images/hero_scooter.png")}
-					className="absolute w-full h-[400px] opacity-20"
+					className="absolute w-full h-100 opacity-20"
 					resizeMode="cover"
 					style={{ top: 0 }}
 				/>

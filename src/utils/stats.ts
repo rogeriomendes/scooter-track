@@ -16,6 +16,7 @@ export function calculateScooterStats(scooter: Scooter | null, allLogs: Log[]) {
 		return {
 			currentCycleKm: 0,
 			bestCycleKm: 0,
+			worstCycleKm: 0,
 			averageCycleKm: 0,
 			cycles: [],
 			estimatedAutonomy: 0,
@@ -73,10 +74,12 @@ export function calculateScooterStats(scooter: Scooter | null, allLogs: Log[]) {
 	const completedCycles = cycles.filter((c) => c.distance > 0);
 
 	let bestCycleKm = 0;
+	let worstCycleKm = 0;
 	let averageCycleKm = 0;
 
 	if (completedCycles.length > 0) {
 		bestCycleKm = Math.max(...completedCycles.map((c) => c.distance));
+		worstCycleKm = Math.min(...completedCycles.map((c) => c.distance));
 		const totalCycleDistances = completedCycles.reduce(
 			(sum, c) => sum + c.distance,
 			0,
@@ -92,6 +95,7 @@ export function calculateScooterStats(scooter: Scooter | null, allLogs: Log[]) {
 	return {
 		currentCycleKm,
 		bestCycleKm,
+		worstCycleKm,
 		averageCycleKm,
 		cycles,
 		estimatedAutonomy,
