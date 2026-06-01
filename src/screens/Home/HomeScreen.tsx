@@ -13,6 +13,7 @@ import { differenceInDays, format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import * as Sharing from "expo-sharing";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
@@ -28,6 +29,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BatteryArc } from "./components/BatteryArc";
 import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
+import { UsageSparkline } from "./components/UsageSparkline";
+import { WeatherWidget } from "./components/WeatherWidget";
 
 export default function DashboardScreen() {
 	const colorScheme = useColorScheme();
@@ -155,7 +158,7 @@ export default function DashboardScreen() {
 			{/* HEADER - HERO SECTION EDGE-TO-EDGE */}
 			<View
 				className="relative w-full overflow-hidden"
-				style={{ paddingBottom: 24 }}
+				// style={{ paddingBottom: 24 }}
 			>
 				{/* Background Image / Gradient */}
 				<Image
@@ -172,33 +175,39 @@ export default function DashboardScreen() {
 				<View style={{ paddingTop: insets.top + 10, paddingHorizontal: 16 }}>
 					{/* Header Row */}
 					<View className="flex-row items-center justify-between w-full mb-6 z-10">
-						<Pressable
-							className="flex-row items-center gap-2 flex-1 py-1"
-							onPress={() => setIsPickerOpen(true)}
-						>
-							<Text className="text-xl font-bold text-foreground uppercase tracking-widest">
-								{scooter.name}
-							</Text>
-							<StyledIcon
-								name="chevron-down"
-								size={16}
-								className="text-success"
-							/>
-						</Pressable>
-						<Button
-							size="sm"
-							isIconOnly
-							variant="secondary"
-							className="rounded-full bg-surface-secondary/50 backdrop-blur-md border-transparent"
-							onPress={() => {
-								setIsAddingNew(false);
-								setIsFormOpen(true);
-							}}
-						>
-							<StyledIcon name="edit-2" size={18} className="text-white" />
-						</Button>
+						<View className="flex-row items-center flex-1 gap-2 mr-2">
+							<Pressable
+								className="flex-row items-center gap-2 py-1 shrink"
+								onPress={() => setIsPickerOpen(true)}
+							>
+								<Text
+									className="text-xl font-bold text-foreground uppercase tracking-widest"
+									numberOfLines={1}
+								>
+									{scooter.name}
+								</Text>
+								<StyledIcon
+									name="chevron-down"
+									size={16}
+									className="text-success"
+								/>
+							</Pressable>
+						</View>
+						<View className="flex-row items-center gap-2 ml-2">
+							<Button
+								size="sm"
+								isIconOnly
+								variant="secondary"
+								className="rounded-full bg-surface-secondary/50 backdrop-blur-md border-transparent"
+								onPress={() => {
+									setIsAddingNew(false);
+									setIsFormOpen(true);
+								}}
+							>
+								<StyledIcon name="edit-2" size={18} className="text-white" />
+							</Button>
+						</View>
 					</View>
-
 					{/* Arc Battery Indicator */}
 					<View className="items-center w-full z-10 mb-2">
 						<BatteryArc
@@ -209,73 +218,73 @@ export default function DashboardScreen() {
 							statusText={smartStatus.text}
 							statusColor={smartStatus.color}
 						/>
-
-						{/* Autonomia Estimada Centralizada Abaixo do Arco */}
-						<View className="mt-8 flex-row items-center gap-2">
-							<StyledIcon name="award" size={14} className="text-info" />
-							<Text className="text-sm text-foreground font-bold tracking-wider">
-								≈ {stats?.estimatedAutonomy.toFixed(0) || "--"} km restantes
-							</Text>
-						</View>
 					</View>
-				</View>
-
-				{/* INDICADORES LIMPOS (2 Linhas de Estatísticas) */}
-				<View className="items-center mt-4 px-4 z-10 gap-y-2 w-full">
-					{/* Primeira Linha: Carga e Ciclo */}
-					<View className="flex-row justify-center items-center w-full">
-						<View className="flex-1 flex-row items-center justify-end gap-1.5">
-							<StyledIcon name="clock" size={14} className="text-info" />
-							<Text className="text-xs font-bold text-muted uppercase">
-								Carga: <Text className="text-foreground">{lastChargeText}</Text>
-							</Text>
-						</View>
-
-						<View className="w-8 items-center">
-							<Text className="text-muted/50">•</Text>
-						</View>
-
-						<View className="flex-1 flex-row items-center justify-start gap-1.5">
-							<StyledIcon name="activity" size={14} className="text-success" />
-							<Text className="text-xs font-bold text-muted uppercase">
-								Ciclo:{" "}
-								<Text className="text-foreground">
-									{stats?.currentCycleKm.toFixed(1) || "0.0"}km
+					{/* INDICADORES LIMPOS (2 Linhas de Estatísticas) */}
+					<View className="items-center mt-4 px-4 z-10 gap-y-2 w-full">
+						{/* Primeira Linha: Carga e Ciclo */}
+						<View className="flex-row justify-center items-center w-full">
+							<View className="flex-1 flex-row items-center justify-end gap-1.5">
+								<StyledIcon name="clock" size={14} className="text-info" />
+								<Text className="text-xs font-bold text-muted uppercase">
+									Carga:{" "}
+									<Text className="text-foreground">{lastChargeText}</Text>
 								</Text>
-							</Text>
-						</View>
-					</View>
+							</View>
 
-					{/* Segunda Linha: Total e Eficiência */}
-					<View className="flex-row justify-center items-center w-full">
-						<View className="flex-1 flex-row items-center justify-end gap-1.5">
-							<StyledIcon name="map-pin" size={14} className="text-primary" />
-							<Text className="text-xs font-bold text-muted uppercase">
-								Total:{" "}
-								<Text className="text-foreground">
-									{stats?.totalKm.toFixed(0) || "0"}km
+							<View className="w-8 items-center">
+								<Text className="text-muted/50">•</Text>
+							</View>
+
+							<View className="flex-1 flex-row items-center justify-start gap-1.5">
+								<StyledIcon
+									name="activity"
+									size={14}
+									className="text-success"
+								/>
+								<Text className="text-xs font-bold text-muted uppercase">
+									Ciclo:{" "}
+									<Text className="text-foreground">
+										{stats?.currentCycleKm.toFixed(1) || "0.0"}km
+									</Text>
 								</Text>
-							</Text>
+							</View>
 						</View>
 
-						<View className="w-8 items-center">
-							<Text className="text-muted/50">•</Text>
-						</View>
-
-						<View className="flex-1 flex-row items-center justify-start gap-1.5">
-							<StyledIcon name="zap" size={14} className="text-warning" />
-							<Text className="text-xs font-bold text-muted uppercase">
-								Efic:{" "}
-								<Text className="text-foreground">
-									{stats?.averageCycleKm.toFixed(1) || "0.0"}km/c
+						{/* Segunda Linha: Total e Eficiência */}
+						<View className="flex-row justify-center items-center w-full">
+							<View className="flex-1 flex-row items-center justify-end gap-1.5">
+								<StyledIcon name="map-pin" size={14} className="text-primary" />
+								<Text className="text-xs font-bold text-muted uppercase">
+									Total:{" "}
+									<Text className="text-foreground">
+										{stats?.totalKm.toFixed(0) || "0"}km
+									</Text>
 								</Text>
-							</Text>
+							</View>
+
+							<View className="w-8 items-center">
+								<Text className="text-muted/50">•</Text>
+							</View>
+
+							<View className="flex-1 flex-row items-center justify-start gap-1.5">
+								<StyledIcon name="zap" size={14} className="text-warning" />
+								<Text className="text-xs font-bold text-muted uppercase">
+									Efic:{" "}
+									<Text className="text-foreground">
+										{stats?.averageCycleKm.toFixed(1) || "0.0"}km/c
+									</Text>
+								</Text>
+							</View>
 						</View>
 					</View>
 				</View>
 			</View>
 
-			<View className="px-4 mt-4">
+			<View className="px-4 mt-9">
+				<WeatherWidget />
+
+				<UsageSparkline trips={allLogs.filter((l) => l.type === "trip")} />
+
 				{/* AÇÕES RÁPIDAS (Hierarquia Clara de CTAs) */}
 				<Animated.View entering={FadeInDown.delay(300).springify()}>
 					<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
@@ -288,7 +297,7 @@ export default function DashboardScreen() {
 							onPress={() => router.push("/(tabs)/trips")}
 						>
 							<StyledIcon name="map-pin" size={20} className="text-white" />
-							<Button.Label className="text-white">Registrar Uso</Button.Label>
+							<Button.Label className="text-white">Uso</Button.Label>
 						</Button>
 
 						<Button
@@ -297,10 +306,22 @@ export default function DashboardScreen() {
 							onPress={() => router.push("/(tabs)/charges")}
 						>
 							<StyledIcon name="zap" size={20} className="text-foreground" />
-							<Button.Label className="text-foreground">
-								Registrar Recarga
-							</Button.Label>
+							<Button.Label className="text-foreground">Recarga</Button.Label>
 						</Button>
+
+						{scooter?.invoicePdfPath && (
+							<Button
+								variant="secondary"
+								isIconOnly
+								onPress={async () => {
+									if (scooter.invoicePdfPath) {
+										await Sharing.shareAsync(scooter.invoicePdfPath);
+									}
+								}}
+							>
+								<StyledIcon name="file-text" size={20} className="text-info" />
+							</Button>
+						)}
 					</View>
 				</Animated.View>
 

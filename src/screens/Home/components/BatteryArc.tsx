@@ -1,7 +1,6 @@
-import React from "react";
-import { View, Text } from "react-native";
-import Svg, { Path } from "react-native-svg";
 import { StyledIcon } from "@/components/StyledIcon";
+import { Text, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 type BatteryArcProps = {
 	percentage: number;
@@ -38,7 +37,13 @@ export function BatteryArc({
 
 	return (
 		<View style={{ width: size, alignItems: "center" }}>
-			<View style={{ height: center + strokeWidth, width: size, overflow: "hidden" }}>
+			<View
+				style={{
+					height: center + strokeWidth,
+					width: size,
+					overflow: "hidden",
+				}}
+			>
 				<Svg width={size} height={size}>
 					{/* Background Arc */}
 					<Path
@@ -62,7 +67,7 @@ export function BatteryArc({
 			</View>
 
 			{/* Center Text (Battery %) - pulled up to sit inside the arc */}
-			<View style={{ marginTop: - (center * 0.7), alignItems: "center" }}>
+			<View style={{ marginTop: -(center * 0.7), alignItems: "center" }}>
 				<Text
 					className="text-[64px] font-black tracking-tighter"
 					style={{
@@ -74,7 +79,7 @@ export function BatteryArc({
 				>
 					{percentage}%
 				</Text>
-				<View className="flex-row items-center gap-1.5 mt-1 bg-surface-secondary/80 backdrop-blur-md px-3 py-1 rounded-full border border-surface-secondary">
+				<View className="flex-row items-center gap-1.5 mt-3 bg-surface-secondary/80 backdrop-blur-md px-3 py-1 rounded-full border border-surface-secondary">
 					<StyledIcon name={statusIcon} size={14} className={statusColor} />
 					<Text className="text-xs font-bold text-foreground">
 						{statusText}
