@@ -44,7 +44,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 	const height = 40;
 	const paddingTop = 6;
 	const paddingBottom = 6;
-	const paddingHorizontal = 0;
+	const paddingHorizontal = 6;
 
 	// Find max distance to scale the graph
 	const maxDistance = Math.max(...data.map((d) => d.distance), 1); // min 1 to avoid /0
@@ -160,7 +160,9 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 										onPress={() =>
 											setActivePoint(isActive ? null : p.date.toISOString())
 										}
+										// @ts-expect-error
 										onMouseEnter={() => setActivePoint(p.date.toISOString())}
+										// @ts-ignore
 										onMouseLeave={() => setActivePoint(null)}
 									/>
 								</G>

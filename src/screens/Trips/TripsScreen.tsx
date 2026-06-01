@@ -11,7 +11,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
-import { Button } from "heroui-native";
+import { Button, Separator } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import {
@@ -48,7 +48,7 @@ export default function TripsScreen() {
 
 	const dashboardStats = useMemo(() => {
 		if (tripsList.length === 0)
-			return { totalKm: 0, avgKm: 0, maxKm: 0, activeDays: 0 };
+			return { totalKm: 0, avgKm: 0, maxKm: 0, activeDays: 0, tripCount: 0 };
 
 		let totalKm = 0;
 		let maxKm = 0;
@@ -63,7 +63,7 @@ export default function TripsScreen() {
 		const activeDays = uniqueDays.size;
 		const avgKm = totalKm / activeDays;
 
-		return { totalKm, avgKm, maxKm, activeDays };
+		return { totalKm, avgKm, maxKm, activeDays, tripCount: tripsList.length };
 	}, [tripsList]);
 
 	const displayedTrips = useMemo(
@@ -158,54 +158,85 @@ export default function TripsScreen() {
 			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD) */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="flex-row gap-3 px-4 mb-4 mt-2"
+				className="flex-row items-center px-4 mb-4 mt-2"
 			>
-				<Card
-					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-				>
-					<StyledIcon name="map-pin" size={18} className="mb-2 text-info" />
+				{/* TOTAL */}
+				<View className="flex-1 items-center justify-center py-2">
+					<StyledIcon name="map-pin" size={16} className="mb-2 text-info" />
 					<View className="flex-row items-baseline gap-1">
-						<Text className="text-xl font-black text-foreground">
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
 							{dashboardStats.totalKm.toFixed(1)}
 						</Text>
 					</View>
-					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-1">
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1">
 						Total
 					</Text>
-				</Card>
-				<Card
-					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-				>
+				</View>
+
+				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+
+				{/* MEDIA DIA */}
+				<View className="flex-1 items-center justify-center py-2">
 					<StyledIcon
 						name="bar-chart-2"
-						size={18}
+						size={16}
 						className="mb-2 text-foreground"
 					/>
 					<View className="flex-row items-baseline gap-1">
-						<Text className="text-xl font-black text-foreground">
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
 							{dashboardStats.avgKm.toFixed(1)}
 						</Text>
 					</View>
-					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-1">
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
 						Média/Dia
 					</Text>
-				</Card>
-				<Card
-					variant="secondary"
-					className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
-				>
-					<StyledIcon name="calendar" size={18} className="mb-2 text-success" />
+				</View>
+
+				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+
+				{/* MAIOR VIAGEM */}
+				<View className="flex-1 items-center justify-center py-2">
+					<StyledIcon name="award" size={16} className="mb-2 text-warning" />
 					<View className="flex-row items-baseline gap-1">
-						<Text className="text-xl font-black text-foreground">
-							{dashboardStats.activeDays}
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
+							{dashboardStats.maxKm.toFixed(1)}
 						</Text>
 					</View>
-					<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-1">
-						Dias Uso
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
+						Recorde
 					</Text>
-				</Card>
+				</View>
+
+				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+
+				{/* QTD VIAGENS */}
+				<View className="flex-1 items-center justify-center py-2">
+					<StyledIcon name="hash" size={16} className="mb-2 text-success" />
+					<View className="flex-row items-baseline gap-1">
+						<Text
+							className="text-lg font-black text-foreground"
+							numberOfLines={1}
+							adjustsFontSizeToFit
+						>
+							{dashboardStats.tripCount}
+						</Text>
+					</View>
+					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
+						Viagens
+					</Text>
+				</View>
 			</Animated.View>
 
 			{/* SELETOR DE MÊS */}
@@ -269,14 +300,15 @@ export default function TripsScreen() {
 							variant="secondary"
 							className="border border-surface-secondary bg-surface shadow-sm p-0"
 						>
-							<Pressable 
-								className="py-4 px-4" 
-								onPress={() => handleEdit(item)}
-							>
+							<Pressable className="py-4 px-4" onPress={() => handleEdit(item)}>
 								<View className="flex-row items-start justify-between">
 									<View className="flex-row items-start gap-3 flex-1">
 										<View className="bg-success/10 p-2.5 rounded-xl border border-success/20 mt-0.5">
-											<StyledIcon name="map-pin" size={18} className="text-success" />
+											<StyledIcon
+												name="map-pin"
+												size={18}
+												className="text-success"
+											/>
 										</View>
 										<View className="flex-1">
 											<View className="flex-row items-baseline gap-1">
@@ -286,28 +318,42 @@ export default function TripsScreen() {
 												<Text className="font-bold text-muted text-xs">km</Text>
 											</View>
 											<View className="flex-row items-center gap-1.5 mt-0.5">
-												<StyledIcon name="battery" size={10} className="text-muted" />
+												<StyledIcon
+													name="battery"
+													size={10}
+													className="text-muted"
+												/>
 												<Text className="text-xs font-bold text-muted">
-													Bateria final: <Text className="text-foreground">{item.batteryLevel}{scooter.trackingMode === "percent" ? "%" : "V"}</Text>
+													Bateria final:{" "}
+													<Text className="text-foreground">
+														{item.batteryLevel}
+														{scooter.trackingMode === "percent" ? "%" : "V"}
+													</Text>
 													{scooter.trackingMode === "voltage" && (
 														<Text className="font-bold text-muted text-xs ml-1">
-															{" "}({calculateBatteryPercentage(item.batteryLevel, scooter.batteryType)}%)
+															{" "}
+															(
+															{calculateBatteryPercentage(
+																item.batteryLevel,
+																scooter.batteryType,
+															)}
+															%)
 														</Text>
 													)}
 												</Text>
 											</View>
 										</View>
 									</View>
-									
+
 									<View className="items-end">
-										<Text className="text-[10px] text-muted font-bold uppercase tracking-widest capitalize">
+										<Text className="text-[10px] text-muted font-bold uppercase tracking-widest">
 											{format(item.date, "HH:mm", { locale: ptBR })}
 										</Text>
 									</View>
 								</View>
 
 								{item.notes ? (
-									<View className="mt-3 pl-[46px]">
+									<View className="mt-3 pl-11.5">
 										<Text className="text-xs text-muted italic">
 											"{item.notes}"
 										</Text>
