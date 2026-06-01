@@ -41,10 +41,10 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 	}, [trips]);
 
 	const width = 250;
-	const height = 75;
-	const paddingTop = 20;
-	const paddingBottom = 10;
-	const paddingHorizontal = 20;
+	const height = 40;
+	const paddingTop = 6;
+	const paddingBottom = 6;
+	const paddingHorizontal = 0;
 
 	// Find max distance to scale the graph
 	const maxDistance = Math.max(...data.map((d) => d.distance), 1); // min 1 to avoid /0
@@ -160,9 +160,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 										onPress={() =>
 											setActivePoint(isActive ? null : p.date.toISOString())
 										}
-										// @ts-expect-error
 										onMouseEnter={() => setActivePoint(p.date.toISOString())}
-										// @ts-expect-error
 										onMouseLeave={() => setActivePoint(null)}
 									/>
 								</G>
@@ -171,26 +169,36 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 
 						{/* Tooltip */}
 						{activePoint &&
-							points.find((p) => p.date.toISOString() === activePoint) && (
-								<SvgText
-									x={
-										points.find((p) => p.date.toISOString() === activePoint)!.x
-									}
-									y={
-										points.find((p) => p.date.toISOString() === activePoint)!
-											.y - 12
-									}
-									fill="white"
-									fontSize="11"
-									fontWeight="bold"
-									textAnchor="middle"
-								>
-									{points
-										.find((p) => p.date.toISOString() === activePoint)!
-										.val.toFixed(1)}
-									km
-								</SvgText>
-							)}
+							(() => {
+								const activeData = points.find(
+									(p) => p.date.toISOString() === activePoint,
+								);
+								if (!activeData) return null;
+
+								// If the point is too close to the top, show tooltip below it.
+								const isNearTop = activeData.y < 25;
+								const tooltipY = isNearTop
+									? activeData.y + 20
+									: activeData.y - 12;
+
+								// If it's the first or last point, change text anchor to avoid horizontal clipping
+								const isFirst = activeData === points[0];
+								const isLast = activeData === points[points.length - 1];
+								const anchor = isFirst ? "start" : isLast ? "end" : "middle";
+
+								return (
+									<SvgText
+										x={activeData.x}
+										y={tooltipY}
+										fill="white"
+										fontSize="11"
+										fontWeight="bold"
+										textAnchor={anchor}
+									>
+										{activeData.val.toFixed(1)}km
+									</SvgText>
+								);
+							})()}
 					</Svg>
 				</View>
 			</View>
@@ -198,7 +206,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 			<Separator orientation="vertical" thickness={1} className="h-10/12" />
 
 			<View className="items-center justify-center">
-				<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1 self-start">
+				<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">
 					Média Diária
 				</Text>
 				<View className="flex-row items-center gap-1 mb-0.5">
