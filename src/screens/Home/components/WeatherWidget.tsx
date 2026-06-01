@@ -1,16 +1,9 @@
+import { StyledIcon } from "@/components/StyledIcon";
+import { useAppStore } from "@/store/useAppStore";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { StyledIcon } from "@/components/StyledIcon";
-
-type WeatherData = {
-	temperature_2m: number;
-	relative_humidity_2m: number;
-	weather_code: number;
-	wind_speed_10m: number;
-	is_day: number;
-};
 
 function getWeatherInfo(code: number, isDay: number) {
 	if (code === 0 || code === 1) {
@@ -47,7 +40,7 @@ function getWeatherInfo(code: number, isDay: number) {
 }
 
 export function WeatherWidget() {
-	const [weather, setWeather] = useState<WeatherData | null>(null);
+	const { weatherData: weather, setWeatherData } = useAppStore();
 	const [errorMsg, setErrorMsg] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -65,28 +58,35 @@ export function WeatherWidget() {
 				const { latitude, longitude } = location.coords;
 
 				const res = await fetch(
-					`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day`,
+					`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day,apparent_temperature,wind_gusts_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`,
 				);
 				const data = await res.json();
 
-				if (data.current) {
-					setWeather(data.current);
+				if (data.current && data.daily) {
+					setWeatherData({
+						...data.current,
+						precipitation_probability:
+							data.daily.precipitation_probability_max[0] || 0,
+						next_day_max: data.daily.temperature_2m_max[1] || 0,
+						next_day_min: data.daily.temperature_2m_min[1] || 0,
+						fetchTime: Date.now(),
+					});
 				} else {
 					console.warn("Weather API Error:", data);
-					setErrorMsg("Erro na API");
+					if (!weather) setErrorMsg("Erro na API");
 				}
 			} catch (err) {
 				console.warn("Weather Fetch Error:", err);
-				setErrorMsg("Erro de rede");
+				if (!weather) setErrorMsg("Erro de rede");
 			} finally {
 				setLoading(false);
 			}
 		})();
 	}, []);
 
-	if (loading) {
+	if (loading && !weather) {
 		return (
-			<View className="bg-surface-secondary/50 backdrop-blur-md p-4 rounded-2xl border border-surface-secondary mb-4 items-center justify-center">
+			<View className="p-4 mb-4 items-center justify-center">
 				<ActivityIndicator size="small" color="#888" />
 			</View>
 		);
@@ -94,7 +94,7 @@ export function WeatherWidget() {
 
 	if (errorMsg || !weather) {
 		return (
-			<View className="bg-surface-secondary/50 backdrop-blur-md p-4 rounded-2xl border border-surface-secondary mb-4 items-center justify-center">
+			<View className="p-4 mb-4 items-center justify-center">
 				<Text className="text-muted text-xs">{errorMsg || "Sem dados"}</Text>
 			</View>
 		);
@@ -105,38 +105,69 @@ export function WeatherWidget() {
 	return (
 		<Animated.View
 			entering={FadeInDown.delay(300).springify()}
-			className="bg-surface-secondary/30 p-4 rounded-2xl border border-surface-secondary mb-6 flex-row items-center justify-between"
+			className="p-4 mb-4 flex-row items-center justify-between bg-surface/60 rounded-2xl"
 		>
-			<View className="flex-row items-center gap-3">
-				<View className="bg-background/80 p-2.5 rounded-2xl">
+			<View className="flex-row items-center gap-3 flex-1">
+				<View className="p-2.5">
 					<StyledIcon
-						name={info.icon as any}
+						name={info.icon as StyledIcon}
 						size={28}
 						className={info.color}
 					/>
 				</View>
-				<View>
-					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+				<View className="flex-1">
+					<Text
+						className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
+						numberOfLines={1}
+					>
 						{info.text}
 					</Text>
-					<Text className="text-2xl font-black text-foreground">
-						{Math.round(weather.temperature_2m)}°C
+					<View className="flex-row items-center gap-2">
+						<Text className="text-2xl font-black text-foreground">
+							{Math.round(weather.temperature_2m)}°C
+						</Text>
+						{loading && <ActivityIndicator size={12} color="#888" />}
+					</View>
+					<Text
+						className="text-[10px] font-medium text-muted mt-0.5"
+						numberOfLines={1}
+					>
+						Sens.: {Math.round(weather.apparent_temperature)}°C • Amanhã:{" "}
+						{Math.round(weather.next_day_min)}°/
+						{Math.round(weather.next_day_max)}°
 					</Text>
 				</View>
 			</View>
 
-			<View className="items-end gap-1.5">
-				<View className="flex-row items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md">
-					<StyledIcon name="wind" size={12} className="text-muted" />
-					<Text className="text-xs font-bold text-muted">
-						{weather.wind_speed_10m} km/h
-					</Text>
+			<View className="flex-row gap-1">
+				<View className="gap-1">
+					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
+						<StyledIcon name="cloud-rain" size={12} className="text-info" />
+						<Text className="text-[11px] font-bold text-muted">
+							{weather.precipitation_probability}%
+						</Text>
+					</View>
+
+					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
+						<StyledIcon name="droplet" size={12} className="text-info" />
+						<Text className="text-[11px] font-bold text-muted">
+							{weather.relative_humidity_2m}%
+						</Text>
+					</View>
 				</View>
-				<View className="flex-row items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md">
-					<StyledIcon name="droplet" size={12} className="text-info" />
-					<Text className="text-xs font-bold text-muted">
-						{weather.relative_humidity_2m}% Umi
-					</Text>
+				<View className="gap-1">
+					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
+						<StyledIcon name="wind" size={12} className="text-warning" />
+						<Text className="text-[11px] font-bold text-muted">
+							{weather.wind_gusts_10m} km/h
+						</Text>
+					</View>
+					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
+						<StyledIcon name="wind" size={12} className="text-muted" />
+						<Text className="text-[11px] font-bold text-muted">
+							{weather.wind_speed_10m} km/h
+						</Text>
+					</View>
 				</View>
 			</View>
 		</Animated.View>

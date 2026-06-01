@@ -1,3 +1,14 @@
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScooterFormSheet } from "@/components/ScooterFormSheet";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { calculateBatteryPercentage } from "@/constants/batteryCharts";
+import { db } from "@/db/client";
+import { logs, scooters } from "@/db/schema";
+import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 import { differenceInDays, format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,17 +27,6 @@ import {
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { EmptyScooterState } from "@/components/EmptyScooterState";
-import { ScooterFormSheet } from "@/components/ScooterFormSheet";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { calculateBatteryPercentage } from "@/constants/batteryCharts";
-import { db } from "@/db/client";
-import { logs, scooters } from "@/db/schema";
-import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 import { BatteryArc } from "./components/BatteryArc";
 import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
 import { UsageSparkline } from "./components/UsageSparkline";
@@ -280,7 +280,7 @@ export default function DashboardScreen() {
 				</View>
 			</View>
 
-			<View className="px-4 mt-9">
+			<View className="px-4 mt-4">
 				<WeatherWidget />
 
 				<UsageSparkline trips={allLogs.filter((l) => l.type === "trip")} />

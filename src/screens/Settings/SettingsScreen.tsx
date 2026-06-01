@@ -1,3 +1,9 @@
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { db } from "@/db/client";
+import { logs, scooters } from "@/db/schema";
+import { useAppStore } from "@/store/useAppStore";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
@@ -6,12 +12,6 @@ import { Card } from "heroui-native/card";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { db } from "@/db/client";
-import { logs, scooters } from "@/db/schema";
-import { useAppStore } from "@/store/useAppStore";
 
 export default function SettingsScreen() {
 	const { theme, setTheme, setActiveScooterId, triggerRefresh } = useAppStore();
@@ -74,7 +74,7 @@ export default function SettingsScreen() {
 
 			{/* APARÊNCIA - Segmented Control */}
 			<Animated.View entering={FadeInDown.delay(100).springify()}>
-				<Text className="text-[10px] font-bold text-muted mb-2 uppercase tracking-widest ml-1">
+				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Tema do Aplicativo
 				</Text>
 				<Card
@@ -143,7 +143,7 @@ export default function SettingsScreen() {
 
 			{/* BACKUP E RESTAURAÇÃO */}
 			<Animated.View entering={FadeInDown.delay(300).springify()}>
-				<Text className="text-[10px] font-bold text-muted mb-2 uppercase tracking-widest ml-1">
+				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Backup e Dados
 				</Text>
 				<Card
@@ -182,7 +182,7 @@ export default function SettingsScreen() {
 
 			{/* ZONA DE PERIGO */}
 			<Animated.View entering={FadeInDown.delay(400).springify()}>
-				<Text className="text-[10px] font-bold text-danger mb-2 uppercase tracking-widest ml-1">
+				<Text className="text-xs font-bold text-danger mb-2 uppercase tracking-widest ml-1">
 					Zona de Perigo
 				</Text>
 				<Card

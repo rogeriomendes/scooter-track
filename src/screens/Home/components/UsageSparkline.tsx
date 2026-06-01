@@ -96,10 +96,10 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 				: "flat";
 
 	return (
-		<View className="mb-6 z-10 w-full flex-row items-center bg-surface-secondary/30 gap-6 py-3">
+		<View className="mb-6 z-10 w-full flex-row items-center gap-6">
 			<View className="flex-1">
 				<View className="flex-row justify-between items-center w-full mb-3">
-					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider">
+					<Text className="text-xs font-bold text-muted uppercase tracking-wider">
 						Últimos 7 dias
 					</Text>
 					<Text className="text-xs font-bold text-success">
@@ -161,10 +161,10 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 										onPress={() =>
 											setActivePoint(isActive ? null : p.date.toISOString())
 										}
-										// @ts-expect-error
-										onMouseEnter={() => setActivePoint(p.date.toISOString())}
-										// @ts-ignore
-										onMouseLeave={() => setActivePoint(null)}
+										// // @ts-expect-error
+										// onMouseEnter={() => setActivePoint(p.date.toISOString())}
+										// // @ts-expect-error
+										// onMouseLeave={() => setActivePoint(null)}
 									/>
 								</G>
 							);
@@ -209,7 +209,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 			<Separator orientation="vertical" thickness={1} className="h-10/12" />
 
 			<View className="items-center justify-center">
-				<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">
+				<Text className="text-xs font-bold text-muted uppercase tracking-wider mb-1.5">
 					Média Diária
 				</Text>
 				<View className="flex-row items-center gap-1 mb-0.5">
@@ -231,7 +231,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 					{trend === "flat" && (
 						<StyledIcon name="minus" size={12} className="text-muted" />
 					)}
-					<Text className="text-[10px] text-muted font-bold">km/dia</Text>
+					<Text className="text-[11px] text-muted font-bold">km/dia</Text>
 				</View>
 			</View>
 		</View>
