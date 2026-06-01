@@ -192,7 +192,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 									<SvgText
 										x={activeData.x}
 										y={tooltipY}
-										fill="white"
+										fill="rgb(16, 185, 129)"
 										fontSize="11"
 										fontWeight="bold"
 										textAnchor={anchor}

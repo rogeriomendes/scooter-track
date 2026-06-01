@@ -204,7 +204,7 @@ export default function DashboardScreen() {
 									setIsFormOpen(true);
 								}}
 							>
-								<StyledIcon name="edit-2" size={18} className="text-white" />
+								<StyledIcon name="edit-2" size={18} className="text-muted" />
 							</Button>
 						</View>
 					</View>
