@@ -1,6 +1,6 @@
 import { StyledIcon } from "@/components/StyledIcon";
 import { isSameDay, subDays } from "date-fns";
-import { Separator } from "heroui-native";
+import { Separator, useThemeColor } from "heroui-native";
 import { useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import Svg, {
@@ -24,6 +24,7 @@ type UsageSparklineProps = {
 
 export function UsageSparkline({ trips }: UsageSparklineProps) {
 	const [activePoint, setActivePoint] = useState<string | null>(null);
+	const foregroundColor = useThemeColor("foreground") as unknown as string;
 
 	// Group data by last 7 days
 	const data = useMemo(() => {
@@ -192,7 +193,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 									<SvgText
 										x={activeData.x}
 										y={tooltipY}
-										fill="rgb(16, 185, 129)"
+										fill={foregroundColor}
 										fontSize="11"
 										fontWeight="bold"
 										textAnchor={anchor}

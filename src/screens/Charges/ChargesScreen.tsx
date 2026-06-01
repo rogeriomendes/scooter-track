@@ -1,13 +1,3 @@
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { EmptyScooterState } from "@/components/EmptyScooterState";
-import { MonthSelector } from "@/components/MonthSelector";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { calculateBatteryPercentage } from "@/constants/batteryCharts";
-import { db } from "@/db/client";
-import { logs } from "@/db/schema";
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
@@ -22,6 +12,16 @@ import {
 	View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { MonthSelector } from "@/components/MonthSelector";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { calculateBatteryPercentage } from "@/constants/batteryCharts";
+import { db } from "@/db/client";
+import { logs } from "@/db/schema";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 import { ChargeFormSheet } from "./components/ChargeFormSheet";
 
 export default function ChargesScreen() {

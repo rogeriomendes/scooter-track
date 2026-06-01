@@ -1,19 +1,19 @@
-import { db } from "@/db/client";
-import migrations from "@/drizzle/migrations";
-import { useAppStore } from "@/store/useAppStore";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import {
 	DarkTheme,
 	DefaultTheme,
 	ThemeProvider,
 } from "expo-router/react-navigation";
+import { StatusBar } from "expo-status-bar";
 import { HeroUINativeProvider } from "heroui-native";
 import { useEffect } from "react";
 import { Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Uniwind } from "uniwind";
+import { db } from "@/db/client";
+import migrations from "@/drizzle/migrations";
+import { useAppStore } from "@/store/useAppStore";
 
 import "../global.css";
 

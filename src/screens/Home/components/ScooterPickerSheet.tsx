@@ -1,10 +1,10 @@
+import { BottomSheet } from "heroui-native";
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
 import { scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
-import { BottomSheet } from "heroui-native";
-import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
 
 interface ScooterPickerSheetProps {
 	isOpen: boolean;

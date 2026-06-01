@@ -1,9 +1,9 @@
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import { useThemeColor } from "heroui-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function TabLayout() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);

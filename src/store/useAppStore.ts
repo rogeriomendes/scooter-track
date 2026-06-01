@@ -21,7 +21,8 @@ export const useAppStore = create<AppState>()(
 			refreshCounter: 0,
 			setActiveScooterId: (id) => set({ activeScooterId: id }),
 			setTheme: (theme) => set({ theme }),
-			triggerRefresh: () => set((state) => ({ refreshCounter: state.refreshCounter + 1 })),
+			triggerRefresh: () =>
+				set((state) => ({ refreshCounter: state.refreshCounter + 1 })),
 		}),
 		{
 			name: "scootertrack-storage",

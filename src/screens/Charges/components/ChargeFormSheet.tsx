@@ -1,15 +1,15 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { eq } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
+import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import { useEffect, useState } from "react";
+import { Keyboard, Platform, Pressable, Text, View } from "react-native";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs, type scooters } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import * as Haptics from "expo-haptics";
-import { BottomSheet, Button, Label, TextField } from "heroui-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useEffect, useState } from "react";
-import { Keyboard, View, Pressable, Text, Platform } from "react-native";
 
 interface ChargeFormSheetProps {
 	isOpen: boolean;
@@ -114,7 +114,7 @@ export function ChargeFormSheet({
 					<View className="flex-row gap-2">
 						<TextField className="flex-1">
 							<Label>Data</Label>
-							<Pressable 
+							<Pressable
 								onPress={() => setShowDatePicker(true)}
 								className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
 							>
@@ -125,7 +125,7 @@ export function ChargeFormSheet({
 						</TextField>
 						<TextField className="flex-1">
 							<Label>Hora</Label>
-							<Pressable 
+							<Pressable
 								onPress={() => setShowTimePicker(true)}
 								className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
 							>
@@ -143,13 +143,14 @@ export function ChargeFormSheet({
 									? "Bateria após Carga (%)"
 									: "Voltagem após Carga (V)"}
 							</Label>
-							<Pressable 
+							<Pressable
 								onPress={() => {
 									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 									if (scooter.trackingMode === "percent") {
 										setVoltage("100");
 									} else {
-										const maxV = BATTERY_CHARTS[scooter.batteryType]?.maxVoltage;
+										const maxV =
+											BATTERY_CHARTS[scooter.batteryType]?.maxVoltage;
 										if (maxV) setVoltage(maxV.toString());
 									}
 								}}

@@ -1,9 +1,3 @@
-import { BottomSheetInput } from "@/components/BottomSheetInput";
-import { StyledIcon } from "@/components/StyledIcon";
-import { BATTERY_CHARTS } from "@/constants/batteryCharts";
-import { db } from "@/db/client";
-import { scooters } from "@/db/schema";
-import { useAppStore } from "@/store/useAppStore";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -23,6 +17,12 @@ import {
 	Text,
 	View,
 } from "react-native";
+import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
+import { BATTERY_CHARTS } from "@/constants/batteryCharts";
+import { db } from "@/db/client";
+import { scooters } from "@/db/schema";
+import { useAppStore } from "@/store/useAppStore";
 
 interface ScooterFormSheetProps {
 	isOpen: boolean;

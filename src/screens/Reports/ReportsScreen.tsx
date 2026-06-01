@@ -1,8 +1,3 @@
-import { EmptyScooterState } from "@/components/EmptyScooterState";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 import { format } from "date-fns";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
@@ -16,6 +11,11 @@ import {
 } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 
 const screenWidth = Dimensions.get("window").width;
 

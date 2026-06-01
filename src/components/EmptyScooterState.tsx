@@ -1,10 +1,10 @@
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { ScooterFormSheet } from "@/components/ScooterFormSheet";
 import { Button } from "heroui-native/button";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { ScooterFormSheet } from "@/components/ScooterFormSheet";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
 
 interface EmptyScooterStateProps {
 	title?: string;

@@ -1,8 +1,8 @@
-import { StyledIcon } from "@/components/StyledIcon";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { StyledIcon } from "@/components/StyledIcon";
 
 type WeatherData = {
 	temperature_2m: number;
@@ -14,7 +14,11 @@ type WeatherData = {
 
 function getWeatherInfo(code: number, isDay: number) {
 	if (code === 0 || code === 1) {
-		return { icon: isDay ? "sun" : "moon", text: "Clima ideal", color: "text-warning" };
+		return {
+			icon: isDay ? "sun" : "moon",
+			text: "Clima ideal",
+			color: "text-warning",
+		};
 	}
 	if (code === 2 || code === 3) {
 		return { icon: "cloud", text: "Nublado", color: "text-muted" };
@@ -29,9 +33,17 @@ function getWeatherInfo(code: number, isDay: number) {
 		return { icon: "cloud-snow", text: "Frio extremo", color: "text-info" };
 	}
 	if (code >= 95) {
-		return { icon: "cloud-lightning", text: "Tempestade", color: "text-danger" };
+		return {
+			icon: "cloud-lightning",
+			text: "Tempestade",
+			color: "text-danger",
+		};
 	}
-	return { icon: "thermometer", text: "Bom para pilotar", color: "text-success" };
+	return {
+		icon: "thermometer",
+		text: "Bom para pilotar",
+		color: "text-success",
+	};
 }
 
 export function WeatherWidget() {
@@ -97,22 +109,34 @@ export function WeatherWidget() {
 		>
 			<View className="flex-row items-center gap-3">
 				<View className="bg-background/80 p-2.5 rounded-2xl">
-					<StyledIcon name={info.icon as any} size={28} className={info.color} />
+					<StyledIcon
+						name={info.icon as any}
+						size={28}
+						className={info.color}
+					/>
 				</View>
 				<View>
-					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">{info.text}</Text>
-					<Text className="text-2xl font-black text-foreground">{Math.round(weather.temperature_2m)}°C</Text>
+					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+						{info.text}
+					</Text>
+					<Text className="text-2xl font-black text-foreground">
+						{Math.round(weather.temperature_2m)}°C
+					</Text>
 				</View>
 			</View>
-			
+
 			<View className="items-end gap-1.5">
 				<View className="flex-row items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md">
 					<StyledIcon name="wind" size={12} className="text-muted" />
-					<Text className="text-xs font-bold text-muted">{weather.wind_speed_10m} km/h</Text>
+					<Text className="text-xs font-bold text-muted">
+						{weather.wind_speed_10m} km/h
+					</Text>
 				</View>
 				<View className="flex-row items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md">
 					<StyledIcon name="droplet" size={12} className="text-info" />
-					<Text className="text-xs font-bold text-muted">{weather.relative_humidity_2m}% Umi</Text>
+					<Text className="text-xs font-bold text-muted">
+						{weather.relative_humidity_2m}% Umi
+					</Text>
 				</View>
 			</View>
 		</Animated.View>

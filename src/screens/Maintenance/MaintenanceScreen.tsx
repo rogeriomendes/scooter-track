@@ -1,12 +1,3 @@
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { EmptyScooterState } from "@/components/EmptyScooterState";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { db } from "@/db/client";
-import { maintenance } from "@/db/schema";
-import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 import { addMonths, differenceInDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
@@ -21,6 +12,15 @@ import {
 	View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { db } from "@/db/client";
+import { maintenance } from "@/db/schema";
+import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 import { MaintenanceFormSheet } from "./components/MaintenanceFormSheet";
 
 export function MaintenanceScreen() {

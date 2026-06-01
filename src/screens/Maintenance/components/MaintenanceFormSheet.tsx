@@ -1,6 +1,3 @@
-import { BottomSheetInput } from "@/components/BottomSheetInput";
-import { db } from "@/db/client";
-import { maintenance, type scooters } from "@/db/schema";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -16,6 +13,9 @@ import {
 	Text,
 	View,
 } from "react-native";
+import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { db } from "@/db/client";
+import { maintenance, type scooters } from "@/db/schema";
 
 interface MaintenanceFormSheetProps {
 	isOpen: boolean;

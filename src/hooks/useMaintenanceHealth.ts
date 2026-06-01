@@ -1,16 +1,16 @@
+import { addMonths, differenceInDays } from "date-fns";
 import { useMemo } from "react";
-import { maintenance } from "@/db/schema";
-import { differenceInDays, addMonths } from "date-fns";
-import { calculateScooterStats } from "@/utils/stats";
+import type { maintenance } from "@/db/schema";
+import type { calculateScooterStats } from "@/utils/stats";
 
 export function useMaintenanceHealth(
 	maintenanceList: (typeof maintenance.$inferSelect)[],
-	stats: ReturnType<typeof calculateScooterStats> | null
+	stats: ReturnType<typeof calculateScooterStats> | null,
 ) {
 	return useMemo(() => {
 		let itemsInRisk = 0;
 		let nextItem: typeof maintenance.$inferSelect | null = null;
-		
+
 		let highestPriorityScore = -1;
 		let highestNormalWear = -1;
 		let bestPriorityItemInfo = { primary: "", secondary: "" };
@@ -26,14 +26,22 @@ export function useMaintenanceHealth(
 
 			const wornKm = currentTotalKm - item.lastMaintenanceKm;
 			const remainingKm = Math.max(0, item.intervalKm - wornKm);
-			let wearPercentageKm = item.intervalKm > 0 ? (wornKm / item.intervalKm) * 100 : 0;
+			const wearPercentageKm =
+				item.intervalKm > 0 ? (wornKm / item.intervalKm) * 100 : 0;
 
 			let wearPercentageMonths = 0;
 			let remainingDaysMonths = 0;
 			if (item.lastMaintenanceDate && item.intervalMonths) {
-				const nextDate = addMonths(item.lastMaintenanceDate, item.intervalMonths);
-				const totalDays = differenceInDays(nextDate, item.lastMaintenanceDate) || 1;
-				const daysPassed = differenceInDays(new Date(), item.lastMaintenanceDate);
+				const nextDate = addMonths(
+					item.lastMaintenanceDate,
+					item.intervalMonths,
+				);
+				const totalDays =
+					differenceInDays(nextDate, item.lastMaintenanceDate) || 1;
+				const daysPassed = differenceInDays(
+					new Date(),
+					item.lastMaintenanceDate,
+				);
 				remainingDaysMonths = Math.max(0, totalDays - daysPassed);
 				wearPercentageMonths = (daysPassed / totalDays) * 100;
 			}
@@ -41,8 +49,12 @@ export function useMaintenanceHealth(
 			let wearPercentageFixedDate = 0;
 			let remainingDaysFixedDate = 0;
 			if (item.targetDate && item.lastMaintenanceDate) {
-				const totalDays = differenceInDays(item.targetDate, item.lastMaintenanceDate) || 1;
-				const daysPassed = differenceInDays(new Date(), item.lastMaintenanceDate);
+				const totalDays =
+					differenceInDays(item.targetDate, item.lastMaintenanceDate) || 1;
+				const daysPassed = differenceInDays(
+					new Date(),
+					item.lastMaintenanceDate,
+				);
 				remainingDaysFixedDate = Math.max(0, totalDays - daysPassed);
 				wearPercentageFixedDate = (daysPassed / totalDays) * 100;
 			}
@@ -81,14 +93,19 @@ export function useMaintenanceHealth(
 			}
 
 			if (wearPercentage >= 70) itemsInRisk++;
-			
+
 			if (isPriority) {
 				isPriorityActive = true;
 				// If priority, the one with lowest absolute remaining (days or km) gets a high score.
 				// Since we can't easily compare 10 days to 10 km, we use the wear percentage as tie-breaker,
 				// BUT we prioritize Dates if they are extremely close (<= 3 dias).
-				let daysLeft = (itemType === "date") ? remainingDaysFixedDate : ((itemType === "months" || itemType === "mixed") ? remainingDaysMonths : 999);
-				
+				const daysLeft =
+					itemType === "date"
+						? remainingDaysFixedDate
+						: itemType === "months" || itemType === "mixed"
+							? remainingDaysMonths
+							: 999;
+
 				if (daysLeft <= 3) {
 					priorityScore = 10000 + wearPercentage; // Critical date
 				} else {
@@ -110,7 +127,9 @@ export function useMaintenanceHealth(
 		}
 
 		nextItem = bestPriorityItem || bestNormalItem;
-		let nextItemInfo = bestPriorityItem ? bestPriorityItemInfo : bestNormalItemInfo;
+		const nextItemInfo = bestPriorityItem
+			? bestPriorityItemInfo
+			: bestNormalItemInfo;
 
 		return { itemsInRisk, nextItem, nextItemInfo, isPriorityActive };
 	}, [maintenanceList, stats]);

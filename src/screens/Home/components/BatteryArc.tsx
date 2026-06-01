@@ -1,6 +1,6 @@
-import { StyledIcon } from "@/components/StyledIcon";
 import { Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { StyledIcon } from "@/components/StyledIcon";
 
 type BatteryArcProps = {
 	percentage: number;
