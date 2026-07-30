@@ -1,9 +1,3 @@
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { db } from "@/db/client";
-import { logs, scooters } from "@/db/schema";
-import { useAppStore } from "@/store/useAppStore";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
@@ -12,6 +6,12 @@ import { Card } from "heroui-native/card";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { db } from "@/db/client";
+import { logs, scooters } from "@/db/schema";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function SettingsScreen() {
 	const { theme, setTheme, setActiveScooterId, triggerRefresh } = useAppStore();

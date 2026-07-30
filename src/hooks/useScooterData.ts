@@ -3,7 +3,6 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { db } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
-import { useAppStore } from "@/store/useAppStore";
 import { calculateScooterStats } from "@/utils/stats";
 
 export function useScooterData(activeScooterId: number | null) {
@@ -20,8 +19,6 @@ export function useScooterData(activeScooterId: number | null) {
 	const [isLoading, setIsLoading] = useState(true);
 
 	const [totalScooters, setTotalScooters] = useState(0);
-
-	const refreshCounter = useAppStore((s) => s.refreshCounter);
 
 	const loadData = useCallback(async () => {
 		if (!activeScooterId) {

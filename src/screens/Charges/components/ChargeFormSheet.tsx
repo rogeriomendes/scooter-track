@@ -1,4 +1,6 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+	type DateTimePickerChangeEvent,
+} from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
@@ -49,14 +51,20 @@ export function ChargeFormSheet({
 		}
 	}, [isOpen, editItem]);
 
-	const onChangeDate = (event: any, selectedDate?: Date) => {
+	const onChangeDate = (
+		_event: DateTimePickerChangeEvent,
+		selectedDate?: Date,
+	) => {
 		setShowDatePicker(Platform.OS === "ios");
 		if (selectedDate) {
 			setDate(selectedDate);
 		}
 	};
 
-	const onChangeTime = (event: any, selectedDate?: Date) => {
+	const onChangeTime = (
+		_event: DateTimePickerChangeEvent,
+		selectedDate?: Date,
+	) => {
 		setShowTimePicker(Platform.OS === "ios");
 		if (selectedDate) {
 			setDate(selectedDate);

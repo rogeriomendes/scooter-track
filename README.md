@@ -1,56 +1,70 @@
-# Welcome to your Expo app 👋
+# ScooterTrack 📡
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> [!AVISO]
+**Projeto desenvolvido com Vibe-coded.** O ScooterTrack é construído por meio de um fluxo de trabalho rápido, assistido por IA e orientado por experimentação. Ele está em constante evolução: revise as alterações cuidadosamente e teste-as em seu próprio ambiente antes de confiar na correção automática para produção.
 
-## Get started
+ScooterTrack é um aplicativo mobile em Expo e React Native para acompanhar o uso, manutenção e desempenho de scooters elétricas. O app centraliza registros de viagens, recargas, ciclos de bateria e itens de manutenção em um fluxo simples e visual.
 
-1. Install dependencies
+## O que o projeto faz
 
+- Gerencia múltiplas scooters em uma mesma instalação;
+- Registra viagens com distância percorrida e observações;
+- Registra recargas e calcula ciclos de uso entre cargas;
+- Acompanha manutenção preventiva por quilometragem, meses ou data fixa;
+- Exibe insights e gráficos de evolução de distância;
+- Permite backup e restauração local dos dados.
+
+## Stack principal
+
+- Expo SDK 57 + React Native
+- Expo Router para navegação
+- TypeScript
+- Drizzle ORM com SQLite local
+- Zustand para estado global e persistência
+- Reanimated, Gesture Handler e HeroUI Native para a interface
+
+## Estrutura do projeto
+
+- src/app: telas e rotas do app
+- src/screens: módulos de Home, Recargas, Usos, Manutenção, Relatórios e Configurações
+- src/components: componentes reutilizáveis e sheets de formulário
+- src/db: schema do banco e cliente SQLite
+- src/hooks: hooks para carregamento e cálculo de dados
+- src/utils: funções utilitárias e estatísticas
+
+## Como executar
+
+1. Instale as dependências:
    ```bash
-   npm install
+   pnpm install
    ```
-
-2. Start the app
-
+2. Inicie o projeto:
    ```bash
-   npx expo start
+   pnpm start
    ```
+3. Escolha uma das opções:
+   - Android: `pnpm android`
+   - iOS: `pnpm ios`
+   - Web: `pnpm web`
 
-In the output, you'll find options to open the app in a
+## Scripts disponíveis
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- `pnpm start`: inicia o Expo Dev Server
+- `pnpm android`: abre no Android
+- `pnpm ios`: abre no iOS
+- `pnpm web`: inicia a versão web
+- `pnpm lint`: valida o projeto com Biome
+- `pnpm lint:write`: corrige problemas automaticamente
+- `pnpm format`: formata os arquivos
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Persistência de dados
 
-## Get a fresh project
+Os dados são armazenados localmente em SQLite via Drizzle. Na tela de Configurações, é possível:
 
-When you're ready, run:
+- exportar o banco para backup;
+- restaurar um backup previamente exportado;
+- apagar todos os dados da aplicação.
 
-```bash
-npm run reset-project
-```
+## Observações
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Este projeto está em evolução e foi estruturado com foco em uso prático e rápida iteração. Recomenda-se revisar mudanças e testar em ambiente próprio antes de depender do app em cenários críticos.

@@ -1,55 +1,55 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1779454813578,
-      "tag": "0000_sudden_luminals",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1779890251532,
-      "tag": "0001_slippery_big_bertha",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1779919159489,
-      "tag": "0002_grey_fallen_one",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1780143147734,
-      "tag": "0003_broken_captain_stacy",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1780145612491,
-      "tag": "0004_magenta_eternity",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1780146723940,
-      "tag": "0005_red_iron_lad",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1780236024095,
-      "tag": "0006_clear_catseye",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1779454813578,
+			"tag": "0000_sudden_luminals",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1779890251532,
+			"tag": "0001_slippery_big_bertha",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1779919159489,
+			"tag": "0002_grey_fallen_one",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1780143147734,
+			"tag": "0003_broken_captain_stacy",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1780145612491,
+			"tag": "0004_magenta_eternity",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "6",
+			"when": 1780146723940,
+			"tag": "0005_red_iron_lad",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "6",
+			"when": 1780236024095,
+			"tag": "0006_clear_catseye",
+			"breakpoints": true
+		}
+	]
 }

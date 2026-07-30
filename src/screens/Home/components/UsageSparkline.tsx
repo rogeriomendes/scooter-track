@@ -1,4 +1,3 @@
-import { StyledIcon } from "@/components/StyledIcon";
 import { isSameDay, subDays } from "date-fns";
 import { Separator, useThemeColor } from "heroui-native";
 import { useMemo, useState } from "react";
@@ -12,6 +11,7 @@ import Svg, {
 	Stop,
 	Text as SvgText,
 } from "react-native-svg";
+import { StyledIcon } from "@/components/StyledIcon";
 
 type TripLog = {
 	date: Date;

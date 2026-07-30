@@ -1,10 +1,10 @@
-import { StyledIcon } from "@/components/StyledIcon";
-import { useAppStore } from "@/store/useAppStore";
 import * as Location from "expo-location";
 import { Popover } from "heroui-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { StyledIcon } from "@/components/StyledIcon";
+import { useAppStore } from "@/store/useAppStore";
 
 function getWeatherInfo(code: number, isDay: number) {
 	if (code === 0 || code === 1) {
@@ -78,6 +78,7 @@ export function WeatherWidget() {
 	const [errorMsg, setErrorMsg] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: initial fetch on mount only
 	useEffect(() => {
 		(async () => {
 			try {

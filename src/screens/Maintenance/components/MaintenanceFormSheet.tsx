@@ -1,4 +1,6 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+	type DateTimePickerChangeEvent,
+} from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
@@ -72,14 +74,20 @@ export function MaintenanceFormSheet({
 		}
 	}, [isOpen, editItem]);
 
-	const onChangeTargetDate = (event: any, selectedDate?: Date) => {
+	const onChangeTargetDate = (
+		_event: DateTimePickerChangeEvent,
+		selectedDate?: Date,
+	) => {
 		setShowTargetDatePicker(Platform.OS === "ios");
 		if (selectedDate) {
 			setTargetDate(selectedDate);
 		}
 	};
 
-	const onChangeLastDate = (event: any, selectedDate?: Date) => {
+	const onChangeLastDate = (
+		_event: DateTimePickerChangeEvent,
+		selectedDate?: Date,
+	) => {
 		setShowLastDatePicker(Platform.OS === "ios");
 		if (selectedDate) {
 			setLastDate(selectedDate);
