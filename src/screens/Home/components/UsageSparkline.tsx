@@ -68,16 +68,23 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 		return `${acc} L ${point.x},${point.y}`;
 	}, "");
 
-	const prevTotal = useMemo(() => {
+	const activeDaysCount = useMemo(() => {
+		return data.filter((d) => d.distance > 0).length;
+	}, [data]);
+
+	const prevStats = useMemo(() => {
 		const now = new Date();
 		let total = 0;
+		let activeDays = 0;
 		for (let i = 13; i >= 7; i--) {
 			const targetDate = subDays(now, i);
-			total += trips
+			const dist = trips
 				.filter((t) => isSameDay(t.date, targetDate))
 				.reduce((acc, curr) => acc + curr.distance, 0);
+			total += dist;
+			if (dist > 0) activeDays++;
 		}
-		return total;
+		return { total, activeDays };
 	}, [trips]);
 
 	const totalDistance7Days = data.reduce((acc, d) => acc + d.distance, 0);
@@ -86,8 +93,10 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 		return null; // hide if no usage in 7 days
 	}
 
-	const dailyAverage = totalDistance7Days / 7;
-	const prevDailyAverage = prevTotal / 7;
+	const dailyAverage =
+		activeDaysCount > 0 ? totalDistance7Days / activeDaysCount : 0;
+	const prevDailyAverage =
+		prevStats.activeDays > 0 ? prevStats.total / prevStats.activeDays : 0;
 	const trend =
 		dailyAverage > prevDailyAverage
 			? "up"
