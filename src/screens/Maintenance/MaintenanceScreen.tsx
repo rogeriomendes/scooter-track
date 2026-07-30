@@ -1,6 +1,7 @@
 import { addMonths, differenceInDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
 import { Button } from "heroui-native";
 import { Card } from "heroui-native/card";
 import { useState } from "react";
@@ -42,6 +43,23 @@ export function MaintenanceScreen() {
 		await db.delete(maintenance).where(eq(maintenance.id, id));
 		refresh();
 		setItemToDelete(null);
+	};
+
+	const handleQuickComplete = async (item: typeof maintenance.$inferSelect) => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+		if (item.type === "date") {
+			setItemToEdit(item);
+			setIsBottomSheetOpen(true);
+		} else {
+			await db
+				.update(maintenance)
+				.set({
+					lastMaintenanceKm: stats?.totalKm || 0,
+					lastMaintenanceDate: new Date(),
+				})
+				.where(eq(maintenance.id, item.id));
+			refresh();
+		}
 	};
 
 	if (isLoading) {
@@ -325,13 +343,35 @@ export function MaintenanceScreen() {
 											</View>
 										</View>
 
-										<View className="items-end pl-2">
-											<Text className={`text-sm font-black ${statusColor}`}>
-												{wearPercentage.toFixed(0)}%
-											</Text>
-											<Text className="text-[9px] font-bold text-muted uppercase tracking-wider mt-0.5">
-												Desgaste
-											</Text>
+										<View className="items-end pl-2 gap-1.5">
+											<View className="items-end">
+												<Text className={`text-sm font-black ${statusColor}`}>
+													{wearPercentage.toFixed(0)}%
+												</Text>
+												<Text className="text-[9px] font-bold text-muted uppercase tracking-wider mt-0.5">
+													Desgaste
+												</Text>
+											</View>
+											<Button
+												size="sm"
+												variant="secondary"
+												className="h-7 px-2.5 bg-surface-secondary/60 border border-surface-secondary"
+												onPress={(e) => {
+													e.stopPropagation();
+													handleQuickComplete(item);
+												}}
+											>
+												<View className="flex-row items-center gap-1">
+													<StyledIcon
+														name="check"
+														size={12}
+														className="text-success"
+													/>
+													<Button.Label className="text-[10px] font-bold text-foreground">
+														Concluir
+													</Button.Label>
+												</View>
+											</Button>
 										</View>
 									</View>
 								</Pressable>

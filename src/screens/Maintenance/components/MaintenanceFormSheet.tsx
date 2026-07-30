@@ -1,7 +1,7 @@
 import DateTimePicker, {
 	type DateTimePickerChangeEvent,
 } from "@react-native-community/datetimepicker";
-import { format } from "date-fns";
+import { addDays, differenceInDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
@@ -102,6 +102,8 @@ export function MaintenanceFormSheet({
 
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
+		const isResetting = resetWear || !editItem;
+
 		const dataToSave = {
 			name,
 			type,
@@ -109,16 +111,19 @@ export function MaintenanceFormSheet({
 				type === "km" || type === "mixed" ? parseFloat(intervalKm) || 0 : 0,
 			intervalMonths:
 				type === "months" || type === "mixed"
-					? parseInt(intervalMonths) || 0
+					? parseInt(intervalMonths, 10) || 0
 					: null,
 			targetDate: type === "date" ? targetDate : null,
-			...(type !== "km" ? { lastMaintenanceDate: lastDate } : {}),
-			...(resetWear || !editItem
-				? {
-						lastMaintenanceKm: currentTotalKm,
-						...(type === "km" ? { lastMaintenanceDate: new Date() } : {}),
-					}
-				: {}),
+			lastMaintenanceKm: isResetting
+				? currentTotalKm
+				: editItem
+					? editItem.lastMaintenanceKm
+					: currentTotalKm,
+			lastMaintenanceDate: isResetting
+				? new Date()
+				: type !== "km"
+					? lastDate
+					: editItem?.lastMaintenanceDate || new Date(),
 		};
 
 		if (editItem) {
@@ -260,20 +265,44 @@ export function MaintenanceFormSheet({
 						)}
 
 						{editItem && (
-							<Button
-								variant={resetWear ? "primary" : "secondary"}
-								className="mt-2"
-								onPress={() => {
-									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-									setResetWear(!resetWear);
-								}}
-							>
-								<Button.Label>
-									{resetWear
-										? "Desgaste será zerado"
-										: "Troquei esta peça agora (Zerar desgaste)"}
-								</Button.Label>
-							</Button>
+							<View className="mt-3 p-3 bg-surface-secondary/40 rounded-xl border border-surface-secondary">
+								<Button
+									variant={resetWear ? "primary" : "secondary"}
+									onPress={() => {
+										Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+										const nextReset = !resetWear;
+										setResetWear(nextReset);
+										if (nextReset) {
+											setLastDate(new Date());
+											if (
+												type === "date" &&
+												editItem.targetDate &&
+												editItem.lastMaintenanceDate
+											) {
+												const prevDuration = differenceInDays(
+													editItem.targetDate,
+													editItem.lastMaintenanceDate,
+												);
+												const durationToUse =
+													prevDuration > 0 ? prevDuration : 30;
+												setTargetDate(addDays(new Date(), durationToUse));
+											}
+										}
+									}}
+								>
+									<Button.Label>
+										{resetWear
+											? "✓ Revisão marcada como feita (Zerar desgaste)"
+											: "Marcar revisão/troca como realizada hoje"}
+									</Button.Label>
+								</Button>
+								{type === "date" && resetWear && (
+									<Text className="text-xs text-muted mt-2 text-center">
+										Nova data de vencimento calculada automaticamente. Altere
+										abaixo se desejar.
+									</Text>
+								)}
+							</View>
 						)}
 
 						<View className="flex-row gap-2 mt-4 w-full">
