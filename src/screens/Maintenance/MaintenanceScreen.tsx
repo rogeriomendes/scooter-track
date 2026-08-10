@@ -47,19 +47,15 @@ export function MaintenanceScreen() {
 
 	const handleQuickComplete = async (item: typeof maintenance.$inferSelect) => {
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-		if (item.type === "date") {
-			setItemToEdit(item);
-			setIsBottomSheetOpen(true);
-		} else {
-			await db
-				.update(maintenance)
-				.set({
-					lastMaintenanceKm: stats?.totalKm || 0,
-					lastMaintenanceDate: new Date(),
-				})
-				.where(eq(maintenance.id, item.id));
-			refresh();
-		}
+		await db
+			.update(maintenance)
+			.set({
+				isCompleted: true,
+				lastMaintenanceKm: stats?.totalKm || 0,
+				lastMaintenanceDate: new Date(),
+			})
+			.where(eq(maintenance.id, item.id));
+		refresh();
 	};
 
 	if (isLoading) {
@@ -355,20 +351,25 @@ export function MaintenanceScreen() {
 											<Button
 												size="sm"
 												variant="secondary"
-												className="h-7 px-2.5 bg-surface-secondary/60 border border-surface-secondary"
+												className={`h-7 px-2.5 ${item.isCompleted ? "bg-success/15 border border-success/30" : "bg-surface-secondary/60 border border-surface-secondary"}`}
 												onPress={(e) => {
 													e.stopPropagation();
-													handleQuickComplete(item);
+													if (!item.isCompleted) {
+														handleQuickComplete(item);
+													} else {
+														setItemToEdit(item);
+														setIsBottomSheetOpen(true);
+													}
 												}}
 											>
 												<View className="flex-row items-center gap-1">
 													<StyledIcon
-														name="check"
+														name={item.isCompleted ? "check-circle" : "check"}
 														size={12}
 														className="text-success"
 													/>
-													<Button.Label className="text-[10px] font-bold text-foreground">
-														Concluir
+													<Button.Label className={`text-[10px] font-bold ${item.isCompleted ? "text-success" : "text-foreground"}`}>
+														{item.isCompleted ? "Concluída" : "Concluir"}
 													</Button.Label>
 												</View>
 											</Button>

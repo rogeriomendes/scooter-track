@@ -1,3 +1,8 @@
+import { AppBottomSheet } from "@/components/AppBottomSheet";
+import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
+import { db } from "@/db/client";
+import { maintenance, type scooters } from "@/db/schema";
 import DateTimePicker, {
 	type DateTimePickerChangeEvent,
 } from "@react-native-community/datetimepicker";
@@ -10,11 +15,6 @@ import { Label } from "heroui-native/label";
 import { TextField } from "heroui-native/text-field";
 import { useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
-import { AppBottomSheet } from "@/components/AppBottomSheet";
-import { BottomSheetInput } from "@/components/BottomSheetInput";
-import { StyledIcon } from "@/components/StyledIcon";
-import { db } from "@/db/client";
-import { maintenance, type scooters } from "@/db/schema";
 
 interface MaintenanceFormSheetProps {
 	isOpen: boolean;
@@ -91,6 +91,19 @@ export function MaintenanceFormSheet({
 		}
 	};
 
+	const isReadOnly = Boolean(editItem?.isCompleted);
+
+	const handleReopen = async () => {
+		if (!editItem) return;
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+		await db
+			.update(maintenance)
+			.set({ isCompleted: false })
+			.where(eq(maintenance.id, editItem.id));
+		onOpenChange(false);
+		onSaved();
+	};
+
 	const handleSave = async () => {
 		if (!name) return;
 		if (type === "km" && !intervalKm) return;
@@ -121,6 +134,7 @@ export function MaintenanceFormSheet({
 				: type !== "km"
 					? lastDate
 					: editItem?.lastMaintenanceDate || new Date(),
+			isCompleted: resetWear || (editItem ? Boolean(editItem.isCompleted) : false),
 		};
 
 		if (editItem) {
@@ -148,14 +162,41 @@ export function MaintenanceFormSheet({
 		<AppBottomSheet
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
-			title={editItem ? "Editar Manutenção" : "Adicionar Peça/Serviço"}
+			title={
+				isReadOnly
+					? "Detalhes da Manutenção"
+					: editItem
+						? "Editar Manutenção"
+						: "Adicionar Peça/Serviço"
+			}
 		>
+			{isReadOnly && (
+				<View className="bg-success/15 border border-success/30 p-3 rounded-2xl flex-row items-center mb-3 gap-3">
+					<View className="w-8 h-8 rounded-xl bg-success/20 items-center justify-center">
+						<StyledIcon
+							name="check-circle"
+							size={18}
+							className="text-success"
+						/>
+					</View>
+					<View className="flex-1">
+						<Text className="text-success font-bold text-xs">
+							Manutenção Concluída
+						</Text>
+						<Text className="text-muted text-[11px] font-medium">
+							Esta manutenção já foi realizada. As informações estão em modo de visualização.
+						</Text>
+					</View>
+				</View>
+			)}
+
 			<TextField>
 				<Label>Nome da Peça/Serviço</Label>
 				<BottomSheetInput
 					placeholder="Ex: Pastilha de freio traseira"
 					value={name}
 					onChangeText={setName}
+					editable={!isReadOnly}
 					variant="secondary"
 				/>
 			</TextField>
@@ -166,35 +207,39 @@ export function MaintenanceFormSheet({
 					<Button
 						size="sm"
 						variant={type === "km" ? "primary" : "secondary"}
-						onPress={() => setType("km")}
+						isDisabled={isReadOnly}
+						onPress={() => !isReadOnly && setType("km")}
 					>
 						<Button.Label>Por KM</Button.Label>
 					</Button>
 					<Button
 						size="sm"
 						variant={type === "months" ? "primary" : "secondary"}
-						onPress={() => setType("months")}
+						isDisabled={isReadOnly}
+						onPress={() => !isReadOnly && setType("months")}
 					>
 						<Button.Label>Por Meses</Button.Label>
 					</Button>
 					<Button
 						size="sm"
 						variant={type === "date" ? "primary" : "secondary"}
-						onPress={() => setType("date")}
+						isDisabled={isReadOnly}
+						onPress={() => !isReadOnly && setType("date")}
 					>
 						<Button.Label>Data Fixa</Button.Label>
 					</Button>
 					<Button
 						size="sm"
 						variant={type === "mixed" ? "primary" : "secondary"}
-						onPress={() => setType("mixed")}
+						isDisabled={isReadOnly}
+						onPress={() => !isReadOnly && setType("mixed")}
 					>
 						<Button.Label>Misto</Button.Label>
 					</Button>
 				</View>
 			</View>
 
-			{(type === "km" || type === "mixed") && (
+			{type === "km" && (
 				<TextField>
 					<Label>Intervalo de Troca (KM)</Label>
 					<BottomSheetInput
@@ -202,56 +247,129 @@ export function MaintenanceFormSheet({
 						keyboardType="numeric"
 						value={intervalKm}
 						onChangeText={setIntervalKm}
+						editable={!isReadOnly}
 						variant="secondary"
 					/>
 				</TextField>
 			)}
 
-			{(type === "months" || type === "mixed") && (
-				<TextField>
-					<Label>Intervalo de Troca (Meses)</Label>
-					<BottomSheetInput
-						placeholder="Ex: 6"
-						keyboardType="numeric"
-						value={intervalMonths}
-						onChangeText={setIntervalMonths}
-						variant="secondary"
-					/>
-				</TextField>
-			)}
-
-			{type !== "km" && (
-				<TextField>
-					<Label>Data de Início</Label>
-					<Pressable
-						onPress={() => setShowLastDatePicker(true)}
-						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-4 active:opacity-80"
-					>
-						<Text className="text-foreground text-sm">
-							{format(lastDate, "dd/MM/yyyy", { locale: ptBR })}
-						</Text>
-						<StyledIcon name="calendar" size={18} className="text-muted" />
-					</Pressable>
-				</TextField>
+			{type === "months" && (
+				<View className="flex-row gap-3">
+					<View className="flex-1">
+						<TextField>
+							<Label>Intervalo (Meses)</Label>
+							<BottomSheetInput
+								placeholder="Ex: 6"
+								keyboardType="numeric"
+								value={intervalMonths}
+								onChangeText={setIntervalMonths}
+								editable={!isReadOnly}
+								variant="secondary"
+							/>
+						</TextField>
+					</View>
+					<View className="flex-1">
+						<TextField>
+							<Label>Data de Início</Label>
+							<Pressable
+								onPress={() => !isReadOnly && setShowLastDatePicker(true)}
+								className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
+							>
+								<Text className="text-foreground text-sm">
+									{format(lastDate, "dd/MM/yyyy", { locale: ptBR })}
+								</Text>
+								<StyledIcon name="calendar" size={16} className="text-muted" />
+							</Pressable>
+						</TextField>
+					</View>
+				</View>
 			)}
 
 			{type === "date" && (
-				<TextField>
-					<Label>Data de Vencimento</Label>
-					<Pressable
-						onPress={() => setShowTargetDatePicker(true)}
-						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-4 active:opacity-80"
-					>
-						<Text className="text-foreground text-sm">
-							{format(targetDate, "dd/MM/yyyy", { locale: ptBR })}
-						</Text>
-						<StyledIcon name="calendar" size={18} className="text-muted" />
-					</Pressable>
-				</TextField>
+				<View className="flex-row gap-3">
+					<View className="flex-1">
+						<TextField>
+							<Label>Data de Início</Label>
+							<Pressable
+								onPress={() => !isReadOnly && setShowLastDatePicker(true)}
+								className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
+							>
+								<Text className="text-foreground text-sm">
+									{format(lastDate, "dd/MM/yyyy", { locale: ptBR })}
+								</Text>
+								<StyledIcon name="calendar" size={16} className="text-muted" />
+							</Pressable>
+						</TextField>
+					</View>
+					<View className="flex-1">
+						<TextField>
+							<Label>Data Vencimento</Label>
+							<Pressable
+								onPress={() => !isReadOnly && setShowTargetDatePicker(true)}
+								className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
+							>
+								<Text className="text-foreground text-sm">
+									{format(targetDate, "dd/MM/yyyy", { locale: ptBR })}
+								</Text>
+								<StyledIcon name="calendar" size={16} className="text-muted" />
+							</Pressable>
+						</TextField>
+					</View>
+				</View>
 			)}
 
-			{editItem && (
-				<View className="mt-3 p-3 bg-surface-secondary/40 rounded-xl border border-surface-secondary">
+			{type === "mixed" && (
+				<View className="gap-3">
+					<View className="flex-row gap-3">
+						<View className="flex-1">
+							<TextField>
+								<Label>Intervalo (KM)</Label>
+								<BottomSheetInput
+									placeholder="Ex: 1000"
+									keyboardType="numeric"
+									value={intervalKm}
+									onChangeText={setIntervalKm}
+									editable={!isReadOnly}
+									variant="secondary"
+								/>
+							</TextField>
+						</View>
+						<View className="flex-1">
+							<TextField>
+								<Label>Data de Início</Label>
+								<Pressable
+									onPress={() => !isReadOnly && setShowLastDatePicker(true)}
+									className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
+								>
+									<Text className="text-foreground text-sm">
+										{format(lastDate, "dd/MM/yyyy", { locale: ptBR })}
+									</Text>
+									<StyledIcon
+										name="calendar"
+										size={16}
+										className="text-muted"
+									/>
+								</Pressable>
+							</TextField>
+						</View>
+					</View>
+
+					<TextField>
+						<Label>Intervalo (Meses)</Label>
+						<BottomSheetInput
+							placeholder="Ex: 6"
+							keyboardType="numeric"
+							value={intervalMonths}
+							onChangeText={setIntervalMonths}
+							editable={!isReadOnly}
+							variant="secondary"
+						/>
+					</TextField>
+				</View>
+			)}
+
+			{editItem && !isReadOnly && (
+				<View className="mt-3 bg-surface-secondary/40 rounded-xl border border-surface-secondary">
 					<Button
 						variant={resetWear ? "primary" : "secondary"}
 						onPress={() => {
@@ -269,8 +387,7 @@ export function MaintenanceFormSheet({
 										editItem.targetDate,
 										editItem.lastMaintenanceDate,
 									);
-									const durationToUse =
-										prevDuration > 0 ? prevDuration : 30;
+									const durationToUse = prevDuration > 0 ? prevDuration : 30;
 									setTargetDate(addDays(new Date(), durationToUse));
 								}
 							}
@@ -284,28 +401,52 @@ export function MaintenanceFormSheet({
 					</Button>
 					{type === "date" && resetWear && (
 						<Text className="text-xs text-muted mt-2 text-center">
-							Nova data de vencimento calculada automaticamente. Altere
-							abaixo se desejar.
+							Nova data de vencimento calculada automaticamente. Altere abaixo
+							se desejar.
 						</Text>
 					)}
 				</View>
 			)}
 
-			<View className="flex-row gap-2 mt-4 w-full">
-				{editItem && onDeleteRequest && (
+			{isReadOnly ? (
+				<View className="flex-row gap-2 mt-4 w-full">
+					{editItem && onDeleteRequest && (
+						<Button
+							variant="secondary"
+							className="flex-1 bg-danger/10 border border-danger/10"
+							feedbackVariant="scale-ripple"
+							onPress={() => onDeleteRequest(editItem.id)}
+						>
+							<Button.Label className="text-danger">Excluir</Button.Label>
+						</Button>
+					)}
 					<Button
 						variant="secondary"
-						className="flex-1 bg-danger/10 border border-danger/10"
-						feedbackVariant="scale-ripple"
-						onPress={() => onDeleteRequest(editItem.id)}
+						className="flex-1"
+						onPress={handleReopen}
 					>
-						<Button.Label className="text-danger">Excluir</Button.Label>
+						<Button.Label className="text-foreground">
+							Reabrir Manutenção
+						</Button.Label>
 					</Button>
-				)}
-				<Button variant="primary" className="flex-1" onPress={handleSave}>
-					<Button.Label>{editItem ? "Salvar" : "Adicionar"}</Button.Label>
-				</Button>
-			</View>
+				</View>
+			) : (
+				<View className="flex-row gap-2 mt-4 w-full">
+					{editItem && onDeleteRequest && (
+						<Button
+							variant="secondary"
+							className="flex-1 bg-danger/10 border border-danger/10"
+							feedbackVariant="scale-ripple"
+							onPress={() => onDeleteRequest(editItem.id)}
+						>
+							<Button.Label className="text-danger">Excluir</Button.Label>
+						</Button>
+					)}
+					<Button variant="primary" className="flex-1" onPress={handleSave}>
+						<Button.Label>{editItem ? "Salvar" : "Adicionar"}</Button.Label>
+					</Button>
+				</View>
+			)}
 
 			{showTargetDatePicker && (
 				<DateTimePicker
