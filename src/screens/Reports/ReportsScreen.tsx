@@ -3,7 +3,7 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
-import { format } from "date-fns";
+import { format, startOfMonth, subDays } from "date-fns";
 import * as Haptics from "expo-haptics";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
@@ -25,6 +25,9 @@ export default function ReportsScreen() {
 	const { scooter, allLogs, stats, isLoading } =
 		useScooterData(activeScooterId);
 	const [viewMode, setViewMode] = useState<"day" | "cycle">("day");
+	const [timeframe, setTimeframe] = useState<"7d" | "30d" | "month" | "all">(
+		"30d",
+	);
 
 	const theme = useAppStore((s) => s.theme);
 	const colorScheme = useColorScheme();
@@ -43,62 +46,94 @@ export default function ReportsScreen() {
 		[logsList],
 	);
 
+	const filteredTrips = useMemo(() => {
+		const now = new Date();
+		if (timeframe === "7d") {
+			const limit = subDays(now, 7);
+			return tripsOnly.filter((t) => t.date >= limit);
+		}
+		if (timeframe === "30d") {
+			const limit = subDays(now, 30);
+			return tripsOnly.filter((t) => t.date >= limit);
+		}
+		if (timeframe === "month") {
+			const limit = startOfMonth(now);
+			return tripsOnly.filter((t) => t.date >= limit);
+		}
+		return tripsOnly;
+	}, [tripsOnly, timeframe]);
+
 	const chartData = useMemo(() => {
 		if (viewMode === "day") {
 			// Group trips by day to show daily distance
 			const dailyMap = new Map<string, number>();
-			tripsOnly.forEach((t) => {
+			filteredTrips.forEach((t) => {
 				const d = format(t.date, "dd/MM");
 				dailyMap.set(d, (dailyMap.get(d) || 0) + t.distance);
 			});
-			const arr = Array.from(dailyMap.entries()).map(([label, value]) => ({
+			return Array.from(dailyMap.entries()).map(([label, value]) => ({
 				label,
 				value,
 				date: label,
 			}));
-			// Take last 14 days for the chart
-			return arr.slice(-14).map((log) => ({
-				value: log.value,
-				label: log.label,
-				date: log.date,
-			}));
 		} else {
 			// Por ciclo
-			return (
-				stats?.cycles.slice(-14).map((c: any, i: number) => ({
-					value: c.distance,
-					label: `C${i + 1}`,
-					date: `Ciclo ${i + 1}`,
-				})) || []
-			);
+			const cyclesList = stats?.cycles || [];
+			const now = new Date();
+			let filteredCycles = cyclesList;
+			if (timeframe === "7d") {
+				const limit = subDays(now, 7);
+				filteredCycles = cyclesList.filter((c: any) => c.endDate >= limit);
+			} else if (timeframe === "30d") {
+				const limit = subDays(now, 30);
+				filteredCycles = cyclesList.filter((c: any) => c.endDate >= limit);
+			} else if (timeframe === "month") {
+				const limit = startOfMonth(now);
+				filteredCycles = cyclesList.filter((c: any) => c.endDate >= limit);
+			}
+			return filteredCycles.map((c: any, i: number) => ({
+				value: c.distance,
+				label: `C${i + 1}`,
+				date: `Ciclo ${i + 1}`,
+			}));
 		}
-	}, [tripsOnly, stats?.cycles, viewMode]);
+	}, [filteredTrips, stats?.cycles, viewMode, timeframe]);
 
 	const chartStats = useMemo(() => {
 		if (viewMode === "day") {
-			const total = tripsOnly.reduce((sum, t) => sum + t.distance, 0);
+			const total = filteredTrips.reduce((sum, t) => sum + t.distance, 0);
 			const uniqueDays = new Set(
-				tripsOnly.map((t) => format(new Date(t.date), "yyyy-MM-dd")),
+				filteredTrips.map((t) => format(new Date(t.date), "yyyy-MM-dd")),
 			).size;
 			const maxTrip =
-				tripsOnly.length > 0
-					? Math.max(...tripsOnly.map((t) => t.distance))
+				filteredTrips.length > 0
+					? Math.max(...filteredTrips.map((t) => t.distance))
 					: 0;
 			const avg = uniqueDays > 0 ? total / uniqueDays : 0;
+			const realAvgCycle =
+				stats?.averageCycleKm && stats.averageCycleKm > 0
+					? `${stats.averageCycleKm.toFixed(1)}`
+					: scooter?.autonomyGoal
+						? `${scooter.autonomyGoal.toFixed(0)}`
+						: "0";
+
 			return {
 				mainValue: total,
-				mainLabel: "KM TOTAL (VIAGENS)",
+				mainLabel: "KM TOTAL (PERÍODO)",
 				avgValue: avg,
 				avgLabel: "MÉDIA DIÁRIA (KM)",
 				maxValue: maxTrip,
 				maxLabel: "MAIOR VIAGEM (KM)",
-				countValue: uniqueDays,
-				countLabel: "DIAS ATIVOS",
+				countValue: realAvgCycle,
+				countLabel: "AUTONOMIA MÉDIA (KM)",
 			};
 		} else {
-			const cyclesCount = stats?.cycles.length || 0;
-			const totalCyclesDist =
-				stats?.cycles.reduce((sum: number, c: any) => sum + c.distance, 0) || 0;
+			const cyclesList = stats?.cycles || [];
+			const cyclesCount = cyclesList.length;
+			const totalCyclesDist = cyclesList.reduce(
+				(sum: number, c: any) => sum + c.distance,
+				0,
+			);
 			const avg = cyclesCount > 0 ? totalCyclesDist / cyclesCount : 0;
 			const max = stats?.bestCycleKm || 0;
 			return {
@@ -108,11 +143,11 @@ export default function ReportsScreen() {
 				avgLabel: "MÉDIA POR CICLO (KM)",
 				maxValue: max,
 				maxLabel: "MELHOR CICLO (KM)",
-				countValue: cyclesCount,
-				countLabel: "CICLOS FECHADOS",
+				countValue: cyclesCount.toString(),
+				countLabel: "CICLOS CONCLUÍDOS",
 			};
 		}
-	}, [tripsOnly, stats, viewMode]);
+	}, [filteredTrips, stats, scooter, viewMode]);
 
 	if (isLoading) {
 		return (
@@ -148,10 +183,10 @@ export default function ReportsScreen() {
 				</Animated.Text>
 			</View>
 
-			{/* TOGGLE SEGMENTADO */}
+			{/* TOGGLE SEGMENTADO E FILTRO DE TEMPO */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="mb-4"
+				className="mb-4 gap-3"
 			>
 				<View className="flex-row bg-surface-tertiary p-1.5 rounded-2xl">
 					<Pressable
@@ -202,6 +237,43 @@ export default function ReportsScreen() {
 						</Text>
 					</Pressable>
 				</View>
+
+				<View className="flex-row items-center justify-between px-1">
+					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider">
+						Período
+					</Text>
+					<View className="flex-row gap-1 bg-surface-tertiary p-1 rounded-xl">
+						{(
+							[
+								{ id: "7d", label: "7D" },
+								{ id: "30d", label: "30D" },
+								{ id: "month", label: "Mês" },
+								{ id: "all", label: "Tudo" },
+							] as const
+						).map((t) => (
+							<Pressable
+								key={t.id}
+								onPress={() => {
+									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+									setTimeframe(t.id);
+								}}
+								className={`px-3 py-1 rounded-lg ${
+									timeframe === t.id
+										? "bg-surface shadow-sm"
+										: "active:opacity-70"
+								}`}
+							>
+								<Text
+									className={`text-xs font-bold ${
+										timeframe === t.id ? "text-success" : "text-muted"
+									}`}
+								>
+									{t.label}
+								</Text>
+							</Pressable>
+						))}
+					</View>
+				</View>
 			</Animated.View>
 
 			{/* GRÁFICO NEON */}
@@ -215,7 +287,7 @@ export default function ReportsScreen() {
 							Evolução de Distância
 						</Text>
 						<Text className="text-2xl font-black text-foreground">
-							{chartData.length > 0 ? "Últimos Registros" : "Sem dados"}
+							{chartData.length > 0 ? "Registros do Período" : "Sem dados"}
 						</Text>
 					</View>
 
@@ -226,7 +298,7 @@ export default function ReportsScreen() {
 								curved
 								data={chartData}
 								width={screenWidth - 80}
-								height={180}
+								height={150}
 								hideDataPoints={false}
 								dataPointsColor="#17C964"
 								dataPointsRadius={4}
@@ -344,6 +416,37 @@ export default function ReportsScreen() {
 						</Text>
 					</Card>
 				</View>
+			</Animated.View>
+
+			{/* CARD DE AUTONOMIA REAL & EFICIÊNCIA */}
+			<Animated.View
+				entering={FadeInDown.delay(600).springify()}
+				className="mt-3"
+			>
+				<Card
+					variant="secondary"
+					className="p-4 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+				>
+					<View className="w-10 h-10 rounded-xl bg-success/15 items-center justify-center">
+						<StyledIcon
+							name="battery-charging"
+							size={20}
+							className="text-success"
+						/>
+					</View>
+					<View className="flex-1">
+						<Text className="text-xs font-bold text-foreground mb-0.5">
+							Eficiência & Autonomia Real
+						</Text>
+						<Text className="text-xs text-muted leading-4">
+							{stats?.averageCycleKm && stats.averageCycleKm > 0
+								? `Autonomia média calculada de ${stats.averageCycleKm.toFixed(1)} km por carga completa.`
+								: scooter.autonomyGoal && scooter.autonomyGoal > 0
+									? `Meta de autonomia cadastrada em ${scooter.autonomyGoal.toFixed(0)} km por recarga.`
+									: "Registre viagens e recargas para calcular a autonomia média real por ciclo."}
+						</Text>
+					</View>
+				</Card>
 			</Animated.View>
 		</ScreenWrapper>
 	);
