@@ -1,12 +1,12 @@
-import { AppBottomSheet } from "@/components/AppBottomSheet";
-import { StyledIcon } from "@/components/StyledIcon";
-import { BATTERY_CHARTS } from "@/constants/batteryCharts";
-import type { scooters } from "@/db/schema";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import * as Sharing from "expo-sharing";
 import { Button } from "heroui-native";
 import { Alert, Pressable, Text, View } from "react-native";
+import { AppBottomSheet } from "@/components/AppBottomSheet";
+import { StyledIcon } from "@/components/StyledIcon";
+import { BATTERY_CHARTS } from "@/constants/batteryCharts";
+import type { scooters } from "@/db/schema";
 
 interface ScooterDetailsSheetProps {
 	isOpen: boolean;
@@ -178,7 +178,7 @@ export function ScooterDetailsSheet({
 						onEditRequest();
 					}}
 				>
-					<StyledIcon name="edit-2" size={16} className="text-white mr-2" />
+					<StyledIcon name="edit-2" size={16} className="text-primary" />
 					<Button.Label>Editar Scooter</Button.Label>
 				</Button>
 			)}

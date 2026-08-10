@@ -365,29 +365,31 @@ export default function TripsScreen() {
 				)}
 			/>
 
-			{/* FLOATING ACTION BUTTON (FAB) */}
+			{/* FLOATING ACTION PILL */}
 			<Animated.View
 				entering={FadeInDown.delay(500).springify()}
-				className="absolute bottom-6 right-6"
+				className="absolute bottom-6 left-0 right-0 items-center z-20 pointer-events-box-none"
 			>
 				<Button
-					size="lg"
-					isIconOnly
+					size="md"
 					variant="primary"
-					className="rounded-full shadow-lg bg-success border-0 h-16 w-16 shadow-success/40"
+					className="rounded-full shadow-lg bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/40"
 					style={{
 						elevation: 10,
 						shadowColor: "#10b981",
-						shadowOffset: { width: 0, height: 8 },
-						shadowOpacity: 0.5,
-						shadowRadius: 12,
+						shadowOffset: { width: 0, height: 6 },
+						shadowOpacity: 0.4,
+						shadowRadius: 10,
 					}}
 					onPress={() => {
 						setLogToEdit(null);
 						setIsBottomSheetOpen(true);
 					}}
 				>
-					<StyledIcon name="plus" size={28} color="white" />
+					<StyledIcon name="plus" size={18} color="white" />
+					<Button.Label className="text-white font-bold text-sm">
+						Registrar Uso
+					</Button.Label>
 				</Button>
 			</Animated.View>
 
