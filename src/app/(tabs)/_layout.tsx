@@ -1,7 +1,8 @@
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
+import Feather from "@expo/vector-icons/Feather";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useThemeColor } from "heroui-native";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function TabLayout() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
@@ -23,22 +24,37 @@ export default function TabLayout() {
 		>
 			<NativeTabs.Trigger name="index">
 				<NativeTabs.Trigger.Label>Dashboard</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="house" md="home" />
+				<NativeTabs.Trigger.Icon
+					src={<NativeTabs.Trigger.VectorIcon family={Feather} name="home" />}
+				/>
 			</NativeTabs.Trigger>
 
 			<NativeTabs.Trigger name="trips">
 				<NativeTabs.Trigger.Label>Usos</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="map" md="map" />
+				<NativeTabs.Trigger.Icon
+					src={
+						<NativeTabs.Trigger.VectorIcon family={Feather} name="map-pin" />
+					}
+				/>
 			</NativeTabs.Trigger>
 
 			<NativeTabs.Trigger name="charges">
 				<NativeTabs.Trigger.Label>Recargas</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="bolt" md="bolt" />
+				<NativeTabs.Trigger.Icon
+					src={<NativeTabs.Trigger.VectorIcon family={Feather} name="zap" />}
+				/>
 			</NativeTabs.Trigger>
 
 			<NativeTabs.Trigger name="reports">
 				<NativeTabs.Trigger.Label>Gráficos</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="chart.bar" md="bar_chart" />
+				<NativeTabs.Trigger.Icon
+					src={
+						<NativeTabs.Trigger.VectorIcon
+							family={Feather}
+							name="bar-chart-2"
+						/>
+					}
+				/>
 			</NativeTabs.Trigger>
 
 			<NativeTabs.Trigger
@@ -46,7 +62,9 @@ export default function TabLayout() {
 				hidden={!(scooter && scooter.showMaintenance)}
 			>
 				<NativeTabs.Trigger.Label>Manut.</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="wrench" md="build" />
+				<NativeTabs.Trigger.Icon
+					src={<NativeTabs.Trigger.VectorIcon family={Feather} name="tool" />}
+				/>
 			</NativeTabs.Trigger>
 		</NativeTabs>
 	);

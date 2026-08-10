@@ -5,6 +5,7 @@ import { Card } from "heroui-native/card";
 import { Separator } from "heroui-native/separator";
 import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import Svg, {
 	Circle,
 	Defs,
@@ -103,20 +104,21 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 	}, "");
 
 	return (
-		<Card
-			variant="secondary"
-			className="mb-6 bg-surface border border-surface-secondary shadow-sm p-4 rounded-2xl"
-		>
-			{/* HEADER WITH TOGGLE PILLS */}
-			<View className="flex-row justify-between items-center mb-3">
-				<View className="flex-row items-center gap-1.5">
-					<StyledIcon name="activity" size={16} className="text-success" />
-					<Text className="text-xs font-black text-foreground uppercase tracking-wider">
-						Uso & Desempenho
-					</Text>
-				</View>
+		<Animated.View entering={FadeInDown.delay(200).springify()}>
+			<Card
+				variant="secondary"
+				className="mb-6 bg-surface border border-surface-secondary shadow-sm p-4 rounded-2xl"
+			>
+				{/* HEADER WITH TOGGLE PILLS */}
+				<View className="flex-row justify-between items-center mb-3">
+					<View className="flex-row items-center gap-1.5">
+						<StyledIcon name="activity" size={16} className="text-success" />
+						<Text className="text-xs font-black text-foreground uppercase tracking-wider">
+							Uso & Desempenho
+						</Text>
+					</View>
 
-				{/* SELECTOR */}
+					{/* SELECTOR */}
 				<View className="flex-row bg-surface-secondary/60 p-0.5 rounded-lg border border-surface-secondary">
 					<Pressable
 						onPress={() => {
@@ -277,5 +279,6 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 				</View>
 			</View>
 		</Card>
-	);
+	</Animated.View>
+);
 }
