@@ -10,6 +10,7 @@ import { HeroUINativeProvider } from "heroui-native";
 import { useEffect } from "react";
 import { Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Uniwind } from "uniwind";
 import { db } from "@/db/client";
 import migrations from "@/drizzle/migrations";
@@ -27,16 +28,16 @@ export default function RootLayout() {
 
 	useEffect(() => {
 		// Sincroniza o tema do Zustand com o motor do Tailwind (Uniwind)
-		Uniwind.setTheme(theme);
-	}, [theme]);
+		Uniwind.setTheme(isDark ? "dark" : "light");
+	}, [isDark]);
 
 	if (error) {
 		return (
-			<View className="flex-1 items-center justify-center p-6 bg-danger-50">
-				<Text className="text-danger-500 text-lg font-bold">
+			<View className="flex-1 items-center justify-center p-6 bg-red-500">
+				<Text className="text-white text-lg font-bold">
 					Erro de Migração DB:
 				</Text>
-				<Text className="text-danger-900 mt-2">{error.message}</Text>
+				<Text className="text-white mt-2">{error.message}</Text>
 			</View>
 		);
 	}
@@ -50,15 +51,17 @@ export default function RootLayout() {
 	}
 
 	return (
-		<ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-			<StatusBar style={isDark ? "light" : "dark"} />
-			<GestureHandlerRootView style={{ flex: 1 }}>
-				<HeroUINativeProvider>
-					<Stack screenOptions={{ headerShown: false }}>
-						<Stack.Screen name="(tabs)" />
-					</Stack>
-				</HeroUINativeProvider>
-			</GestureHandlerRootView>
-		</ThemeProvider>
+		<SafeAreaProvider>
+			<ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+				<StatusBar style={isDark ? "light" : "dark"} />
+				<GestureHandlerRootView style={{ flex: 1 }}>
+					<HeroUINativeProvider>
+						<Stack screenOptions={{ headerShown: false }}>
+							<Stack.Screen name="(tabs)" />
+						</Stack>
+					</HeroUINativeProvider>
+				</GestureHandlerRootView>
+			</ThemeProvider>
+		</SafeAreaProvider>
 	);
 }

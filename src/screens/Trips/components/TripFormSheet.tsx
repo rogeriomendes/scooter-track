@@ -5,9 +5,10 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
-import { BottomSheet, Button, Label, TextField } from "heroui-native";
+import { Button, Label, TextField } from "heroui-native";
 import { useEffect, useState } from "react";
-import { Keyboard, Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
+import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
@@ -38,7 +39,6 @@ export function TripFormSheet({
 	const [showDatePicker, setShowDatePicker] = useState(false);
 	const [showTimePicker, setShowTimePicker] = useState(false);
 
-	// When editItem changes or modal opens, populate the fields
 	useEffect(() => {
 		if (isOpen) {
 			if (editItem) {
@@ -106,7 +106,6 @@ export function TripFormSheet({
 		onOpenChange(false);
 		onSaved();
 
-		// Check for low battery to send notification
 		try {
 			const allLogs = await db
 				.select()
@@ -114,7 +113,6 @@ export function TripFormSheet({
 				.where(eq(logs.scooterId, scooter.id));
 			const stats = calculateScooterStats(scooter, allLogs);
 			if (stats && stats.currentCycleKm >= stats.estimatedAutonomy * 0.8) {
-				// To do: Implemented via local state/toast or EAS dev build
 				console.log("Bateria baixa! KM atual: ", stats.currentCycleKm);
 			}
 		} catch (e) {
@@ -123,110 +121,97 @@ export function TripFormSheet({
 	};
 
 	return (
-		<BottomSheet
+		<AppBottomSheet
 			isOpen={isOpen}
-			onOpenChange={(open) => {
-				if (!open) Keyboard.dismiss();
-				onOpenChange(open);
-			}}
+			onOpenChange={onOpenChange}
+			title={editItem ? "Editar Uso" : "Registrar Uso"}
 		>
-			<BottomSheet.Portal>
-				<BottomSheet.Overlay />
-				<BottomSheet.Content
-					keyboardBehavior="interactive"
-					keyboardBlurBehavior="restore"
+			<View className="flex-row gap-2">
+				<TextField className="flex-1">
+					<Label>Data</Label>
+					<Pressable
+						onPress={() => setShowDatePicker(true)}
+						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+					>
+						<Text className="text-foreground text-base">
+							{format(date, "dd/MM/yyyy", { locale: ptBR })}
+						</Text>
+					</Pressable>
+				</TextField>
+				<TextField className="flex-1">
+					<Label>Hora</Label>
+					<Pressable
+						onPress={() => setShowTimePicker(true)}
+						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+					>
+						<Text className="text-foreground text-base">
+							{format(date, "HH:mm", { locale: ptBR })}
+						</Text>
+					</Pressable>
+				</TextField>
+			</View>
+
+			<TextField>
+				<Label>Distância Percorrida (km)</Label>
+				<BottomSheetInput
+					placeholder="Ex: 14.0"
+					keyboardType="numeric"
+					value={distance}
+					onChangeText={setDistance}
+					variant="secondary"
+				/>
+			</TextField>
+			<TextField>
+				<Label>
+					{scooter.trackingMode === "percent"
+						? "Nível da Bateria (%)"
+						: "Voltagem Final (V)"}
+				</Label>
+				<BottomSheetInput
+					placeholder={
+						scooter.trackingMode === "percent"
+							? "Ex: 85"
+							: BATTERY_CHARTS[
+									scooter.batteryType
+								]?.maxVoltage.toString() || "54.6"
+					}
+					keyboardType="numeric"
+					value={voltage}
+					onChangeText={setVoltage}
+					variant="secondary"
+				/>
+			</TextField>
+			<TextField>
+				<Label>Anotações (opcional)</Label>
+				<BottomSheetInput
+					placeholder="Ex: Passeio na praia"
+					value={notes}
+					onChangeText={setNotes}
+					variant="secondary"
+				/>
+			</TextField>
+			<View className="flex-row gap-2 mt-4 w-full">
+				{editItem && onDeleteRequest && (
+					<Button
+						variant="secondary"
+						className="flex-1 bg-danger/10 border border-danger/10"
+						feedbackVariant="scale-ripple"
+						onPress={() => onDeleteRequest(editItem.id)}
+					>
+						<Button.Label className="text-danger">Excluir</Button.Label>
+					</Button>
+				)}
+				<Button
+					variant="primary"
+					className="flex-1"
+					onPress={handleSaveTrip}
 				>
-					<BottomSheet.Title className="text-xl font-bold text-foreground mb-4">
-						{editItem ? "Editar Uso" : "Registrar Uso"}
-					</BottomSheet.Title>
+					<Button.Label>
+						{editItem ? "Salvar" : "Salvar Registro"}
+					</Button.Label>
+				</Button>
+			</View>
 
-					<View className="flex-row gap-2">
-						<TextField className="flex-1">
-							<Label>Data</Label>
-							<Pressable
-								onPress={() => setShowDatePicker(true)}
-								className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
-							>
-								<Text className="text-foreground text-base">
-									{format(date, "dd/MM/yyyy", { locale: ptBR })}
-								</Text>
-							</Pressable>
-						</TextField>
-						<TextField className="flex-1">
-							<Label>Hora</Label>
-							<Pressable
-								onPress={() => setShowTimePicker(true)}
-								className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
-							>
-								<Text className="text-foreground text-base">
-									{format(date, "HH:mm", { locale: ptBR })}
-								</Text>
-							</Pressable>
-						</TextField>
-					</View>
-
-					<TextField>
-						<Label>Distância Percorrida (km)</Label>
-						<BottomSheetInput
-							placeholder="Ex: 14.0"
-							keyboardType="numeric"
-							value={distance}
-							onChangeText={setDistance}
-							variant="secondary"
-						/>
-					</TextField>
-					<TextField>
-						<Label>
-							{scooter.trackingMode === "percent"
-								? "Nível da Bateria (%)"
-								: "Voltagem Final (V)"}
-						</Label>
-						<BottomSheetInput
-							placeholder={
-								scooter.trackingMode === "percent"
-									? "Ex: 85"
-									: BATTERY_CHARTS[
-											scooter.batteryType
-										]?.maxVoltage.toString() || "54.6"
-							}
-							keyboardType="numeric"
-							value={voltage}
-							onChangeText={setVoltage}
-							variant="secondary"
-						/>
-					</TextField>
-					<TextField>
-						<Label>Anotações (opcional)</Label>
-						<BottomSheetInput
-							placeholder="Ex: Passeio na praia"
-							value={notes}
-							onChangeText={setNotes}
-							variant="secondary"
-						/>
-					</TextField>
-					<View className="flex-row gap-2 mt-4 w-full">
-						{editItem && onDeleteRequest && (
-							<Button
-								variant="secondary"
-								className="flex-1 bg-danger/10 border border-danger/10"
-								feedbackVariant="scale-ripple"
-								onPress={() => onDeleteRequest(editItem.id)}
-							>
-								<Button.Label className="text-danger">Excluir</Button.Label>
-							</Button>
-						)}
-						<Button
-							variant="primary"
-							className="flex-1"
-							onPress={handleSaveTrip}
-						>
-							<Button.Label>
-								{editItem ? "Salvar" : "Salvar Registro"}
-							</Button.Label>
-						</Button>
-					</View>
-				</BottomSheet.Content>
-			</BottomSheet.Portal>
 			{showDatePicker && (
 				<DateTimePicker
 					value={date}
@@ -245,6 +230,6 @@ export function TripFormSheet({
 					onDismiss={() => setShowTimePicker(false)}
 				/>
 			)}
-		</BottomSheet>
+		</AppBottomSheet>
 	);
 }

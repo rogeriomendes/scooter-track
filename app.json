@@ -2,14 +2,14 @@
 	"expo": {
 		"name": "ScooterTrack",
 		"slug": "ScooterTrack",
-		"version": "1.0.0",
+		"version": "1.1.0",
 		"orientation": "portrait",
 		"icon": "./assets/images/icon.png",
 		"scheme": "scootertrack",
 		"userInterfaceStyle": "automatic",
 		"ios": {
 			"bundleIdentifier": "com.scootertrack.app",
-			"icon": "./assets/expo.icon"
+			"icon": "./assets/images/icon.png"
 		},
 		"android": {
 			"package": "com.scootertrack.app",
@@ -37,14 +37,11 @@
 					}
 				}
 			],
-			"expo-image",
-			"expo-sharing",
 			"expo-sqlite",
 			"@react-native-community/datetimepicker"
 		],
 		"experiments": {
-			"typedRoutes": true,
-			"reactCompiler": true
+			"typedRoutes": true
 		},
 		"extra": {
 			"router": {},

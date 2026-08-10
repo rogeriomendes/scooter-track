@@ -12,7 +12,7 @@ CREATE TABLE `__new_maintenance` (
 	FOREIGN KEY (`scooterId`) REFERENCES `scooters`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-INSERT INTO `__new_maintenance`("id", "scooterId", "name", "type", "intervalKm", "lastMaintenanceKm", "intervalMonths", "lastMaintenanceDate", "createdAt") SELECT "id", "scooterId", "name", "type", "intervalKm", "lastMaintenanceKm", "intervalMonths", "lastMaintenanceDate", "createdAt" FROM `maintenance`;--> statement-breakpoint
+INSERT INTO `__new_maintenance`("id", "scooterId", "name", "intervalKm", "lastMaintenanceKm", "createdAt") SELECT "id", "scooterId", "name", "intervalKm", "lastMaintenanceKm", "createdAt" FROM `maintenance`;--> statement-breakpoint
 DROP TABLE `maintenance`;--> statement-breakpoint
 ALTER TABLE `__new_maintenance` RENAME TO `maintenance`;--> statement-breakpoint
 PRAGMA foreign_keys=ON;
