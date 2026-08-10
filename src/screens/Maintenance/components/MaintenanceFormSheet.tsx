@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
 import { maintenance, type scooters } from "@/db/schema";
 
@@ -224,11 +225,12 @@ export function MaintenanceFormSheet({
 					<Label>Data de Início</Label>
 					<Pressable
 						onPress={() => setShowLastDatePicker(true)}
-						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-4 active:opacity-80"
 					>
-						<Text className="text-foreground text-base">
+						<Text className="text-foreground text-sm">
 							{format(lastDate, "dd/MM/yyyy", { locale: ptBR })}
 						</Text>
+						<StyledIcon name="calendar" size={18} className="text-muted" />
 					</Pressable>
 				</TextField>
 			)}
@@ -238,11 +240,12 @@ export function MaintenanceFormSheet({
 					<Label>Data de Vencimento</Label>
 					<Pressable
 						onPress={() => setShowTargetDatePicker(true)}
-						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-4 active:opacity-80"
 					>
-						<Text className="text-foreground text-base">
+						<Text className="text-foreground text-sm">
 							{format(targetDate, "dd/MM/yyyy", { locale: ptBR })}
 						</Text>
+						<StyledIcon name="calendar" size={18} className="text-muted" />
 					</Pressable>
 				</TextField>
 			)}

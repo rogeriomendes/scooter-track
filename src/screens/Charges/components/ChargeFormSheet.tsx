@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs, type scooters } from "@/db/schema";
@@ -114,22 +115,24 @@ export function ChargeFormSheet({
 					<Label>Data</Label>
 					<Pressable
 						onPress={() => setShowDatePicker(true)}
-						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
 					>
-						<Text className="text-foreground text-base">
+						<Text className="text-foreground text-sm">
 							{format(date, "dd/MM/yyyy", { locale: ptBR })}
 						</Text>
+						<StyledIcon name="calendar" size={16} className="text-muted" />
 					</Pressable>
 				</TextField>
 				<TextField className="flex-1">
 					<Label>Hora</Label>
 					<Pressable
 						onPress={() => setShowTimePicker(true)}
-						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
 					>
-						<Text className="text-foreground text-base">
+						<Text className="text-foreground text-sm">
 							{format(date, "HH:mm", { locale: ptBR })}
 						</Text>
+						<StyledIcon name="clock" size={16} className="text-muted" />
 					</Pressable>
 				</TextField>
 			</View>
@@ -147,8 +150,7 @@ export function ChargeFormSheet({
 							if (scooter.trackingMode === "percent") {
 								setVoltage("100");
 							} else {
-								const maxV =
-									BATTERY_CHARTS[scooter.batteryType]?.maxVoltage;
+								const maxV = BATTERY_CHARTS[scooter.batteryType]?.maxVoltage;
 								if (maxV) setVoltage(maxV.toString());
 							}
 						}}
@@ -162,9 +164,8 @@ export function ChargeFormSheet({
 					placeholder={
 						scooter.trackingMode === "percent"
 							? "Ex: 100"
-							: BATTERY_CHARTS[
-									scooter.batteryType
-								]?.maxVoltage.toString() || "54.6"
+							: BATTERY_CHARTS[scooter.batteryType]?.maxVoltage.toString() ||
+								"54.6"
 					}
 					keyboardType="numeric"
 					value={voltage}
@@ -192,14 +193,8 @@ export function ChargeFormSheet({
 						<Button.Label className="text-danger">Excluir</Button.Label>
 					</Button>
 				)}
-				<Button
-					variant="primary"
-					className="flex-1"
-					onPress={handleSaveCharge}
-				>
-					<Button.Label>
-						{editItem ? "Salvar" : "Salvar Registro"}
-					</Button.Label>
+				<Button variant="primary" className="flex-1" onPress={handleSaveCharge}>
+					<Button.Label>{editItem ? "Salvar" : "Salvar Registro"}</Button.Label>
 				</Button>
 			</View>
 

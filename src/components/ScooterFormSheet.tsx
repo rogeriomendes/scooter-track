@@ -1,10 +1,3 @@
-import { AppBottomSheet } from "@/components/AppBottomSheet";
-import { BottomSheetInput } from "@/components/BottomSheetInput";
-import { StyledIcon } from "@/components/StyledIcon";
-import { BATTERY_CHARTS } from "@/constants/batteryCharts";
-import { db } from "@/db/client";
-import { scooters } from "@/db/schema";
-import { useAppStore } from "@/store/useAppStore";
 import DateTimePicker, {
 	type DateTimePickerChangeEvent,
 } from "@react-native-community/datetimepicker";
@@ -20,6 +13,13 @@ import { Label } from "heroui-native/label";
 import { TextField } from "heroui-native/text-field";
 import { useEffect, useState } from "react";
 import { Alert, Platform, Pressable, Switch, Text, View } from "react-native";
+import { AppBottomSheet } from "@/components/AppBottomSheet";
+import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
+import { BATTERY_CHARTS } from "@/constants/batteryCharts";
+import { db } from "@/db/client";
+import { scooters } from "@/db/schema";
+import { useAppStore } from "@/store/useAppStore";
 
 interface ScooterFormSheetProps {
 	isOpen: boolean;
@@ -274,11 +274,12 @@ export function ScooterFormSheet({
 				<Label>Data de Compra (opcional)</Label>
 				<Pressable
 					onPress={() => setShowDatePicker(true)}
-					className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+					className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-4 active:opacity-80"
 				>
-					<Text className="text-foreground text-base">
+					<Text className="text-foreground text-sm">
 						{format(purchaseDate, "dd/MM/yyyy", { locale: ptBR })}
 					</Text>
+					<StyledIcon name="calendar" size={18} className="text-muted" />
 				</Pressable>
 			</TextField>
 
@@ -313,7 +314,7 @@ export function ScooterFormSheet({
 			<View className="mt-2">
 				<Label className="mb-2">Nota Fiscal (PDF) (opcional)</Label>
 				{invoicePdfPath ? (
-					<View className="flex-row items-center bg-surface-secondary/60 p-3 rounded-2xl border border-surface-secondary">
+					<View className="flex-row items-center bg-surface/60 p-3 rounded-2xl border border-surface-secondary">
 						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center mr-3">
 							<StyledIcon name="file-text" size={18} className="text-success" />
 						</View>

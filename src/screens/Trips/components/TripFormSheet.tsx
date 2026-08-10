@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs, type scooters } from "@/db/schema";
@@ -133,22 +134,24 @@ export function TripFormSheet({
 					<Label>Data</Label>
 					<Pressable
 						onPress={() => setShowDatePicker(true)}
-						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
 					>
-						<Text className="text-foreground text-base">
+						<Text className="text-foreground text-sm">
 							{format(date, "dd/MM/yyyy", { locale: ptBR })}
 						</Text>
+						<StyledIcon name="calendar" size={16} className="text-muted" />
 					</Pressable>
 				</TextField>
 				<TextField className="flex-1">
 					<Label>Hora</Label>
 					<Pressable
 						onPress={() => setShowTimePicker(true)}
-						className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
+						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
 					>
-						<Text className="text-foreground text-base">
+						<Text className="text-foreground text-sm">
 							{format(date, "HH:mm", { locale: ptBR })}
 						</Text>
+						<StyledIcon name="clock" size={16} className="text-muted" />
 					</Pressable>
 				</TextField>
 			</View>
