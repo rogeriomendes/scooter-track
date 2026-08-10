@@ -43,6 +43,7 @@ export function ScooterFormSheet({
 	);
 	const [showMaintenance, setShowMaintenance] = useState(true);
 	const [initialKm, setInitialKm] = useState("0");
+	const [autonomyGoal, setAutonomyGoal] = useState("0");
 	const [purchaseDate, setPurchaseDate] = useState<Date>(new Date());
 	const [showDatePicker, setShowDatePicker] = useState(false);
 	const [serialNumber, setSerialNumber] = useState("");
@@ -59,6 +60,9 @@ export function ScooterFormSheet({
 				setTrackingMode(editItem.trackingMode as "voltage" | "percent");
 				setShowMaintenance(editItem.showMaintenance);
 				setInitialKm(editItem.initialKm.toString());
+				setAutonomyGoal(
+					editItem.autonomyGoal ? editItem.autonomyGoal.toString() : "0",
+				);
 				setPurchaseDate(editItem.purchaseDate || new Date());
 				setSerialNumber(editItem.serialNumber || "");
 				setMotorNumber(editItem.motorNumber || "");
@@ -69,6 +73,7 @@ export function ScooterFormSheet({
 				setTrackingMode("voltage");
 				setShowMaintenance(true);
 				setInitialKm("0");
+				setAutonomyGoal("0");
 				setPurchaseDate(new Date());
 				setSerialNumber("");
 				setMotorNumber("");
@@ -91,13 +96,14 @@ export function ScooterFormSheet({
 		try {
 			const result = await DocumentPicker.getDocumentAsync({
 				type: "application/pdf",
-				copyToCacheDirectory: false,
+				copyToCacheDirectory: true,
 			});
 
 			if (!result.canceled && result.assets && result.assets.length > 0) {
 				const pickedFile = result.assets[0];
 
-				const fileName = `invoice_${Date.now()}_${pickedFile.name}`;
+				const cleanFileName = pickedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+				const fileName = `invoice_${Date.now()}_${cleanFileName}`;
 				const destPath = `${FileSystem.documentDirectory}${fileName}`;
 
 				await FileSystem.copyAsync({
@@ -108,7 +114,7 @@ export function ScooterFormSheet({
 				setInvoicePdfPath(destPath);
 			}
 		} catch (error) {
-			Alert.alert("Erro", "Não foi possível selecionar o PDF.");
+			Alert.alert("Erro", "Não foi possível selecionar a Nota Fiscal em PDF.");
 		}
 	};
 
@@ -150,6 +156,7 @@ export function ScooterFormSheet({
 					trackingMode,
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
+					autonomyGoal: parseFloat(autonomyGoal) || 0,
 					purchaseDate,
 					serialNumber,
 					motorNumber,
@@ -165,6 +172,7 @@ export function ScooterFormSheet({
 					trackingMode,
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
+					autonomyGoal: parseFloat(autonomyGoal) || 0,
 					purchaseDate,
 					serialNumber,
 					motorNumber,
@@ -180,6 +188,7 @@ export function ScooterFormSheet({
 		}
 
 		setInitialKm("0");
+		setAutonomyGoal("0");
 		setSerialNumber("");
 		setMotorNumber("");
 		setInvoicePdfPath(null);
@@ -233,19 +242,36 @@ export function ScooterFormSheet({
 					</View>
 				</View>
 			)}
-			<TextField>
-				<Label>Odômetro Inicial (KM)</Label>
-				<BottomSheetInput
-					placeholder="0"
-					keyboardType="numeric"
-					value={initialKm}
-					onChangeText={setInitialKm}
-					variant="secondary"
-				/>
-			</TextField>
+			<View className="flex-row gap-3">
+				<View className="flex-1">
+					<TextField>
+						<Label>Odômetro (KM)</Label>
+						<BottomSheetInput
+							placeholder="0"
+							keyboardType="numeric"
+							value={initialKm}
+							onChangeText={setInitialKm}
+							variant="secondary"
+						/>
+					</TextField>
+				</View>
+
+				<View className="flex-1">
+					<TextField>
+						<Label>Autonomia (opcional)</Label>
+						<BottomSheetInput
+							placeholder="Ex: 50"
+							keyboardType="numeric"
+							value={autonomyGoal}
+							onChangeText={setAutonomyGoal}
+							variant="secondary"
+						/>
+					</TextField>
+				</View>
+			</View>
 
 			<TextField>
-				<Label>Data de Compra</Label>
+				<Label>Data de Compra (opcional)</Label>
 				<Pressable
 					onPress={() => setShowDatePicker(true)}
 					className="bg-surface-secondary h-12 rounded-xl justify-center px-4"
@@ -256,37 +282,41 @@ export function ScooterFormSheet({
 				</Pressable>
 			</TextField>
 
-			<TextField>
-				<Label>Número de Série / Chassi (Opcional)</Label>
-				<BottomSheetInput
-					placeholder="Ex: 9AABCD1234..."
-					value={serialNumber}
-					onChangeText={setSerialNumber}
-					variant="secondary"
-					autoCapitalize="characters"
-				/>
-			</TextField>
-
-			<TextField>
-				<Label>Número do Motor (Opcional)</Label>
-				<BottomSheetInput
-					placeholder="Ex: 60V1000W..."
-					value={motorNumber}
-					onChangeText={setMotorNumber}
-					variant="secondary"
-					autoCapitalize="characters"
-				/>
-			</TextField>
-
-			<View className="mt-2 mb-2">
-				<Label className="mb-2">Nota Fiscal (PDF)</Label>
-				{invoicePdfPath ? (
-					<View className="flex-row items-center bg-surface-secondary p-3 rounded-xl">
-						<StyledIcon
-							name="file-text"
-							size={24}
-							className="text-primary mr-3"
+			<View className="flex-row gap-3">
+				<View className="flex-1">
+					<TextField>
+						<Label>Nº Série / Chassi (opcional)</Label>
+						<BottomSheetInput
+							placeholder="Ex: 9AABCD..."
+							value={serialNumber}
+							onChangeText={setSerialNumber}
+							variant="secondary"
+							autoCapitalize="characters"
 						/>
+					</TextField>
+				</View>
+
+				<View className="flex-1">
+					<TextField>
+						<Label>Nº do Motor (opcional)</Label>
+						<BottomSheetInput
+							placeholder="Ex: 60V1000W..."
+							value={motorNumber}
+							onChangeText={setMotorNumber}
+							variant="secondary"
+							autoCapitalize="characters"
+						/>
+					</TextField>
+				</View>
+			</View>
+
+			<View className="mt-2">
+				<Label className="mb-2">Nota Fiscal (PDF) (opcional)</Label>
+				{invoicePdfPath ? (
+					<View className="flex-row items-center bg-surface-secondary/60 p-3 rounded-2xl border border-surface-secondary">
+						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center mr-3">
+							<StyledIcon name="file-text" size={18} className="text-success" />
+						</View>
 						<View className="flex-1">
 							<Text className="text-foreground font-bold text-sm">
 								Nota Fiscal Anexada
@@ -295,13 +325,13 @@ export function ScooterFormSheet({
 						<View className="flex-row gap-2">
 							<Pressable
 								onPress={viewInvoicePdf}
-								className="p-2 bg-primary/20 rounded-lg"
+								className="p-2 bg-success/15 rounded-lg active:opacity-70"
 							>
-								<StyledIcon name="eye" size={16} className="text-primary" />
+								<StyledIcon name="eye" size={16} className="text-success" />
 							</Pressable>
 							<Pressable
 								onPress={removeInvoicePdf}
-								className="p-2 bg-danger/20 rounded-lg"
+								className="p-2 bg-danger/15 rounded-lg active:opacity-70"
 							>
 								<StyledIcon name="trash-2" size={16} className="text-danger" />
 							</Pressable>
@@ -310,10 +340,10 @@ export function ScooterFormSheet({
 				) : (
 					<Button
 						variant="secondary"
-						className="border border-dashed border-muted/30"
+						className="bg-surface-secondary/60 border border-surface-secondary rounded-2xl"
 						onPress={pickInvoicePdf}
 					>
-						<View className="flex-row items-center gap-2">
+						<View className="flex-row items-center justify-center gap-2">
 							<StyledIcon name="upload" size={18} className="text-foreground" />
 							<Button.Label>Anexar Arquivo PDF</Button.Label>
 						</View>
@@ -332,7 +362,7 @@ export function ScooterFormSheet({
 					thumbColor="#ffffff"
 				/>
 			</View>
-			<View className="flex-row gap-2 mt-4 w-full">
+			<View className="flex-row gap-2 mt-2 w-full">
 				{editItem && onDeleteRequest && (
 					<Button
 						variant="secondary"

@@ -55,7 +55,7 @@ export function ScooterDetailsSheet({
 			onOpenChange={onOpenChange}
 			title="Dados da Scooter"
 		>
-			<View className="bg-surface-secondary/40 p-2 rounded-2xl border border-surface-secondary mb-4">
+			<View className="bg-surface-secondary/40 pl-2 rounded-2xl border border-surface-secondary mb-4">
 				<View className="flex-row items-center justify-between">
 					<Text className="text-xl font-bold text-foreground">
 						{scooter.name}
@@ -78,72 +78,94 @@ export function ScooterDetailsSheet({
 				</Text> */}
 			</View>
 
-			<View className="gap-3 mb-4">
-				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">
-						Total KM (Geral)
-					</Text>
-					<Text className="text-sm font-bold text-foreground">
-						{(totalKm ?? scooter.initialKm).toFixed(1)} km
-					</Text>
+			<View className="gap-2.5 mb-4">
+				{/* Linha 1: Total KM & Odômetro Inicial */}
+				<View className="flex-row gap-2.5">
+					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
+						<Text className="text-xs font-medium text-muted mb-1">
+							Total KM (Geral)
+						</Text>
+						<Text className="text-sm font-bold text-foreground">
+							{(totalKm ?? scooter.initialKm).toFixed(1)} km
+						</Text>
+					</View>
+
+					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
+						<Text className="text-xs font-medium text-muted mb-1">
+							Odômetro Inicial
+						</Text>
+						<Text className="text-sm font-bold text-foreground">
+							{scooter.initialKm} km
+						</Text>
+					</View>
 				</View>
 
-				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">
-						Odômetro Inicial
-					</Text>
-					<Text className="text-sm font-bold text-foreground">
-						{scooter.initialKm} km
-					</Text>
+				{/* Linha 2: Meta Autonomia & Data da Compra */}
+				<View className="flex-row gap-2.5">
+					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
+						<Text className="text-xs font-medium text-muted mb-1">
+							Meta Autonomia
+						</Text>
+						<Text className="text-sm font-bold text-foreground">
+							{scooter.autonomyGoal} km
+						</Text>
+					</View>
+
+					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
+						<Text className="text-xs font-medium text-muted mb-1">
+							Data da Compra
+						</Text>
+						<Text className="text-sm font-bold text-foreground">
+							{scooter.purchaseDate
+								? format(new Date(scooter.purchaseDate), "dd/MM/yyyy", {
+										locale: ptBR,
+									})
+								: "Não informada"}
+						</Text>
+					</View>
 				</View>
 
-				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">
-						Meta de Autonomia
-					</Text>
-					<Text className="text-sm font-bold text-foreground">
-						{scooter.autonomyGoal} km
-					</Text>
+				{/* Linha 3: Nº Série & Nº Motor */}
+				<View className="flex-row gap-2.5">
+					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
+						<Text className="text-xs font-medium text-muted mb-1">
+							Nº Série / Chassi
+						</Text>
+						<Text
+							className="text-sm font-bold text-foreground"
+							numberOfLines={1}
+						>
+							{scooter.serialNumber || "Não informado"}
+						</Text>
+					</View>
+
+					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
+						<Text className="text-xs font-medium text-muted mb-1">
+							Nº do Motor
+						</Text>
+						<Text
+							className="text-sm font-bold text-foreground"
+							numberOfLines={1}
+						>
+							{scooter.motorNumber || "Não informado"}
+						</Text>
+					</View>
 				</View>
 
-				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">Data da Compra</Text>
-					<Text className="text-sm font-bold text-foreground">
-						{scooter.purchaseDate
-							? format(new Date(scooter.purchaseDate), "dd/MM/yyyy", {
-									locale: ptBR,
-								})
-							: "Não informada"}
-					</Text>
-				</View>
-
-				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">
-						Número de Série / Chassi
-					</Text>
-					<Text className="text-sm font-bold text-foreground">
-						{scooter.serialNumber || "Não informado"}
-					</Text>
-				</View>
-
-				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">
-						Número do Motor
-					</Text>
-					<Text className="text-sm font-bold text-foreground">
-						{scooter.motorNumber || "Não informado"}
-					</Text>
-				</View>
-
-				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">Aba Manutenção</Text>
-					<Text
-						className={`text-sm font-bold ${
-							scooter.showMaintenance ? "text-success" : "text-muted"
-						}`}
-					>
-						{scooter.showMaintenance ? "Ativada" : "Oculta"}
-					</Text>
+				{/* Linha 4: Aba Manutenção */}
+				<View className="flex-row gap-2.5">
+					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary flex-row justify-between items-center">
+						<Text className="text-xs font-medium text-muted">
+							Aba Manutenção
+						</Text>
+						<Text
+							className={`text-xs font-bold ${
+								scooter.showMaintenance ? "text-success" : "text-muted"
+							}`}
+						>
+							{scooter.showMaintenance ? "Ativada" : "Oculta"}
+						</Text>
+					</View>
 				</View>
 			</View>
 
@@ -151,20 +173,20 @@ export function ScooterDetailsSheet({
 				<View className="mb-4">
 					<Pressable
 						onPress={viewInvoicePdf}
-						className="flex-row items-center bg-surface-secondary p-3.5 rounded-xl border border-primary/20"
+						className="flex-row items-center bg-surface/60 p-3.5 rounded-2xl active:opacity-80"
 					>
-						<StyledIcon
-							name="file-text"
-							size={22}
-							className="text-primary mr-3"
-						/>
+						<View className="w-10 h-10 rounded-xl bg-success/15 items-center justify-center mr-3">
+							<StyledIcon name="file-text" size={20} className="text-success" />
+						</View>
 						<View className="flex-1">
 							<Text className="text-foreground font-bold text-sm">
-								Visualizar Nota Fiscal (PDF)
+								Nota Fiscal (PDF)
 							</Text>
-							<Text className="text-muted text-xs">Clique para abrir</Text>
+							<Text className="text-muted text-xs font-medium">
+								Toque para abrir ou compartilhar
+							</Text>
 						</View>
-						<StyledIcon name="eye" size={18} className="text-primary" />
+						<StyledIcon name="eye" size={18} className="text-success" />
 					</Pressable>
 				</View>
 			)}

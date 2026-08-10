@@ -166,8 +166,8 @@ export function TripFormSheet({
 			<TextField>
 				<Label>
 					{scooter.trackingMode === "percent"
-						? "Nível da Bateria (%)"
-						: "Voltagem Final (V)"}
+						? "Nível da Bateria (%) (opcional)"
+						: "Voltagem Final (V) (opcional)"}
 				</Label>
 				<BottomSheetInput
 					placeholder={
