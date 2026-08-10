@@ -1,4 +1,3 @@
-import { StyledIcon } from "@/components/StyledIcon";
 import { format, isSameDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, Separator, useThemeColor } from "heroui-native";
@@ -13,6 +12,7 @@ import Svg, {
 	Stop,
 	Text as SvgText,
 } from "react-native-svg";
+import { StyledIcon } from "@/components/StyledIcon";
 
 type TripLog = {
 	date: Date;
@@ -246,7 +246,11 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 					</View>
 				</View>
 
-				<Separator orientation="vertical" thickness={1} className="h-full my-0.5" />
+				<Separator
+					orientation="vertical"
+					thickness={1}
+					className="h-full my-0.5"
+				/>
 
 				{/* DAILY AVERAGE */}
 				<View className="items-center justify-between px-1 py-0.5">

@@ -1,12 +1,12 @@
+import { AppBottomSheet } from "@/components/AppBottomSheet";
+import { StyledIcon } from "@/components/StyledIcon";
+import { BATTERY_CHARTS } from "@/constants/batteryCharts";
+import type { scooters } from "@/db/schema";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import * as Sharing from "expo-sharing";
 import { Button } from "heroui-native";
 import { Alert, Pressable, Text, View } from "react-native";
-import { AppBottomSheet } from "@/components/AppBottomSheet";
-import { StyledIcon } from "@/components/StyledIcon";
-import { BATTERY_CHARTS } from "@/constants/batteryCharts";
-import type { scooters } from "@/db/schema";
 
 interface ScooterDetailsSheetProps {
 	isOpen: boolean;
@@ -55,8 +55,8 @@ export function ScooterDetailsSheet({
 			onOpenChange={onOpenChange}
 			title="Dados da Scooter"
 		>
-			<View className="bg-surface-secondary/40 p-4 rounded-2xl border border-surface-secondary mb-4">
-				<View className="flex-row items-center justify-between mb-2">
+			<View className="bg-surface-secondary/40 p-2 rounded-2xl border border-surface-secondary mb-4">
+				<View className="flex-row items-center justify-between">
 					<Text className="text-xl font-bold text-foreground">
 						{scooter.name}
 					</Text>
@@ -68,33 +68,39 @@ export function ScooterDetailsSheet({
 						</Text>
 					</View>
 				</View>
-				<Text className="text-xs text-muted">
+				{/* <Text className="text-xs text-muted mt-2">
 					Cadastrada em{" "}
 					{scooter.createdAt
 						? format(new Date(scooter.createdAt), "dd/MM/yyyy", {
 								locale: ptBR,
 							})
 						: "-"}
-				</Text>
+				</Text> */}
 			</View>
 
 			<View className="gap-3 mb-4">
 				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">Total KM (Geral)</Text>
+					<Text className="text-sm font-medium text-muted">
+						Total KM (Geral)
+					</Text>
 					<Text className="text-sm font-bold text-foreground">
 						{(totalKm ?? scooter.initialKm).toFixed(1)} km
 					</Text>
 				</View>
 
 				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">Odômetro Inicial</Text>
+					<Text className="text-sm font-medium text-muted">
+						Odômetro Inicial
+					</Text>
 					<Text className="text-sm font-bold text-foreground">
 						{scooter.initialKm} km
 					</Text>
 				</View>
 
 				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">Meta de Autonomia</Text>
+					<Text className="text-sm font-medium text-muted">
+						Meta de Autonomia
+					</Text>
 					<Text className="text-sm font-bold text-foreground">
 						{scooter.autonomyGoal} km
 					</Text>
@@ -121,7 +127,9 @@ export function ScooterDetailsSheet({
 				</View>
 
 				<View className="flex-row justify-between items-center bg-surface p-3 rounded-xl border border-surface-secondary">
-					<Text className="text-sm font-medium text-muted">Número do Motor</Text>
+					<Text className="text-sm font-medium text-muted">
+						Número do Motor
+					</Text>
 					<Text className="text-sm font-bold text-foreground">
 						{scooter.motorNumber || "Não informado"}
 					</Text>
