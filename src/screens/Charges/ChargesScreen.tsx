@@ -67,6 +67,44 @@ export default function ChargesScreen() {
 		null,
 	);
 
+	const chargeGainMap = useMemo(() => {
+		const map = new Map<number, { initialPct: number; gainedPct: number }>();
+		if (!scooter) return map;
+		const ascLogs = [...allLogs].sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+		);
+
+		let prevBatteryLevel: number | null = null;
+
+		for (const log of ascLogs) {
+			if (log.type === "charge") {
+				if (prevBatteryLevel !== null && log.batteryLevel > prevBatteryLevel) {
+					let prevPct = prevBatteryLevel;
+					let currPct = log.batteryLevel;
+					if (scooter.trackingMode === "voltage") {
+						prevPct = calculateBatteryPercentage(
+							prevBatteryLevel,
+							scooter.batteryType,
+						);
+						currPct = calculateBatteryPercentage(
+							log.batteryLevel,
+							scooter.batteryType,
+						);
+					}
+					const gainedPct = Math.max(0, Math.round(currPct - prevPct));
+					map.set(log.id, {
+						initialPct: Math.round(prevPct),
+						gainedPct,
+					});
+				}
+				prevBatteryLevel = log.batteryLevel;
+			} else if (log.type === "trip") {
+				prevBatteryLevel = log.batteryLevel;
+			}
+		}
+		return map;
+	}, [allLogs, scooter]);
+
 	const handleDelete = async (id: number) => {
 		await db.delete(logs).where(eq(logs.id, id));
 		refresh();
@@ -113,98 +151,85 @@ export default function ChargesScreen() {
 				</Animated.Text>
 			</View>
 
-			{/* ESTATÍSTICAS RÁPIDAS */}
+			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="flex-row items-center px-4 mb-4 mt-2"
+				className="px-4 mb-3 mt-1 gap-2"
 			>
-				{/* MES ATUAL */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon name="zap" size={16} className="mb-2 text-info" />
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{chargesList.length}
-						</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
-						Mês Atual
-					</Text>
+				<View className="flex-row gap-2">
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
+							<StyledIcon name="zap" size={18} className="text-info" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Mês Atual
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{chargesList.length}{" "}
+								<Text className="text-xs font-bold text-muted">cargas</Text>
+							</Text>
+						</View>
+					</Card>
+
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
+							<StyledIcon name="navigation" size={18} className="text-success" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Média / Ciclo
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{stats?.averageCycleKm.toFixed(1) || "0.0"}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
+					</Card>
 				</View>
 
-				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+				<View className="flex-row gap-2">
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
+							<StyledIcon name="trending-up" size={18} className="text-warning" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Melhor Ciclo
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{stats?.bestCycleKm.toFixed(1) || "0.0"}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
+					</Card>
 
-				{/* MEDIA/CICLO */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon
-						name="navigation"
-						size={16}
-						className="mb-2 text-success"
-					/>
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{stats?.averageCycleKm.toFixed(1) || "0.0"}
-						</Text>
-						<Text className="font-bold text-muted text-[10px]">km</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
-						Média/Ciclo
-					</Text>
-				</View>
-
-				<Separator orientation="vertical" thickness={1} className="h-10/12" />
-
-				{/* MELHOR CICLO */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon
-						name="trending-up"
-						size={16}
-						className="mb-2 text-warning"
-					/>
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{stats?.bestCycleKm.toFixed(1) || "0.0"}
-						</Text>
-						<Text className="font-bold text-muted text-[10px]">km</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
-						Melhor Ciclo
-					</Text>
-				</View>
-
-				<Separator orientation="vertical" thickness={1} className="h-10/12" />
-
-				{/* PIOR CICLO */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon
-						name="trending-down"
-						size={16}
-						className="mb-2 text-danger"
-					/>
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{stats?.worstCycleKm.toFixed(1) || "0.0"}
-						</Text>
-						<Text className="font-bold text-muted text-[10px]">km</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
-						Pior Ciclo
-					</Text>
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-danger/15 items-center justify-center">
+							<StyledIcon name="trending-down" size={18} className="text-danger" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Pior Ciclo
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{stats?.worstCycleKm.toFixed(1) || "0.0"}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
+					</Card>
 				</View>
 			</Animated.View>
 
@@ -258,6 +283,7 @@ export default function ChargesScreen() {
 				renderItem={({ item, index }) => {
 					const cycle = stats?.cycles.find((c) => c.chargeLog.id === item.id);
 					const autonomia = cycle ? cycle.distance.toFixed(1) : "0.0";
+					const gain = chargeGainMap.get(item.id);
 
 					return (
 						<Animated.View
@@ -299,18 +325,33 @@ export default function ChargesScreen() {
 														</Text>
 													)}
 												</View>
-												<View className="flex-row items-center gap-1.5 mt-0.5">
-													<StyledIcon
-														name="navigation"
-														size={10}
-														className="text-success"
-													/>
-													<Text className="text-xs font-bold text-muted">
-														Recuperou:{" "}
-														<Text className="text-success">
-															+{autonomia} km
+												<View className="flex-row items-center gap-2 mt-0.5 flex-wrap">
+													<View className="flex-row items-center gap-1">
+														<StyledIcon
+															name="navigation"
+															size={10}
+															className="text-success"
+														/>
+														<Text className="text-xs font-bold text-muted">
+															Ciclo:{" "}
+															<Text className="text-success font-black">
+																+{autonomia} km
+															</Text>
 														</Text>
-													</Text>
+													</View>
+
+													{gain && gain.gainedPct > 0 && (
+														<View className="bg-success/10 px-2 py-0.5 rounded-full border border-success/20 flex-row items-center gap-0.5">
+															<StyledIcon
+																name="trending-up"
+																size={10}
+																className="text-success"
+															/>
+															<Text className="text-[10px] font-bold text-success">
+																+{gain.gainedPct}% ({gain.initialPct}% ➔ {scooter.trackingMode === "percent" ? item.batteryLevel : calculateBatteryPercentage(item.batteryLevel, scooter.batteryType)}%)
+															</Text>
+														</View>
+													)}
 												</View>
 											</View>
 										</View>

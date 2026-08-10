@@ -110,6 +110,44 @@ export default function TripsScreen() {
 		null,
 	);
 
+	const tripConsumptionMap = useMemo(() => {
+		const map = new Map<number, { consumedPct: number; consumedValue: number }>();
+		if (!scooter) return map;
+		const ascLogs = [...allLogs].sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+		);
+
+		let prevBatteryLevel: number | null = null;
+
+		for (const log of ascLogs) {
+			if (log.type === "trip") {
+				if (prevBatteryLevel !== null && prevBatteryLevel > log.batteryLevel) {
+					const diff = prevBatteryLevel - log.batteryLevel;
+					let consumedPct = diff;
+					if (scooter.trackingMode === "voltage") {
+						const prevPct = calculateBatteryPercentage(
+							prevBatteryLevel,
+							scooter.batteryType,
+						);
+						const currPct = calculateBatteryPercentage(
+							log.batteryLevel,
+							scooter.batteryType,
+						);
+						consumedPct = Math.max(0, prevPct - currPct);
+					}
+					map.set(log.id, {
+						consumedPct: Math.round(consumedPct),
+						consumedValue: diff,
+					});
+				}
+				prevBatteryLevel = log.batteryLevel;
+			} else if (log.type === "charge") {
+				prevBatteryLevel = log.batteryLevel;
+			}
+		}
+		return map;
+	}, [allLogs, scooter]);
+
 	const handleDelete = async (id: number) => {
 		await db.delete(logs).where(eq(logs.id, id));
 		refresh();
@@ -156,87 +194,84 @@ export default function TripsScreen() {
 				</Animated.Text>
 			</View>
 
-			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD) */}
+			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="flex-row items-center px-4 mb-4 mt-2"
+				className="px-4 mb-3 mt-1 gap-2"
 			>
-				{/* TOTAL */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon name="map-pin" size={16} className="mb-2 text-info" />
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{dashboardStats.totalKm.toFixed(1)}
-						</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1">
-						Total
-					</Text>
+				<View className="flex-row gap-2">
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
+							<StyledIcon name="map-pin" size={18} className="text-info" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Total Mês
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{dashboardStats.totalKm.toFixed(1)}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
+					</Card>
+
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center">
+							<StyledIcon name="bar-chart-2" size={18} className="text-primary" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Média / Dia
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{dashboardStats.avgKm.toFixed(1)}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
+					</Card>
 				</View>
 
-				<Separator orientation="vertical" thickness={1} className="h-10/12" />
+				<View className="flex-row gap-2">
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
+							<StyledIcon name="award" size={18} className="text-warning" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Recorde
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{dashboardStats.maxKm.toFixed(1)}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
+					</Card>
 
-				{/* MEDIA DIA */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon
-						name="bar-chart-2"
-						size={16}
-						className="mb-2 text-foreground"
-					/>
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{dashboardStats.avgKm.toFixed(1)}
-						</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
-						Média/Dia
-					</Text>
-				</View>
-
-				<Separator orientation="vertical" thickness={1} className="h-10/12" />
-
-				{/* MAIOR VIAGEM */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon name="award" size={16} className="mb-2 text-warning" />
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{dashboardStats.maxKm.toFixed(1)}
-						</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
-						Recorde
-					</Text>
-				</View>
-
-				<Separator orientation="vertical" thickness={1} className="h-10/12" />
-
-				{/* QTD VIAGENS */}
-				<View className="flex-1 items-center justify-center py-2">
-					<StyledIcon name="hash" size={16} className="mb-2 text-success" />
-					<View className="flex-row items-baseline gap-1">
-						<Text
-							className="text-lg font-black text-foreground"
-							numberOfLines={1}
-							adjustsFontSizeToFit
-						>
-							{dashboardStats.tripCount}
-						</Text>
-					</View>
-					<Text className="text-[9px] uppercase font-bold text-muted tracking-wider mt-1 text-center leading-2.5">
-						Viagens
-					</Text>
+					<Card
+						variant="secondary"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					>
+						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
+							<StyledIcon name="hash" size={18} className="text-success" />
+						</View>
+						<View className="flex-1">
+							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+								Viagens
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{dashboardStats.tripCount}
+							</Text>
+						</View>
+					</Card>
 				</View>
 			</Animated.View>
 
@@ -289,81 +324,100 @@ export default function TripsScreen() {
 					</View>
 				}
 				renderSectionHeader={({ section: { title } }) => (
-					<View className="bg-background/90">
+					<View className="bg-background/90 py-1">
 						<Text className="text-xs font-black text-muted uppercase tracking-widest">
 							{title}
 						</Text>
 					</View>
 				)}
-				renderItem={({ item, index }) => (
-					<Animated.View entering={FadeInRight.delay(index * 50).springify()}>
-						<Card
-							variant="secondary"
-							className="border border-surface-secondary bg-surface shadow-sm p-0"
-						>
-							<Pressable className="py-4 px-4" onPress={() => handleEdit(item)}>
-								<View className="flex-row items-start justify-between">
-									<View className="flex-row items-start gap-3 flex-1">
-										<View className="bg-success/10 p-2.5 rounded-xl border border-success/20 mt-0.5">
-											<StyledIcon
-												name="map-pin"
-												size={18}
-												className="text-success"
-											/>
-										</View>
-										<View className="flex-1">
-											<View className="flex-row items-baseline gap-1">
-												<Text className="text-lg font-black text-foreground">
-													{item.distance.toFixed(1)}
-												</Text>
-												<Text className="font-bold text-muted text-xs">km</Text>
-											</View>
-											<View className="flex-row items-center gap-1.5 mt-0.5">
+				renderItem={({ item, index }) => {
+					const consumption = tripConsumptionMap.get(item.id);
+
+					return (
+						<Animated.View entering={FadeInRight.delay(index * 50).springify()}>
+							<Card
+								variant="secondary"
+								className="border border-surface-secondary bg-surface shadow-sm p-0"
+							>
+								<Pressable className="py-4 px-4" onPress={() => handleEdit(item)}>
+									<View className="flex-row items-start justify-between">
+										<View className="flex-row items-start gap-3 flex-1">
+											<View className="bg-success/10 p-2.5 rounded-xl border border-success/20 mt-0.5">
 												<StyledIcon
-													name="battery"
-													size={10}
-													className="text-muted"
+													name="map-pin"
+													size={18}
+													className="text-success"
 												/>
-												<Text className="text-xs font-bold text-muted">
-													Bateria final:{" "}
-													<Text className="text-foreground">
-														{item.batteryLevel}
-														{scooter.trackingMode === "percent" ? "%" : "V"}
-													</Text>
-													{scooter.trackingMode === "voltage" && (
-														<Text className="font-bold text-muted text-xs ml-1">
-															{" "}
-															(
-															{calculateBatteryPercentage(
-																item.batteryLevel,
-																scooter.batteryType,
-															)}
-															%)
-														</Text>
-													)}
-												</Text>
 											</View>
+											<View className="flex-1">
+												<View className="flex-row items-baseline gap-1">
+													<Text className="text-lg font-black text-foreground">
+														{item.distance.toFixed(1)}
+													</Text>
+													<Text className="font-bold text-muted text-xs">km</Text>
+												</View>
+												<View className="flex-row items-center gap-2 mt-0.5 flex-wrap">
+													<View className="flex-row items-center gap-1">
+														<StyledIcon
+															name="battery"
+															size={10}
+															className="text-muted"
+														/>
+														<Text className="text-xs font-bold text-muted">
+															Final:{" "}
+															<Text className="text-foreground">
+																{item.batteryLevel}
+																{scooter.trackingMode === "percent" ? "%" : "V"}
+															</Text>
+															{scooter.trackingMode === "voltage" && (
+																<Text className="font-bold text-muted text-xs ml-1">
+																	{" "}
+																	(
+																	{calculateBatteryPercentage(
+																		item.batteryLevel,
+																		scooter.batteryType,
+																	)}
+																	%)
+																</Text>
+															)}
+														</Text>
+													</View>
+
+													{consumption && consumption.consumedPct > 0 && (
+														<View className="bg-danger/10 px-2 py-0.5 rounded-full border border-danger/20 flex-row items-center gap-0.5">
+															<StyledIcon
+																name="trending-down"
+																size={10}
+																className="text-danger"
+															/>
+															<Text className="text-[10px] font-bold text-danger">
+																-{consumption.consumedPct}%
+															</Text>
+														</View>
+													)}
+												</View>
+											</View>
+										</View>
+
+										<View className="items-end">
+											<Text className="text-[10px] text-muted font-bold uppercase tracking-widest">
+												{format(item.date, "HH:mm", { locale: ptBR })}
+											</Text>
 										</View>
 									</View>
 
-									<View className="items-end">
-										<Text className="text-[10px] text-muted font-bold uppercase tracking-widest">
-											{format(item.date, "HH:mm", { locale: ptBR })}
-										</Text>
-									</View>
-								</View>
-
-								{item.notes ? (
-									<View className="mt-3 pl-11.5">
-										<Text className="text-xs text-muted italic">
-											"{item.notes}"
-										</Text>
-									</View>
-								) : null}
-							</Pressable>
-						</Card>
-					</Animated.View>
-				)}
+									{item.notes ? (
+										<View className="mt-3 pl-11.5">
+											<Text className="text-xs text-muted italic">
+												"{item.notes}"
+											</Text>
+										</View>
+									) : null}
+								</Pressable>
+							</Card>
+						</Animated.View>
+					);
+				}}
 			/>
 
 			{/* FLOATING ACTION PILL */}
