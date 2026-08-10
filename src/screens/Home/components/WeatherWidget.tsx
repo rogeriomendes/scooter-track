@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { Popover } from "heroui-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -37,6 +38,39 @@ function getWeatherInfo(code: number, isDay: number) {
 		text: "Bom para pilotar",
 		color: "text-success",
 	};
+}
+
+function WeatherMetricChip({
+	icon,
+	value,
+	color,
+	tooltip,
+}: {
+	icon: StyledIcon;
+	value: string;
+	color: string;
+	tooltip: string;
+}) {
+	return (
+		<Popover>
+			<Popover.Trigger>
+				<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
+					<StyledIcon name={icon} size={12} className={color} />
+					<Text className="text-[11px] font-bold text-muted">{value}</Text>
+				</View>
+			</Popover.Trigger>
+			<Popover.Portal>
+				<Popover.Content
+					presentation="popover"
+					placement="top"
+					className="bg-surface border border-border rounded-lg px-3 py-2"
+				>
+					<Popover.Arrow />
+					<Text className="text-xs font-medium text-foreground">{tooltip}</Text>
+				</Popover.Content>
+			</Popover.Portal>
+		</Popover>
+	);
 }
 
 export function WeatherWidget() {
@@ -142,33 +176,32 @@ export function WeatherWidget() {
 
 			<View className="flex-row gap-1">
 				<View className="gap-1">
-					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
-						<StyledIcon name="cloud-rain" size={12} className="text-info" />
-						<Text className="text-[11px] font-bold text-muted">
-							{weather.precipitation_probability}%
-						</Text>
-					</View>
-
-					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
-						<StyledIcon name="droplet" size={12} className="text-info" />
-						<Text className="text-[11px] font-bold text-muted">
-							{weather.relative_humidity_2m}%
-						</Text>
-					</View>
+					<WeatherMetricChip
+						icon="cloud-rain"
+						color="text-info"
+						value={`${weather.precipitation_probability}%`}
+						tooltip="Probabilidade de Chuva"
+					/>
+					<WeatherMetricChip
+						icon="droplet"
+						color="text-info"
+						value={`${weather.relative_humidity_2m}%`}
+						tooltip="Umidade do Ar"
+					/>
 				</View>
 				<View className="gap-1">
-					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
-						<StyledIcon name="wind" size={12} className="text-warning" />
-						<Text className="text-[11px] font-bold text-muted">
-							{weather.wind_gusts_10m} km/h
-						</Text>
-					</View>
-					<View className="flex-row items-center justify-start gap-1.5 px-2 py-1">
-						<StyledIcon name="wind" size={12} className="text-muted" />
-						<Text className="text-[11px] font-bold text-muted">
-							{weather.wind_speed_10m} km/h
-						</Text>
-					</View>
+					<WeatherMetricChip
+						icon="wind"
+						color="text-warning"
+						value={`${weather.wind_gusts_10m} km/h`}
+						tooltip="Rajadas de Vento"
+					/>
+					<WeatherMetricChip
+						icon="wind"
+						color="text-muted"
+						value={`${weather.wind_speed_10m} km/h`}
+						tooltip="Velocidade do Vento"
+					/>
 				</View>
 			</View>
 		</Animated.View>
