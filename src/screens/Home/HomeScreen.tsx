@@ -18,6 +18,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScooterDetailsSheet } from "@/components/ScooterDetailsSheet";
 import { ScooterFormSheet } from "@/components/ScooterFormSheet";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
@@ -38,7 +39,11 @@ export default function DashboardScreen() {
 	const router = useRouter();
 	const [isPickerOpen, setIsPickerOpen] = useState(false);
 	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 	const [isAddingNew, setIsAddingNew] = useState(false);
+	const [editingScooter, setEditingScooter] = useState<
+		typeof scooters.$inferSelect | null
+	>(null);
 	const [scooterToDelete, setScooterToDelete] = useState<number | null>(null);
 
 	const { scooter, allLogs, maintenanceList, stats, totalScooters, isLoading } =
@@ -200,11 +205,21 @@ export default function DashboardScreen() {
 								variant="secondary"
 								className="rounded-full bg-surface-secondary/50 backdrop-blur-md border-transparent"
 								onPress={() => {
-									setIsAddingNew(false);
-									setIsFormOpen(true);
+									setIsDetailsOpen(true);
 								}}
 							>
-								<StyledIcon name="edit-2" size={18} className="text-muted" />
+								<StyledIcon name="file-text" size={18} className="text-muted" />
+							</Button>
+							<Button
+								size="sm"
+								isIconOnly
+								variant="secondary"
+								className="rounded-full bg-surface-secondary/50 backdrop-blur-md border-transparent"
+								onPress={() => {
+									router.push("/settings");
+								}}
+							>
+								<StyledIcon name="settings" size={18} className="text-muted" />
 							</Button>
 						</View>
 					</View>
@@ -446,13 +461,33 @@ export default function DashboardScreen() {
 					setIsAddingNew(true);
 					setIsFormOpen(true);
 				}}
+				onEditRequest={(itemToEdit) => {
+					setEditingScooter(itemToEdit);
+					setIsAddingNew(false);
+					setIsFormOpen(true);
+				}}
+			/>
+
+			<ScooterDetailsSheet
+				isOpen={isDetailsOpen}
+				onOpenChange={setIsDetailsOpen}
+				scooter={scooter}
+				totalKm={stats?.totalKm}
+				onEditRequest={() => {
+					setEditingScooter(scooter);
+					setIsAddingNew(false);
+					setIsFormOpen(true);
+				}}
 			/>
 
 			<ScooterFormSheet
 				isOpen={isFormOpen}
 				onOpenChange={setIsFormOpen}
-				editItem={isAddingNew ? null : scooter}
-				onSaved={() => triggerRefresh()}
+				editItem={isAddingNew ? null : (editingScooter || scooter)}
+				onSaved={() => {
+					setEditingScooter(null);
+					triggerRefresh();
+				}}
 				onDeleteRequest={(id) => {
 					setIsFormOpen(false);
 					setScooterToDelete(id);

@@ -1,3 +1,4 @@
+import { StyledIcon } from "@/components/StyledIcon";
 import { format, isSameDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, Separator, useThemeColor } from "heroui-native";
@@ -12,7 +13,6 @@ import Svg, {
 	Stop,
 	Text as SvgText,
 } from "react-native-svg";
-import { StyledIcon } from "@/components/StyledIcon";
 
 type TripLog = {
 	date: Date;
@@ -146,7 +146,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 			</View>
 
 			{/* GRAPH + STATS ROW */}
-			<View className="flex-row items-center gap-3">
+			<View className="flex-row items-stretch gap-3">
 				{/* SPARKLINE */}
 				<View className="flex-1">
 					<View className="flex-row justify-between items-center mb-2">
@@ -246,26 +246,28 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 					</View>
 				</View>
 
-				<Separator orientation="vertical" thickness={1} className="h-12" />
+				<Separator orientation="vertical" thickness={1} className="h-full my-0.5" />
 
 				{/* DAILY AVERAGE */}
-				<View className="items-center justify-center px-1">
-					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">
+				<View className="items-center justify-between px-1 py-0.5">
+					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">
 						Média / Dia
 					</Text>
-					<View className="flex-row items-baseline gap-0.5 mb-0.5">
-						<Text className="text-xl font-black text-foreground">
-							{dailyAverage.toFixed(1)}
+					<View className="items-center">
+						<View className="flex-row items-baseline gap-0.5 mb-0.5">
+							<Text className="text-xl font-black text-foreground">
+								{dailyAverage.toFixed(1)}
+							</Text>
+							<Text className="text-[10px] text-muted font-bold">km</Text>
+						</View>
+						<Text className="text-[9px] text-muted font-bold text-center">
+							{activeDaysCount === 0
+								? "sem uso"
+								: activeDaysCount === 1
+									? "em 1 dia rodado"
+									: `em ${activeDaysCount} dias rodados`}
 						</Text>
-						<Text className="text-[10px] text-muted font-bold">km</Text>
 					</View>
-					<Text className="text-[9px] text-muted font-bold text-center">
-						{activeDaysCount === 0
-							? "sem uso"
-							: activeDaysCount === 1
-								? "em 1 dia rodado"
-								: `em ${activeDaysCount} dias rodados`}
-					</Text>
 				</View>
 			</View>
 		</Card>

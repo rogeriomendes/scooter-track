@@ -1,5 +1,5 @@
 import SettingsScreen from "@/screens/Settings/SettingsScreen";
 
-export default function Tab() {
+export default function SettingsRoute() {
 	return <SettingsScreen />;
 }

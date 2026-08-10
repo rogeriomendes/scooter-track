@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
@@ -14,6 +15,7 @@ import { logs, scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
 
 export default function SettingsScreen() {
+	const router = useRouter();
 	const { theme, setTheme, setActiveScooterId, triggerRefresh } = useAppStore();
 
 	const [isClearAllDialogOpen, setIsClearAllDialogOpen] = useState(false);
@@ -68,9 +70,24 @@ export default function SettingsScreen() {
 
 	return (
 		<ScreenWrapper scrollable contentContainerClassName="p-4 pb-10">
-			<Text className="text-3xl font-bold text-foreground mb-4">
-				Configurações
-			</Text>
+			<View className="flex-row items-center gap-3 mb-6">
+				<Pressable
+					onPress={() => {
+						if (router.canGoBack()) {
+							router.back();
+						} else {
+							router.replace("/");
+						}
+					}}
+					className="p-2.5 rounded-xl bg-surface-secondary/80 active:bg-surface-secondary"
+					hitSlop={8}
+				>
+					<StyledIcon name="arrow-left" size={20} className="text-foreground" />
+				</Pressable>
+				<Text className="text-2xl font-bold text-foreground">
+					Configurações
+				</Text>
+			</View>
 
 			{/* APARÊNCIA - Segmented Control */}
 			<Animated.View entering={FadeInDown.delay(100).springify()}>

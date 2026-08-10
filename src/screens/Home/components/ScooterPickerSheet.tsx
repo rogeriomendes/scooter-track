@@ -10,12 +10,14 @@ interface ScooterPickerSheetProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 	onAddRequest?: () => void;
+	onEditRequest?: (item: typeof scooters.$inferSelect) => void;
 }
 
 export function ScooterPickerSheet({
 	isOpen,
 	onOpenChange,
 	onAddRequest,
+	onEditRequest,
 }: ScooterPickerSheetProps) {
 	const { activeScooterId, setActiveScooterId } = useAppStore();
 	const [scootersList, setScootersList] = useState<
@@ -42,7 +44,6 @@ export function ScooterPickerSheet({
 			isOpen={isOpen}
 			onOpenChange={onOpenChange}
 			title="Trocar de Scooter"
-			// snapPoints={["60%"]}
 		>
 			{scootersList.map((item) => {
 				const isActive = activeScooterId === item.id;
@@ -56,7 +57,7 @@ export function ScooterPickerSheet({
 								: "border-surface-secondary bg-surface"
 						}`}
 					>
-						<View className="flex-row items-center gap-3">
+						<View className="flex-row items-center gap-3 flex-1">
 							<View
 								className={`p-2.5 rounded-xl ${
 									isActive ? "bg-success" : "bg-surface-secondary"
@@ -68,7 +69,7 @@ export function ScooterPickerSheet({
 									className={isActive ? "text-white" : "text-muted"}
 								/>
 							</View>
-							<View>
+							<View className="flex-1">
 								<Text className="text-base font-bold text-foreground">
 									{item.name}
 								</Text>
@@ -80,13 +81,33 @@ export function ScooterPickerSheet({
 							</View>
 						</View>
 
-						{isActive && (
-							<StyledIcon
-								name="check-circle"
-								size={20}
-								className="text-success"
-							/>
-						)}
+						<View className="flex-row items-center gap-2">
+							{onEditRequest && (
+								<Pressable
+									onPress={(e) => {
+										e.stopPropagation();
+										onOpenChange(false);
+										onEditRequest(item);
+									}}
+									className="p-2 rounded-xl bg-surface-secondary/80 active:bg-surface-secondary"
+									hitSlop={8}
+								>
+									<StyledIcon
+										name="edit-2"
+										size={16}
+										className="text-foreground"
+									/>
+								</Pressable>
+							)}
+
+							{isActive && (
+								<StyledIcon
+									name="check-circle"
+									size={20}
+									className="text-success"
+								/>
+							)}
+						</View>
 					</Pressable>
 				);
 			})}
