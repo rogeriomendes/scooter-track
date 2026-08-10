@@ -15,7 +15,9 @@ import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
-import { Button, Label, TextField } from "heroui-native";
+import { Button } from "heroui-native/button";
+import { Label } from "heroui-native/label";
+import { TextField } from "heroui-native/text-field";
 import { useEffect, useState } from "react";
 import { Alert, Platform, Pressable, Switch, Text, View } from "react-native";
 

@@ -1,5 +1,5 @@
 import * as Location from "expo-location";
-import { Popover } from "heroui-native";
+import { Popover } from "heroui-native/popover";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";

@@ -1,6 +1,8 @@
 import { format, isSameDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Card, Separator, useThemeColor } from "heroui-native";
+import { useThemeColor } from "heroui-native";
+import { Card } from "heroui-native/card";
+import { Separator } from "heroui-native/separator";
 import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Svg, {

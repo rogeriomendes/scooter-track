@@ -2,7 +2,7 @@ import { addMonths, differenceInDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
-import { Button } from "heroui-native";
+import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useState } from "react";
 import {

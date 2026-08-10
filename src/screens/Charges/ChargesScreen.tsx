@@ -1,8 +1,9 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
-import { Button, Separator } from "heroui-native";
+import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
+import { Separator } from "heroui-native/separator";
 import { useMemo, useState } from "react";
 import {
 	ActivityIndicator,
