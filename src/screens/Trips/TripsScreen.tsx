@@ -295,7 +295,7 @@ export default function TripsScreen() {
 			<SectionList
 				sections={groupedTrips}
 				keyExtractor={(item) => item.id.toString()}
-				contentContainerClassName="px-4 pb-24 gap-3 pt-2"
+				contentContainerClassName="px-4 pb-24 gap-2 pt-1"
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => {
 					if (displayedTrips.length < tripsList.length) {
@@ -306,7 +306,7 @@ export default function TripsScreen() {
 				ListHeaderComponent={null}
 				ListFooterComponent={
 					displayedTrips.length < tripsList.length ? (
-						<ActivityIndicator size="small" color="#10b981" className="py-4" />
+						<ActivityIndicator size="small" color="#10b981" className="py-3" />
 					) : null
 				}
 				ListEmptyComponent={
@@ -324,8 +324,9 @@ export default function TripsScreen() {
 					</View>
 				}
 				renderSectionHeader={({ section: { title } }) => (
-					<View className="bg-background/90 py-1">
-						<Text className="text-xs font-black text-muted uppercase tracking-widest">
+					<View className="bg-background/95 py-1.5 flex-row items-center gap-1.5">
+						<View className="w-1.5 h-1.5 rounded-full bg-success" />
+						<Text className="text-[11px] font-bold text-muted capitalize">
 							{title}
 						</Text>
 					</View>
@@ -334,24 +335,24 @@ export default function TripsScreen() {
 					const consumption = tripConsumptionMap.get(item.id);
 
 					return (
-						<Animated.View entering={FadeInRight.delay(index * 50).springify()}>
+						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
 							<Card
 								variant="secondary"
-								className="border border-surface-secondary bg-surface shadow-sm p-0"
+								className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
 							>
-								<Pressable className="py-4 px-4" onPress={() => handleEdit(item)}>
-									<View className="flex-row items-start justify-between">
-										<View className="flex-row items-start gap-3 flex-1">
-											<View className="bg-success/10 p-2.5 rounded-xl border border-success/20 mt-0.5">
+								<Pressable className="py-2.5 px-3" onPress={() => handleEdit(item)}>
+									<View className="flex-row items-center justify-between">
+										<View className="flex-row items-center gap-2.5 flex-1">
+											<View className="bg-success/10 p-2 rounded-lg border border-success/20">
 												<StyledIcon
 													name="map-pin"
-													size={18}
+													size={15}
 													className="text-success"
 												/>
 											</View>
 											<View className="flex-1">
 												<View className="flex-row items-baseline gap-1">
-													<Text className="text-lg font-black text-foreground">
+													<Text className="text-base font-black text-foreground">
 														{item.distance.toFixed(1)}
 													</Text>
 													<Text className="font-bold text-muted text-xs">km</Text>
@@ -363,15 +364,14 @@ export default function TripsScreen() {
 															size={10}
 															className="text-muted"
 														/>
-														<Text className="text-xs font-bold text-muted">
+														<Text className="text-[11px] font-semibold text-muted">
 															Final:{" "}
-															<Text className="text-foreground">
+															<Text className="text-foreground font-bold">
 																{item.batteryLevel}
 																{scooter.trackingMode === "percent" ? "%" : "V"}
 															</Text>
 															{scooter.trackingMode === "voltage" && (
-																<Text className="font-bold text-muted text-xs ml-1">
-																	{" "}
+																<Text className="font-semibold text-muted text-[10px] ml-0.5">
 																	(
 																	{calculateBatteryPercentage(
 																		item.batteryLevel,
@@ -384,13 +384,13 @@ export default function TripsScreen() {
 													</View>
 
 													{consumption && consumption.consumedPct > 0 && (
-														<View className="bg-danger/10 px-2 py-0.5 rounded-full border border-danger/20 flex-row items-center gap-0.5">
+														<View className="bg-danger/10 px-1.5 py-0.5 rounded-full border border-danger/20 flex-row items-center gap-0.5">
 															<StyledIcon
 																name="trending-down"
-																size={10}
+																size={9}
 																className="text-danger"
 															/>
-															<Text className="text-[10px] font-bold text-danger">
+															<Text className="text-[9px] font-bold text-danger">
 																-{consumption.consumedPct}%
 															</Text>
 														</View>
@@ -399,16 +399,21 @@ export default function TripsScreen() {
 											</View>
 										</View>
 
-										<View className="items-end">
-											<Text className="text-[10px] text-muted font-bold uppercase tracking-widest">
+										<View className="bg-surface-tertiary px-2 py-0.5 rounded-md">
+											<Text className="text-[10px] text-muted font-bold">
 												{format(item.date, "HH:mm", { locale: ptBR })}
 											</Text>
 										</View>
 									</View>
 
 									{item.notes ? (
-										<View className="mt-3 pl-11.5">
-											<Text className="text-xs text-muted italic">
+										<View className="mt-2 bg-surface-tertiary/50 p-2 rounded-lg border border-surface-secondary/30 flex-row items-start gap-1.5">
+											<StyledIcon
+												name="message-square"
+												size={11}
+												className="text-muted mt-0.5"
+											/>
+											<Text className="text-[11px] text-muted italic flex-1">
 												"{item.notes}"
 											</Text>
 										</View>

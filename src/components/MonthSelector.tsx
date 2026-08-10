@@ -6,6 +6,7 @@ import {
 	subMonths,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import * as Haptics from "expo-haptics";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 interface MonthSelectorProps {
@@ -47,19 +48,25 @@ export function MonthSelector({
 					return (
 						<Pressable
 							key={month.getTime()}
-							onPress={() => onChange(month)}
-							className={`px-4 py-2 rounded-full border shadow-sm ${
+							onPress={() => {
+								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+								onChange(month);
+							}}
+							className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 transition-all ${
 								isSelected
-									? "bg-success border-success shadow-success/20"
-									: "bg-surface border-surface-secondary"
+									? "bg-success/15 border border-success/30 shadow-sm"
+									: "bg-surface-tertiary border border-transparent active:opacity-70"
 							}`}
 						>
+							{isSelected && (
+								<View className="w-1.5 h-1.5 rounded-full bg-success" />
+							)}
 							<Text
-								className={`text-xs font-bold capitalize tracking-wider ${
-									isSelected ? "text-white" : "text-muted"
+								className={`text-xs font-bold capitalize ${
+									isSelected ? "text-success" : "text-muted"
 								}`}
 							>
-								{format(month, "MMM yy", { locale: ptBR })}
+								{format(month, "MMMM yyyy", { locale: ptBR })}
 							</Text>
 						</Pressable>
 					);

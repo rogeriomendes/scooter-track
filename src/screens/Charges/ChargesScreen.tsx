@@ -260,11 +260,11 @@ export default function ChargesScreen() {
 				onEndReachedThreshold={0.5}
 				ListFooterComponent={
 					displayedCharges.length < chargesList.length ? (
-						<ActivityIndicator size="small" color="#10b981" className="py-4" />
+						<ActivityIndicator size="small" color="#10b981" className="py-3" />
 					) : null
 				}
 				keyExtractor={(item) => item.id.toString()}
-				contentContainerClassName="px-4 pb-24 gap-3 pt-2"
+				contentContainerClassName="px-4 pb-24 gap-2 pt-1"
 				showsVerticalScrollIndicator={false}
 				ListEmptyComponent={
 					<View className="items-center justify-center mt-10 opacity-60">
@@ -287,35 +287,35 @@ export default function ChargesScreen() {
 
 					return (
 						<Animated.View
-							entering={FadeInRight.delay(index * 100).springify()}
+							entering={FadeInRight.delay(index * 40).springify()}
 						>
 							<Card
 								variant="secondary"
-								className="border border-surface-secondary bg-surface shadow-sm p-0"
+								className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
 							>
 								<Pressable
-									className="py-4 px-4"
+									className="py-2.5 px-3"
 									onPress={() => handleEdit(item)}
 								>
-									<View className="flex-row items-start justify-between">
-										<View className="flex-row items-start gap-3 flex-1">
-											<View className="bg-info/10 p-2.5 rounded-xl border border-info/20 mt-0.5">
+									<View className="flex-row items-center justify-between">
+										<View className="flex-row items-center gap-2.5 flex-1">
+											<View className="bg-info/10 p-2 rounded-lg border border-info/20">
 												<StyledIcon
 													name="zap"
-													size={18}
+													size={15}
 													className="text-info"
 												/>
 											</View>
 											<View className="flex-1">
 												<View className="flex-row items-baseline gap-1">
-													<Text className="text-lg font-black text-foreground">
+													<Text className="text-base font-black text-foreground">
 														{item.batteryLevel}
 													</Text>
 													<Text className="font-bold text-muted text-xs">
 														{scooter.trackingMode === "percent" ? "%" : "V"}
 													</Text>
 													{scooter.trackingMode === "voltage" && (
-														<Text className="font-bold text-muted text-xs ml-1">
+														<Text className="font-semibold text-muted text-[10px] ml-0.5">
 															(
 															{calculateBatteryPercentage(
 																item.batteryLevel,
@@ -332,22 +332,22 @@ export default function ChargesScreen() {
 															size={10}
 															className="text-success"
 														/>
-														<Text className="text-xs font-bold text-muted">
+														<Text className="text-[11px] font-semibold text-muted">
 															Ciclo:{" "}
-															<Text className="text-success font-black">
+															<Text className="text-success font-bold">
 																+{autonomia} km
 															</Text>
 														</Text>
 													</View>
 
 													{gain && gain.gainedPct > 0 && (
-														<View className="bg-success/10 px-2 py-0.5 rounded-full border border-success/20 flex-row items-center gap-0.5">
+														<View className="bg-success/10 px-1.5 py-0.5 rounded-full border border-success/20 flex-row items-center gap-0.5">
 															<StyledIcon
 																name="trending-up"
-																size={10}
+																size={9}
 																className="text-success"
 															/>
-															<Text className="text-[10px] font-bold text-success">
+															<Text className="text-[9px] font-bold text-success">
 																+{gain.gainedPct}% ({gain.initialPct}% ➔ {scooter.trackingMode === "percent" ? item.batteryLevel : calculateBatteryPercentage(item.batteryLevel, scooter.batteryType)}%)
 															</Text>
 														</View>
@@ -356,16 +356,21 @@ export default function ChargesScreen() {
 											</View>
 										</View>
 
-										<View className="items-end">
-											<Text className="text-[10px] text-muted font-bold uppercase tracking-widest">
+										<View className="bg-surface-tertiary px-2 py-0.5 rounded-md">
+											<Text className="text-[10px] text-muted font-bold">
 												{format(item.date, "dd MMM • HH:mm", { locale: ptBR })}
 											</Text>
 										</View>
 									</View>
 
 									{item.notes ? (
-										<View className="mt-3 pl-11.5">
-											<Text className="text-xs text-muted italic">
+										<View className="mt-2 bg-surface-tertiary/50 p-2 rounded-lg border border-surface-secondary/30 flex-row items-start gap-1.5">
+											<StyledIcon
+												name="message-square"
+												size={11}
+												className="text-muted mt-0.5"
+											/>
+											<Text className="text-[11px] text-muted italic flex-1">
 												"{item.notes}"
 											</Text>
 										</View>
