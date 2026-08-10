@@ -1,4 +1,5 @@
 import { differenceInDays, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -70,6 +71,44 @@ export default function DashboardScreen() {
 		() => allLogs.filter((l) => l.type === "trip").slice(0, 3),
 		[allLogs],
 	);
+
+	const tripConsumptionMap = useMemo(() => {
+		const map = new Map<number, { consumedPct: number; consumedValue: number }>();
+		if (!scooter) return map;
+		const ascLogs = [...allLogs].sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+		);
+
+		let prevBatteryLevel: number | null = null;
+
+		for (const log of ascLogs) {
+			if (log.type === "trip") {
+				if (prevBatteryLevel !== null && prevBatteryLevel > log.batteryLevel) {
+					const diff = prevBatteryLevel - log.batteryLevel;
+					let consumedPct = diff;
+					if (scooter.trackingMode === "voltage") {
+						const prevPct = calculateBatteryPercentage(
+							prevBatteryLevel,
+							scooter.batteryType,
+						);
+						const currPct = calculateBatteryPercentage(
+							log.batteryLevel,
+							scooter.batteryType,
+						);
+						consumedPct = Math.max(0, prevPct - currPct);
+					}
+					map.set(log.id, {
+						consumedPct: Math.round(consumedPct),
+						consumedValue: diff,
+					});
+				}
+				prevBatteryLevel = log.batteryLevel;
+			} else if (log.type === "charge") {
+				prevBatteryLevel = log.batteryLevel;
+			}
+		}
+		return map;
+	}, [allLogs, scooter]);
 
 	const batteryPercent = useMemo(() => {
 		if (!scooter || !latestLog) return 100;
@@ -407,47 +446,106 @@ export default function DashboardScreen() {
 						)}
 					</View>
 
-					<View className="gap-3 mb-4">
+					<View className="gap-2 mb-4">
 						{recentTrips.length === 0 ? (
 							<Text className="text-center text-muted mt-2">
 								Nenhum uso registrado recentemente.
 							</Text>
 						) : (
-							recentTrips.map((trip) => (
-								<Card
-									key={trip.id}
-									variant="secondary"
-									className="bg-surface border border-surface-secondary shadow-sm"
-								>
-									<View className="flex-row items-center justify-between">
-										<View className="flex-row items-center gap-3">
-											<View className="bg-success/10 p-2 rounded-xl border border-success/20">
-												<StyledIcon
-													name="map-pin"
-													size={16}
-													className="text-success"
-												/>
+							recentTrips.map((trip) => {
+								const consumption = tripConsumptionMap.get(trip.id);
+
+								return (
+									<Card
+										key={trip.id}
+										variant="secondary"
+										className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
+									>
+										<Pressable
+											className="py-2.5 px-3"
+											onPress={() => router.push("/(tabs)/trips")}
+										>
+											<View className="flex-row items-center justify-between">
+												<View className="flex-row items-center gap-2.5 flex-1">
+													<View className="bg-success/10 p-2 rounded-lg border border-success/20">
+														<StyledIcon
+															name="map-pin"
+															size={15}
+															className="text-success"
+														/>
+													</View>
+													<View className="flex-1">
+														<View className="flex-row items-baseline gap-1">
+															<Text className="text-base font-black text-foreground">
+																{trip.distance.toFixed(1)}
+															</Text>
+															<Text className="font-bold text-muted text-xs">km</Text>
+														</View>
+														<View className="flex-row items-center gap-2 mt-0.5 flex-wrap">
+															<View className="flex-row items-center gap-1">
+																<StyledIcon
+																	name="battery"
+																	size={10}
+																	className="text-muted"
+																/>
+																<Text className="text-[11px] font-semibold text-muted">
+																	Final:{" "}
+																	<Text className="text-foreground font-bold">
+																		{trip.batteryLevel}
+																		{scooter.trackingMode === "percent" ? "%" : "V"}
+																	</Text>
+																	{scooter.trackingMode === "voltage" && (
+																		<Text className="font-semibold text-muted text-[10px] ml-0.5">
+																			(
+																			{calculateBatteryPercentage(
+																				trip.batteryLevel,
+																				scooter.batteryType,
+																			)}
+																			%)
+																		</Text>
+																	)}
+																</Text>
+															</View>
+
+															{consumption && consumption.consumedPct > 0 && (
+																<View className="bg-danger/10 px-1.5 py-0.5 rounded-full border border-danger/20 flex-row items-center gap-0.5">
+																	<StyledIcon
+																		name="trending-down"
+																		size={9}
+																		className="text-danger"
+																	/>
+																	<Text className="text-[9px] font-bold text-danger">
+																		-{consumption.consumedPct}%
+																	</Text>
+																</View>
+															)}
+														</View>
+													</View>
+												</View>
+
+												<View className="bg-surface-tertiary px-2 py-0.5 rounded-md">
+													<Text className="text-[10px] text-muted font-bold">
+														{format(trip.date, "dd/MM • HH:mm", { locale: ptBR })}
+													</Text>
+												</View>
 											</View>
-											<View>
-												<Text className="text-base font-bold text-foreground">
-													{trip.distance} km
-												</Text>
-												<Text className="text-[10px] text-muted">
-													{format(trip.date, "dd/MM/yyyy")}
-												</Text>
-											</View>
-										</View>
-										{trip.notes ? (
-											<Text
-												className="text-xs text-muted flex-1 text-right ml-4"
-												numberOfLines={1}
-											>
-												{trip.notes}
-											</Text>
-										) : null}
-									</View>
-								</Card>
-							))
+
+											{trip.notes ? (
+												<View className="mt-2 bg-surface-tertiary/50 p-2 rounded-lg border border-surface-secondary/30 flex-row items-start gap-1.5">
+													<StyledIcon
+														name="message-square"
+														size={11}
+														className="text-muted mt-0.5"
+													/>
+													<Text className="text-[11px] text-muted italic flex-1">
+														"{trip.notes}"
+													</Text>
+												</View>
+											) : null}
+										</Pressable>
+									</Card>
+								);
+							})
 						)}
 					</View>
 				</Animated.View>
