@@ -1,4 +1,10 @@
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 import { format } from "date-fns";
+import * as Haptics from "expo-haptics";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import {
@@ -11,11 +17,6 @@ import {
 } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { EmptyScooterState } from "@/components/EmptyScooterState";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -152,38 +153,55 @@ export default function ReportsScreen() {
 				entering={FadeInDown.delay(300).springify()}
 				className="mb-4"
 			>
-				<Card
-					variant="secondary"
-					className="border border-surface-secondary bg-surface p-1"
-				>
-					<View className="flex-row bg-surface-secondary/40 rounded-xl p-1">
-						<Pressable
-							onPress={() => setViewMode("day")}
-							className={`flex-1 py-3 rounded-lg flex-row justify-center items-center gap-2 ${
-								viewMode === "day" ? "bg-surface shadow-sm" : ""
+				<View className="flex-row bg-surface-tertiary p-1.5 rounded-2xl">
+					<Pressable
+						onPress={() => {
+							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+							setViewMode("day");
+						}}
+						className={`flex-1 h-10 rounded-xl flex-row justify-center items-center gap-2 ${
+							viewMode === "day" ? "bg-surface shadow-sm" : "active:opacity-70"
+						}`}
+					>
+						<StyledIcon
+							name="calendar"
+							size={18}
+							className={viewMode === "day" ? "text-success" : "text-muted"}
+						/>
+						<Text
+							className={`text-sm font-bold ${
+								viewMode === "day" ? "text-foreground" : "text-muted"
 							}`}
 						>
-							<Text
-								className={`text-xs font-black uppercase tracking-widest ${viewMode === "day" ? "text-success" : "text-muted"}`}
-							>
-								Por Dia
-							</Text>
-						</Pressable>
+							Por Dia
+						</Text>
+					</Pressable>
 
-						<Pressable
-							onPress={() => setViewMode("cycle")}
-							className={`flex-1 py-3 rounded-lg flex-row justify-center items-center gap-2 ${
-								viewMode === "cycle" ? "bg-surface shadow-sm" : ""
+					<Pressable
+						onPress={() => {
+							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+							setViewMode("cycle");
+						}}
+						className={`flex-1 h-10 rounded-xl flex-row justify-center items-center gap-2 ${
+							viewMode === "cycle"
+								? "bg-surface shadow-sm"
+								: "active:opacity-70"
+						}`}
+					>
+						<StyledIcon
+							name="zap"
+							size={18}
+							className={viewMode === "cycle" ? "text-success" : "text-muted"}
+						/>
+						<Text
+							className={`text-sm font-bold ${
+								viewMode === "cycle" ? "text-foreground" : "text-muted"
 							}`}
 						>
-							<Text
-								className={`text-xs font-black uppercase tracking-widest ${viewMode === "cycle" ? "text-success" : "text-muted"}`}
-							>
-								Por Ciclo
-							</Text>
-						</Pressable>
-					</View>
-				</Card>
+							Por Ciclo
+						</Text>
+					</Pressable>
+				</View>
 			</Animated.View>
 
 			{/* GRÁFICO NEON */}
