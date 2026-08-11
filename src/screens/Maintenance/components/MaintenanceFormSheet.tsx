@@ -1,8 +1,3 @@
-import { AppBottomSheet } from "@/components/AppBottomSheet";
-import { BottomSheetInput } from "@/components/BottomSheetInput";
-import { StyledIcon } from "@/components/StyledIcon";
-import { db } from "@/db/client";
-import { maintenance, type scooters } from "@/db/schema";
 import DateTimePicker, {
 	type DateTimePickerChangeEvent,
 } from "@react-native-community/datetimepicker";
@@ -15,6 +10,11 @@ import { Label } from "heroui-native/label";
 import { TextField } from "heroui-native/text-field";
 import { useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
+import { AppBottomSheet } from "@/components/AppBottomSheet";
+import { BottomSheetInput } from "@/components/BottomSheetInput";
+import { StyledIcon } from "@/components/StyledIcon";
+import { db } from "@/db/client";
+import { maintenance, type scooters } from "@/db/schema";
 
 interface MaintenanceFormSheetProps {
 	isOpen: boolean;
@@ -43,6 +43,8 @@ export function MaintenanceFormSheet({
 	const [showLastDatePicker, setShowLastDatePicker] = useState(false);
 	const [targetDate, setTargetDate] = useState(new Date());
 	const [showTargetDatePicker, setShowTargetDatePicker] = useState(false);
+	const [completedDate, setCompletedDate] = useState(new Date());
+	const [showCompletedDatePicker, setShowCompletedDatePicker] = useState(false);
 	const [resetWear, setResetWear] = useState(false);
 
 	useEffect(() => {
@@ -58,6 +60,9 @@ export function MaintenanceFormSheet({
 				);
 				setLastDate(editItem.lastMaintenanceDate || new Date());
 				setTargetDate(editItem.targetDate || new Date());
+				setCompletedDate(
+					editItem.completedAt ? new Date(editItem.completedAt) : new Date(),
+				);
 				setResetWear(false);
 			} else {
 				setName("");
@@ -66,6 +71,7 @@ export function MaintenanceFormSheet({
 				setIntervalMonths("");
 				setLastDate(new Date());
 				setTargetDate(new Date());
+				setCompletedDate(new Date());
 				setResetWear(false);
 			}
 		}
@@ -91,6 +97,23 @@ export function MaintenanceFormSheet({
 		}
 	};
 
+	const onChangeCompletedDate = async (
+		_event: DateTimePickerChangeEvent,
+		selectedDate?: Date,
+	) => {
+		setShowCompletedDatePicker(Platform.OS === "ios");
+		if (selectedDate) {
+			setCompletedDate(selectedDate);
+			if (editItem && isReadOnly) {
+				await db
+					.update(maintenance)
+					.set({ completedAt: selectedDate })
+					.where(eq(maintenance.id, editItem.id));
+				onSaved();
+			}
+		}
+	};
+
 	const isReadOnly = Boolean(editItem?.isCompleted);
 
 	const handleReopen = async () => {
@@ -113,7 +136,7 @@ export function MaintenanceFormSheet({
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
 		const isResetting = resetWear || !editItem;
-		const now = new Date();
+		const now = completedDate || new Date();
 
 		const dataToSave = {
 			name,
@@ -190,11 +213,18 @@ export function MaintenanceFormSheet({
 						<Text className="text-success font-bold text-xs">
 							Manutenção Concluída
 						</Text>
-						<Text className="text-muted text-[11px] font-medium">
-							{editItem?.completedAt
-								? `Realizada em ${format(new Date(editItem.completedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}.`
-								: "Esta manutenção já foi realizada."}
-						</Text>
+						<Pressable
+							onPress={() => setShowCompletedDatePicker(true)}
+							className="flex-row items-center gap-1 mt-0.5 active:opacity-70"
+						>
+							<Text className="text-muted text-[11px] font-medium">
+								Realizada em{" "}
+								<Text className="text-foreground font-semibold underline">
+									{format(completedDate, "dd/MM/yyyy", { locale: ptBR })}
+								</Text>
+							</Text>
+							<StyledIcon name="edit-2" size={10} className="text-muted" />
+						</Pressable>
 					</View>
 				</View>
 			)}
@@ -378,7 +408,7 @@ export function MaintenanceFormSheet({
 			)}
 
 			{editItem && !isReadOnly && (
-				<View className="mt-3 bg-surface-secondary/40 rounded-xl border border-surface-secondary">
+				<View className="mt-3 bg-surface-secondary/40 rounded-xl p-3 border border-surface-secondary gap-2">
 					<Button
 						variant={resetWear ? "primary" : "secondary"}
 						onPress={() => {
@@ -386,6 +416,7 @@ export function MaintenanceFormSheet({
 							const nextReset = !resetWear;
 							setResetWear(nextReset);
 							if (nextReset) {
+								setCompletedDate(new Date());
 								setLastDate(new Date());
 								if (
 									type === "date" &&
@@ -404,15 +435,26 @@ export function MaintenanceFormSheet({
 					>
 						<Button.Label>
 							{resetWear
-								? "✓ Revisão marcada como feita (Zerar desgaste)"
-								: "Marcar revisão/troca como realizada hoje"}
+								? "✓ Revisão realizada (Zerar desgaste)"
+								: "Marcar revisão/troca como realizada"}
 						</Button.Label>
 					</Button>
-					{type === "date" && resetWear && (
-						<Text className="text-xs text-muted mt-2 text-center">
-							Nova data de vencimento calculada automaticamente. Altere abaixo
-							se desejar.
-						</Text>
+
+					{resetWear && (
+						<View className="mt-1">
+							<Label className="text-xs text-muted font-bold mb-1">
+								Data da Realização
+							</Label>
+							<Pressable
+								onPress={() => setShowCompletedDatePicker(true)}
+								className="bg-surface-tertiary border border-surface-tertiary h-11 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
+							>
+								<Text className="text-foreground text-sm">
+									{format(completedDate, "dd/MM/yyyy", { locale: ptBR })}
+								</Text>
+								<StyledIcon name="calendar" size={16} className="text-muted" />
+							</Pressable>
+						</View>
 					)}
 				</View>
 			)}
@@ -429,11 +471,7 @@ export function MaintenanceFormSheet({
 							<Button.Label className="text-danger">Excluir</Button.Label>
 						</Button>
 					)}
-					<Button
-						variant="secondary"
-						className="flex-1"
-						onPress={handleReopen}
-					>
+					<Button variant="secondary" className="flex-1" onPress={handleReopen}>
 						<Button.Label className="text-foreground">
 							Reabrir Manutenção
 						</Button.Label>
@@ -457,6 +495,15 @@ export function MaintenanceFormSheet({
 				</View>
 			)}
 
+			{showCompletedDatePicker && (
+				<DateTimePicker
+					value={completedDate}
+					mode="date"
+					is24Hour={true}
+					onValueChange={onChangeCompletedDate}
+					onDismiss={() => setShowCompletedDatePicker(false)}
+				/>
+			)}
 			{showTargetDatePicker && (
 				<DateTimePicker
 					value={targetDate}
