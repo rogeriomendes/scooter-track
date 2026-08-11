@@ -127,13 +127,13 @@ export default function ReportsScreen() {
 
 			return {
 				mainValue: total,
-				mainLabel: "KM TOTAL (PERÍODO)",
+				mainLabel: timeframe === "all" ? "Total Geral" : "Total Período",
 				avgValue: avg,
-				avgLabel: "MÉDIA DIÁRIA (KM)",
+				avgLabel: "Média / Dia",
 				maxValue: maxTrip,
-				maxLabel: "MAIOR VIAGEM (KM)",
+				maxLabel: "Maior Viagem",
 				countValue: realAvgCycle,
-				countLabel: "AUTONOMIA MÉDIA (KM)",
+				countLabel: "Autonomia Média",
 			};
 		} else {
 			const cyclesList = stats?.cycles || [];
@@ -146,16 +146,16 @@ export default function ReportsScreen() {
 			const max = stats?.bestCycleKm || 0;
 			return {
 				mainValue: totalCyclesDist,
-				mainLabel: "KM TOTAL (CICLOS)",
+				mainLabel: "Total Ciclos",
 				avgValue: avg,
-				avgLabel: "MÉDIA POR CICLO (KM)",
+				avgLabel: "Média / Ciclo",
 				maxValue: max,
-				maxLabel: "MELHOR CICLO (KM)",
+				maxLabel: "Melhor Ciclo",
 				countValue: cyclesCount.toString(),
-				countLabel: "CICLOS CONCLUÍDOS",
+				countLabel: "Ciclos Concluídos",
 			};
 		}
-	}, [filteredTrips, stats, scooter, viewMode]);
+	}, [filteredTrips, stats, scooter, viewMode, timeframe]);
 
 	if (isLoading) {
 		return (
@@ -186,7 +186,7 @@ export default function ReportsScreen() {
 			{/* TOGGLE SEGMENTADO E FILTRO DE TEMPO */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="pt-1 mb-4 gap-3"
+				className="pt-1 mb-3 gap-2.5"
 			>
 				<View className="flex-row bg-surface-tertiary p-1.5 rounded-2xl">
 					<Pressable
@@ -280,13 +280,13 @@ export default function ReportsScreen() {
 			<Animated.View entering={FadeInDown.delay(400).springify()}>
 				<Card
 					variant="secondary"
-					className="mb-4 border border-surface-secondary bg-surface overflow-hidden p-0 pt-6 pb-2"
+					className="mb-3 border border-surface-secondary bg-surface shadow-sm rounded-2xl overflow-hidden p-0 pt-4 pb-2"
 				>
-					<View className="px-6 mb-4">
-						<Text className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">
+					<View className="px-4 mb-3">
+						<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
 							Evolução de Distância
 						</Text>
-						<Text className="text-2xl font-black text-foreground">
+						<Text className="text-xl font-black text-foreground">
 							{chartData.length > 0 ? "Registros do Período" : "Sem dados"}
 						</Text>
 					</View>
@@ -365,72 +365,113 @@ export default function ReportsScreen() {
 				</Card>
 			</Animated.View>
 
-			{/* INSIGHTS CARDS */}
-			<Animated.View entering={FadeInDown.delay(500).springify()}>
-				<View className="flex-row gap-3 mb-3">
+			{/* INSIGHTS GRID 2x2 CARDS */}
+			<Animated.View
+				entering={FadeInDown.delay(500).springify()}
+				className="gap-2 mb-3"
+			>
+				<View className="flex-row gap-2">
 					<Card
 						variant="secondary"
-						className="flex-1 items-start justify-center p-4 bg-surface border border-surface-secondary shadow-sm"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
-						<Text className="text-[9px] font-black text-muted uppercase tracking-widest mb-2">
-							{chartStats.mainLabel}
-						</Text>
-						<Text className="text-3xl font-black text-foreground">
-							{chartStats.mainValue.toFixed(1)}
-						</Text>
+						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
+							<StyledIcon name="map-pin" size={18} className="text-success" />
+						</View>
+						<View className="flex-1">
+							<Text
+								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
+								numberOfLines={1}
+							>
+								{chartStats.mainLabel}
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{chartStats.mainValue.toFixed(1)}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
 					</Card>
+
 					<Card
 						variant="secondary"
-						className="flex-1 items-start justify-center p-4 bg-surface border border-surface-secondary shadow-sm"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
-						<Text className="text-[9px] font-black text-muted uppercase tracking-widest mb-2">
-							{chartStats.avgLabel}
-						</Text>
-						<Text className="text-3xl font-black text-foreground">
-							{chartStats.avgValue.toFixed(1)}
-						</Text>
+						<View className="w-9 h-9 rounded-xl bg-accent/15 items-center justify-center">
+							<StyledIcon
+								name="bar-chart-2"
+								size={18}
+								className="text-accent"
+							/>
+						</View>
+						<View className="flex-1">
+							<Text
+								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
+								numberOfLines={1}
+							>
+								{chartStats.avgLabel}
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{chartStats.avgValue.toFixed(1)}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
 					</Card>
 				</View>
 
-				<View className="flex-row gap-3">
+				<View className="flex-row gap-2">
 					<Card
 						variant="secondary"
-						className="flex-1 items-start justify-center p-4 bg-surface border border-surface-secondary shadow-sm"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
-						<Text className="text-[9px] font-black text-muted uppercase tracking-widest mb-2">
-							{chartStats.maxLabel}
-						</Text>
-						<Text className="text-3xl font-black text-warning">
-							{chartStats.maxValue.toFixed(1)}
-						</Text>
+						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
+							<StyledIcon name="award" size={18} className="text-warning" />
+						</View>
+						<View className="flex-1">
+							<Text
+								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
+								numberOfLines={1}
+							>
+								{chartStats.maxLabel}
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{chartStats.maxValue.toFixed(1)}{" "}
+								<Text className="text-xs font-bold text-muted">km</Text>
+							</Text>
+						</View>
 					</Card>
+
 					<Card
 						variant="secondary"
-						className="flex-1 items-start justify-center p-4 bg-surface border border-surface-secondary shadow-sm"
+						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
-						<Text className="text-[9px] font-black text-muted uppercase tracking-widest mb-2">
-							{chartStats.countLabel}
-						</Text>
-						<Text className="text-3xl font-black text-success">
-							{chartStats.countValue}
-						</Text>
+						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
+							<StyledIcon name="hash" size={18} className="text-info" />
+						</View>
+						<View className="flex-1">
+							<Text
+								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
+								numberOfLines={1}
+							>
+								{chartStats.countLabel}
+							</Text>
+							<Text className="text-lg font-black text-foreground">
+								{chartStats.countValue}
+							</Text>
+						</View>
 					</Card>
 				</View>
 			</Animated.View>
 
 			{/* CARD DE AUTONOMIA REAL & EFICIÊNCIA */}
-			<Animated.View
-				entering={FadeInDown.delay(600).springify()}
-				className="mt-3"
-			>
+			<Animated.View entering={FadeInDown.delay(600).springify()}>
 				<Card
 					variant="secondary"
-					className="p-4 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					className="p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 				>
-					<View className="w-10 h-10 rounded-xl bg-success/15 items-center justify-center">
+					<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center shrink-0">
 						<StyledIcon
 							name="battery-charging"
-							size={20}
+							size={18}
 							className="text-success"
 						/>
 					</View>
