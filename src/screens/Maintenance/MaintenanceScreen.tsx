@@ -47,14 +47,33 @@ export function MaintenanceScreen() {
 
 	const handleQuickComplete = async (item: typeof maintenance.$inferSelect) => {
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+		const currentKm = stats?.totalKm || 0;
+		const now = new Date();
+
+		const updatePayload: Partial<typeof maintenance.$inferSelect> = {
+			completedAt: now,
+		};
+
+		if (item.type === "km") {
+			updatePayload.lastMaintenanceKm = currentKm;
+			updatePayload.isCompleted = false;
+		} else if (item.type === "months") {
+			updatePayload.lastMaintenanceDate = now;
+			updatePayload.isCompleted = false;
+		} else if (item.type === "mixed") {
+			updatePayload.lastMaintenanceKm = currentKm;
+			updatePayload.lastMaintenanceDate = now;
+			updatePayload.isCompleted = false;
+		} else if (item.type === "date") {
+			updatePayload.isCompleted = true;
+		}
+
 		await db
 			.update(maintenance)
-			.set({
-				isCompleted: true,
-				lastMaintenanceKm: stats?.totalKm || 0,
-				lastMaintenanceDate: new Date(),
-			})
+			.set(updatePayload)
 			.where(eq(maintenance.id, item.id));
+
 		refresh();
 	};
 
@@ -328,6 +347,11 @@ export function MaintenanceScreen() {
 														• {secondaryInfo}
 													</Text>
 												</View>
+												{item.completedAt && (
+													<Text className="text-[10px] font-medium text-muted/80 mt-0.5">
+														Última: {format(new Date(item.completedAt), "dd/MM/yyyy", { locale: ptBR })}
+													</Text>
+												)}
 											</View>
 										</View>
 

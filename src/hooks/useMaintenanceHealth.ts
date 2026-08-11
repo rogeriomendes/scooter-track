@@ -22,6 +22,8 @@ export function useMaintenanceHealth(
 		const currentTotalKm = stats?.totalKm || 0;
 
 		for (const item of maintenanceList) {
+			if (item.isCompleted) continue;
+
 			const itemType = item.type || "km";
 
 			const wornKm = currentTotalKm - item.lastMaintenanceKm;

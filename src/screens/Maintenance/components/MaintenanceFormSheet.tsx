@@ -98,7 +98,7 @@ export function MaintenanceFormSheet({
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 		await db
 			.update(maintenance)
-			.set({ isCompleted: false })
+			.set({ isCompleted: false, completedAt: null })
 			.where(eq(maintenance.id, editItem.id));
 		onOpenChange(false);
 		onSaved();
@@ -113,6 +113,7 @@ export function MaintenanceFormSheet({
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
 		const isResetting = resetWear || !editItem;
+		const now = new Date();
 
 		const dataToSave = {
 			name,
@@ -124,17 +125,23 @@ export function MaintenanceFormSheet({
 					? parseInt(intervalMonths, 10) || 0
 					: null,
 			targetDate: type === "date" ? targetDate : null,
-			lastMaintenanceKm: isResetting
-				? currentTotalKm
-				: editItem
-					? editItem.lastMaintenanceKm
-					: currentTotalKm,
-			lastMaintenanceDate: isResetting
-				? new Date()
-				: type !== "km"
-					? lastDate
-					: editItem?.lastMaintenanceDate || new Date(),
-			isCompleted: resetWear || (editItem ? Boolean(editItem.isCompleted) : false),
+			lastMaintenanceKm:
+				isResetting && (type === "km" || type === "mixed")
+					? currentTotalKm
+					: editItem
+						? editItem.lastMaintenanceKm
+						: currentTotalKm,
+			lastMaintenanceDate:
+				isResetting && (type === "months" || type === "mixed")
+					? now
+					: type !== "km"
+						? lastDate
+						: editItem?.lastMaintenanceDate || now,
+			isCompleted:
+				type === "date"
+					? resetWear || (editItem ? Boolean(editItem.isCompleted) : false)
+					: false,
+			completedAt: resetWear ? now : editItem?.completedAt || null,
 		};
 
 		if (editItem) {
@@ -184,7 +191,9 @@ export function MaintenanceFormSheet({
 							Manutenção Concluída
 						</Text>
 						<Text className="text-muted text-[11px] font-medium">
-							Esta manutenção já foi realizada. As informações estão em modo de visualização.
+							{editItem?.completedAt
+								? `Realizada em ${format(new Date(editItem.completedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}.`
+								: "Esta manutenção já foi realizada."}
 						</Text>
 					</View>
 				</View>
@@ -257,19 +266,6 @@ export function MaintenanceFormSheet({
 				<View className="flex-row gap-3">
 					<View className="flex-1">
 						<TextField>
-							<Label>Intervalo (Meses)</Label>
-							<BottomSheetInput
-								placeholder="Ex: 6"
-								keyboardType="numeric"
-								value={intervalMonths}
-								onChangeText={setIntervalMonths}
-								editable={!isReadOnly}
-								variant="secondary"
-							/>
-						</TextField>
-					</View>
-					<View className="flex-1">
-						<TextField>
 							<Label>Data de Início</Label>
 							<Pressable
 								onPress={() => !isReadOnly && setShowLastDatePicker(true)}
@@ -280,6 +276,19 @@ export function MaintenanceFormSheet({
 								</Text>
 								<StyledIcon name="calendar" size={16} className="text-muted" />
 							</Pressable>
+						</TextField>
+					</View>
+					<View className="flex-1">
+						<TextField>
+							<Label>Intervalo (Meses)</Label>
+							<BottomSheetInput
+								placeholder="Ex: 6"
+								keyboardType="numeric"
+								value={intervalMonths}
+								onChangeText={setIntervalMonths}
+								editable={!isReadOnly}
+								variant="secondary"
+							/>
 						</TextField>
 					</View>
 				</View>
@@ -323,19 +332,6 @@ export function MaintenanceFormSheet({
 					<View className="flex-row gap-3">
 						<View className="flex-1">
 							<TextField>
-								<Label>Intervalo (KM)</Label>
-								<BottomSheetInput
-									placeholder="Ex: 1000"
-									keyboardType="numeric"
-									value={intervalKm}
-									onChangeText={setIntervalKm}
-									editable={!isReadOnly}
-									variant="secondary"
-								/>
-							</TextField>
-						</View>
-						<View className="flex-1">
-							<TextField>
 								<Label>Data de Início</Label>
 								<Pressable
 									onPress={() => !isReadOnly && setShowLastDatePicker(true)}
@@ -350,6 +346,19 @@ export function MaintenanceFormSheet({
 										className="text-muted"
 									/>
 								</Pressable>
+							</TextField>
+						</View>
+						<View className="flex-1">
+							<TextField>
+								<Label>Intervalo (KM)</Label>
+								<BottomSheetInput
+									placeholder="Ex: 1000"
+									keyboardType="numeric"
+									value={intervalKm}
+									onChangeText={setIntervalKm}
+									editable={!isReadOnly}
+									variant="secondary"
+								/>
 							</TextField>
 						</View>
 					</View>
