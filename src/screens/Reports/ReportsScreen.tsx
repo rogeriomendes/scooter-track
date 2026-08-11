@@ -78,18 +78,24 @@ export default function ReportsScreen() {
 			}));
 		} else {
 			// Por ciclo
-			const cyclesList = stats?.cycles || [];
+			const cyclesList = (stats?.cycles || []).filter((c: any) => c.distance > 0);
 			const now = new Date();
 			let filteredCycles = cyclesList;
 			if (timeframe === "7d") {
 				const limit = subDays(now, 7);
-				filteredCycles = cyclesList.filter((c: any) => c.endDate >= limit);
+				filteredCycles = cyclesList.filter(
+					(c: any) => new Date(c.endDate) >= limit,
+				);
 			} else if (timeframe === "30d") {
 				const limit = subDays(now, 30);
-				filteredCycles = cyclesList.filter((c: any) => c.endDate >= limit);
+				filteredCycles = cyclesList.filter(
+					(c: any) => new Date(c.endDate) >= limit,
+				);
 			} else if (timeframe === "month") {
 				const limit = startOfMonth(now);
-				filteredCycles = cyclesList.filter((c: any) => c.endDate >= limit);
+				filteredCycles = cyclesList.filter(
+					(c: any) => new Date(c.endDate) >= limit,
+				);
 			}
 			return filteredCycles.map((c: any, i: number) => ({
 				value: c.distance,

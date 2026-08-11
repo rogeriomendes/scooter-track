@@ -27,17 +27,17 @@ export function calculateScooterStats(scooter: Scooter | null, allLogs: Log[]) {
 		};
 	}
 
-	// Logs are assumed to be sorted by descending date (newest first).
-	// Let's sort them ascending (oldest first) to build cycles chronologically.
+	// Logs are sorted ascending (oldest first) to build cycles chronologically.
 	const sortedLogs = [...allLogs].sort(
-		(a, b) => a.date.getTime() - b.date.getTime(),
+		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
 	);
 
 	let totalKm = scooter.initialKm;
 	let currentCycleKm = 0;
 	const cycles: Cycle[] = [];
 
-	let cycleStartDate = sortedLogs.length > 0 ? sortedLogs[0].date : new Date();
+	let cycleStartDate =
+		sortedLogs.length > 0 ? new Date(sortedLogs[0].date) : new Date();
 	let cycleDistance = 0;
 
 	let chargesCount = 0;
@@ -45,26 +45,31 @@ export function calculateScooterStats(scooter: Scooter | null, allLogs: Log[]) {
 	let lastChargeDate: Date | null = null;
 
 	for (const log of sortedLogs) {
+		const logDate = new Date(log.date);
 		if (log.type === "trip") {
 			cycleDistance += log.distance;
 			totalKm += log.distance;
 			tripsCount++;
 		} else if (log.type === "charge") {
 			chargesCount++;
-			lastChargeDate = log.date;
+			lastChargeDate = logDate;
 
-			// Complete the cycle
-			cycles.push({
-				id: `cycle-${log.id}`,
-				startDate: cycleStartDate,
-				endDate: log.date,
-				distance: cycleDistance,
-				chargeLog: log,
-			});
+			// Complete the cycle ONLY if distance was accumulated (trips ridden before this charge)
+			if (cycleDistance > 0) {
+				cycles.push({
+					id: `cycle-${log.id}`,
+					startDate: cycleStartDate,
+					endDate: logDate,
+					distance: cycleDistance,
+					chargeLog: log,
+				});
+			}
 
 			// Reset for next cycle
-			cycleStartDate = log.date;
+			cycleStartDate = logDate;
 			cycleDistance = 0;
+		} else if (log.type === "initial") {
+			cycleStartDate = logDate;
 		}
 	}
 
@@ -97,7 +102,7 @@ export function calculateScooterStats(scooter: Scooter | null, allLogs: Log[]) {
 		bestCycleKm,
 		worstCycleKm,
 		averageCycleKm,
-		cycles,
+		cycles: completedCycles,
 		estimatedAutonomy,
 		totalKm,
 		chargesCount,
