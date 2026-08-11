@@ -8,7 +8,7 @@ import * as Sharing from "expo-sharing";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Platform, Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
@@ -132,13 +132,43 @@ export default function SettingsScreen() {
 			};
 
 			const backupFileName = `scootertrack_backup_${format(new Date(), "yyyyMMdd_HHmm")}.scootertrack`;
+			const backupContent = JSON.stringify(backupPayload);
+
+			// No Android, permitir que o usuário escolha a pasta de destino (Storage Access Framework)
+			if (Platform.OS === "android") {
+				try {
+					const permissions =
+						await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+					if (permissions.granted) {
+						const createdUri =
+							await FileSystem.StorageAccessFramework.createFileAsync(
+								permissions.directoryUri,
+								backupFileName,
+								"application/json",
+							);
+						await FileSystem.writeAsStringAsync(createdUri, backupContent, {
+							encoding: FileSystem.EncodingType.UTF8,
+						});
+						Haptics.notificationAsync(
+							Haptics.NotificationFeedbackType.Success,
+						);
+						Alert.alert(
+							"Backup Salvo!",
+							`O arquivo de backup (${backupFileName}) foi salvo na pasta selecionada com sucesso.`,
+						);
+						return;
+					}
+				} catch (safError) {
+					console.log("SAF canceled or failed, falling back to share", safError);
+				}
+			}
+
+			// Fallback para Compartilhamento (ou no iOS)
 			const backupFilePath = `${FileSystem.cacheDirectory}${backupFileName}`;
 
-			await FileSystem.writeAsStringAsync(
-				backupFilePath,
-				JSON.stringify(backupPayload),
-				{ encoding: FileSystem.EncodingType.UTF8 },
-			);
+			await FileSystem.writeAsStringAsync(backupFilePath, backupContent, {
+				encoding: FileSystem.EncodingType.UTF8,
+			});
 
 			await Sharing.shareAsync(backupFilePath, {
 				dialogTitle: "Backup ScooterTrack (Banco + Notas Fiscais)",
