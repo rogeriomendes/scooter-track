@@ -1,11 +1,13 @@
 import { desc, eq } from "drizzle-orm";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { db } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
+import { useAppStore } from "@/store/useAppStore";
 import { calculateScooterStats } from "@/utils/stats";
 
 export function useScooterData(activeScooterId: number | null) {
+	const refreshCounter = useAppStore((s) => s.refreshCounter);
 	const [scooter, setScooter] = useState<typeof scooters.$inferSelect | null>(
 		null,
 	);
@@ -65,6 +67,10 @@ export function useScooterData(activeScooterId: number | null) {
 			setIsLoading(false);
 		}
 	}, [activeScooterId]);
+
+	useEffect(() => {
+		loadData();
+	}, [loadData, refreshCounter]);
 
 	useFocusEffect(
 		useCallback(() => {

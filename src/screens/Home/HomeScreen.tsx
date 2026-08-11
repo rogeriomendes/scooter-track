@@ -591,6 +591,7 @@ export default function DashboardScreen() {
 				scooter={scooter}
 				totalKm={stats?.totalKm}
 				onEditRequest={() => {
+					setIsDetailsOpen(false);
 					setEditingScooter(scooter);
 					setIsAddingNew(false);
 					setIsFormOpen(true);
