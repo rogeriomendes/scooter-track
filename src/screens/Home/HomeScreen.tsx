@@ -30,8 +30,8 @@ import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
 import { BatteryArc } from "./components/BatteryArc";
+import { MonthSummaryCard } from "./components/MonthSummaryCard";
 import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
-import { UsageSparkline } from "./components/UsageSparkline";
 import { WeatherWidget } from "./components/WeatherWidget";
 
 export default function DashboardScreen() {
@@ -273,62 +273,81 @@ export default function DashboardScreen() {
 							statusColor={smartStatus.color}
 						/>
 					</View>
-					{/* INDICADORES LIMPOS (2 Linhas de Estatísticas) */}
-					<View className="items-center mt-4 px-4 z-10 gap-y-2 w-full">
-						{/* Primeira Linha: Carga e Ciclo */}
-						<View className="flex-row justify-center items-center w-full">
-							<View className="flex-1 flex-row items-center justify-end gap-1.5">
-								<StyledIcon name="clock" size={14} className="text-info" />
-								<Text className="text-xs font-bold text-muted uppercase">
-									Carga:{" "}
-									<Text className="text-foreground">{lastChargeText}</Text>
-								</Text>
-							</View>
-
-							<View className="w-8 items-center">
-								<Text className="text-muted/50">•</Text>
-							</View>
-
-							<View className="flex-1 flex-row items-center justify-start gap-1.5">
-								<StyledIcon
-									name="activity"
-									size={14}
-									className="text-success"
-								/>
-								<Text className="text-xs font-bold text-muted uppercase">
-									Ciclo:{" "}
-									<Text className="text-foreground">
-										{stats?.currentCycleKm.toFixed(1) || "0.0"}km
+					{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
+					<View className="mt-2 px-1 z-10 gap-2 w-full">
+						<View className="flex-row gap-2">
+							<Card
+								variant="secondary"
+								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+							>
+								<View className="w-8 h-8 rounded-xl bg-info/15 items-center justify-center">
+									<StyledIcon name="clock" size={16} className="text-info" />
+								</View>
+								<View className="flex-1">
+									<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+										Última Carga
 									</Text>
-								</Text>
-							</View>
+									<Text className="text-sm font-black text-foreground" numberOfLines={1}>
+										{lastChargeText}
+									</Text>
+								</View>
+							</Card>
+
+							<Card
+								variant="secondary"
+								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+							>
+								<View className="w-8 h-8 rounded-xl bg-success/15 items-center justify-center">
+									<StyledIcon name="activity" size={16} className="text-success" />
+								</View>
+								<View className="flex-1">
+									<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+										Ciclo Atual
+									</Text>
+									<Text className="text-sm font-black text-foreground">
+										{stats?.currentCycleKm.toFixed(1) || "0.0"}{" "}
+										<Text className="text-xs font-bold text-muted">km</Text>
+									</Text>
+								</View>
+							</Card>
 						</View>
 
-						{/* Segunda Linha: Total e Eficiência */}
-						<View className="flex-row justify-center items-center w-full">
-							<View className="flex-1 flex-row items-center justify-end gap-1.5">
-								<StyledIcon name="map-pin" size={14} className="text-primary" />
-								<Text className="text-xs font-bold text-muted uppercase">
-									Total:{" "}
-									<Text className="text-foreground">
-										{stats?.totalKm.toFixed(0) || "0"}km
+						<View className="flex-row gap-2">
+							<Card
+								variant="secondary"
+								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+							>
+								<View className="w-8 h-8 rounded-xl bg-accent/15 items-center justify-center">
+									<StyledIcon name="map-pin" size={16} className="text-accent" />
+								</View>
+								<View className="flex-1">
+									<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+										KM Total
 									</Text>
-								</Text>
-							</View>
-
-							<View className="w-8 items-center">
-								<Text className="text-muted/50">•</Text>
-							</View>
-
-							<View className="flex-1 flex-row items-center justify-start gap-1.5">
-								<StyledIcon name="zap" size={14} className="text-warning" />
-								<Text className="text-xs font-bold text-muted uppercase">
-									Efic:{" "}
-									<Text className="text-foreground">
-										{stats?.averageCycleKm.toFixed(1) || "0.0"}km/c
+									<Text className="text-sm font-black text-foreground">
+										{stats?.totalKm.toFixed(0) || "0"}{" "}
+										<Text className="text-xs font-bold text-muted">km</Text>
 									</Text>
-								</Text>
-							</View>
+								</View>
+							</Card>
+
+							<Card
+								variant="secondary"
+								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+							>
+								<View className="w-8 h-8 rounded-xl bg-warning/15 items-center justify-center">
+									<StyledIcon name="zap" size={16} className="text-warning" />
+								</View>
+								<View className="flex-1">
+									<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
+										Eficiência
+									</Text>
+									<Text className="text-sm font-black text-foreground">
+										{stats?.averageCycleKm.toFixed(1) || "0.0"}{" "}
+										<Text className="text-xs font-bold text-muted">km/c</Text>
+									</Text>
+								</View>
+							</Card>
 						</View>
 					</View>
 				</View>
@@ -337,7 +356,7 @@ export default function DashboardScreen() {
 			<View className="px-4 mt-4">
 				<WeatherWidget />
 
-				<UsageSparkline trips={allLogs.filter((l) => l.type === "trip")} />
+				<MonthSummaryCard allLogs={allLogs} />
 
 				{/* AÇÕES RÁPIDAS (Hierarquia Clara de CTAs) */}
 				<Animated.View entering={FadeInDown.delay(300).springify()}>

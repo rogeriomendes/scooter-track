@@ -140,13 +140,13 @@ export function WeatherWidget() {
 	return (
 		<Animated.View
 			entering={FadeInDown.delay(300).springify()}
-			className="p-4 mb-4 flex-row items-center justify-between bg-surface/60 rounded-2xl"
+			className="p-3.5 mb-3 flex-row items-center justify-between bg-surface border border-surface-secondary/70 shadow-sm rounded-2xl"
 		>
 			<View className="flex-row items-center gap-3 flex-1">
-				<View className="p-2.5">
+				<View className="p-2.5 bg-surface-secondary/40 rounded-xl border border-surface-secondary/50 justify-center items-center">
 					<StyledIcon
 						name={info.icon as StyledIcon}
-						size={28}
+						size={24}
 						className={info.color}
 					/>
 				</View>
