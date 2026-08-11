@@ -5,7 +5,13 @@ import Animated, {
 	useSharedValue,
 	withSpring,
 } from "react-native-reanimated";
-import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, {
+	Circle,
+	Defs,
+	LinearGradient,
+	Path,
+	Stop,
+} from "react-native-svg";
 import { StyledIcon } from "@/components/StyledIcon";
 
 type BatteryArcProps = {
@@ -77,7 +83,13 @@ export function BatteryArc({
 			>
 				<Svg width={size} height={size}>
 					<Defs>
-						<LinearGradient id="batteryArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+						<LinearGradient
+							id="batteryArcGrad"
+							x1="0%"
+							y1="0%"
+							x2="100%"
+							y2="0%"
+						>
 							<Stop offset="0%" stopColor={gradientColors[0]} />
 							<Stop offset="100%" stopColor={gradientColors[1]} />
 						</LinearGradient>

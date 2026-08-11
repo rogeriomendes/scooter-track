@@ -3,7 +3,6 @@ import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
@@ -29,12 +28,11 @@ import { logs, scooters } from "@/db/schema";
 import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
+import { openPdfFile } from "@/utils/fileViewer";
 import { BatteryArc } from "./components/BatteryArc";
 import { MonthSummaryCard } from "./components/MonthSummaryCard";
 import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
 import { WeatherWidget } from "./components/WeatherWidget";
-
-import { openPdfFile } from "@/utils/fileViewer";
 
 export default function DashboardScreen() {
 	const colorScheme = useColorScheme();
@@ -75,7 +73,10 @@ export default function DashboardScreen() {
 	);
 
 	const tripConsumptionMap = useMemo(() => {
-		const map = new Map<number, { consumedPct: number; consumedValue: number }>();
+		const map = new Map<
+			number,
+			{ consumedPct: number; consumedValue: number }
+		>();
 		if (!scooter) return map;
 		const ascLogs = [...allLogs].sort(
 			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -303,7 +304,10 @@ export default function DashboardScreen() {
 									<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
 										Última Carga
 									</Text>
-									<Text className="text-sm font-black text-foreground" numberOfLines={1}>
+									<Text
+										className="text-sm font-black text-foreground"
+										numberOfLines={1}
+									>
 										{lastChargeText}
 									</Text>
 								</View>
@@ -314,7 +318,11 @@ export default function DashboardScreen() {
 								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-success/15 items-center justify-center">
-									<StyledIcon name="activity" size={16} className="text-success" />
+									<StyledIcon
+										name="activity"
+										size={16}
+										className="text-success"
+									/>
 								</View>
 								<View className="flex-1">
 									<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -334,7 +342,11 @@ export default function DashboardScreen() {
 								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-accent/15 items-center justify-center">
-									<StyledIcon name="map-pin" size={16} className="text-accent" />
+									<StyledIcon
+										name="map-pin"
+										size={16}
+										className="text-accent"
+									/>
 								</View>
 								<View className="flex-1">
 									<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -514,7 +526,9 @@ export default function DashboardScreen() {
 															<Text className="text-base font-black text-foreground">
 																{trip.distance.toFixed(1)}
 															</Text>
-															<Text className="font-bold text-muted text-xs">km</Text>
+															<Text className="font-bold text-muted text-xs">
+																km
+															</Text>
 														</View>
 														<View className="flex-row items-center gap-2 mt-0.5 flex-wrap">
 															<View className="flex-row items-center gap-1">
@@ -527,7 +541,9 @@ export default function DashboardScreen() {
 																	Final:{" "}
 																	<Text className="text-foreground font-bold">
 																		{trip.batteryLevel}
-																		{scooter.trackingMode === "percent" ? "%" : "V"}
+																		{scooter.trackingMode === "percent"
+																			? "%"
+																			: "V"}
 																	</Text>
 																	{scooter.trackingMode === "voltage" && (
 																		<Text className="font-semibold text-muted text-[10px] ml-0.5">
@@ -560,7 +576,9 @@ export default function DashboardScreen() {
 
 												<View className="bg-surface-tertiary px-2 py-0.5 rounded-md">
 													<Text className="text-[10px] text-muted font-bold">
-														{format(trip.date, "dd/MM • HH:mm", { locale: ptBR })}
+														{format(trip.date, "dd/MM • HH:mm", {
+															locale: ptBR,
+														})}
 													</Text>
 												</View>
 											</View>
@@ -617,7 +635,7 @@ export default function DashboardScreen() {
 			<ScooterFormSheet
 				isOpen={isFormOpen}
 				onOpenChange={setIsFormOpen}
-				editItem={isAddingNew ? null : (editingScooter || scooter)}
+				editItem={isAddingNew ? null : editingScooter || scooter}
 				onSaved={() => {
 					setEditingScooter(null);
 					triggerRefresh();

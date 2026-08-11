@@ -46,7 +46,9 @@ export const maintenance = sqliteTable("maintenance", {
 	intervalMonths: integer("intervalMonths"), // Interval in months
 	lastMaintenanceDate: integer("lastMaintenanceDate", { mode: "timestamp" }), // Last time it was performed
 	targetDate: integer("targetDate", { mode: "timestamp" }), // Target fixed date for 'date' mode
-	isCompleted: integer("isCompleted", { mode: "boolean" }).notNull().default(false),
+	isCompleted: integer("isCompleted", { mode: "boolean" })
+		.notNull()
+		.default(false),
 	completedAt: integer("completedAt", { mode: "timestamp" }),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });

@@ -349,7 +349,10 @@ export function MaintenanceScreen() {
 												</View>
 												{item.completedAt && (
 													<Text className="text-[10px] font-medium text-muted/80 mt-0.5">
-														Última: {format(new Date(item.completedAt), "dd/MM/yyyy", { locale: ptBR })}
+														Última:{" "}
+														{format(new Date(item.completedAt), "dd/MM/yyyy", {
+															locale: ptBR,
+														})}
 													</Text>
 												)}
 											</View>

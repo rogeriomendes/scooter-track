@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import * as Sharing from "expo-sharing";
 import { Button } from "heroui-native/button";
 import { Alert, Pressable, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";

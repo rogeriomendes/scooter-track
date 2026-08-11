@@ -78,7 +78,9 @@ export default function ReportsScreen() {
 			}));
 		} else {
 			// Por ciclo
-			const cyclesList = (stats?.cycles || []).filter((c: any) => c.distance > 0);
+			const cyclesList = (stats?.cycles || []).filter(
+				(c: any) => c.distance > 0,
+			);
 			const now = new Date();
 			let filteredCycles = cyclesList;
 			if (timeframe === "7d") {

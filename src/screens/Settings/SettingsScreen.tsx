@@ -1,11 +1,10 @@
-import Constants from "expo-constants";
 import { format } from "date-fns";
+import Constants from "expo-constants";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
-
-import * as Sharing from "expo-sharing";
 import { useRouter } from "expo-router";
+import * as Sharing from "expo-sharing";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useCallback, useEffect, useState } from "react";
@@ -74,10 +73,9 @@ export default function SettingsScreen() {
 				);
 				const pdfFiles = files.filter((f) => f.endsWith(".pdf"));
 				for (const f of pdfFiles) {
-					await FileSystem.deleteAsync(
-						`${FileSystem.documentDirectory}${f}`,
-						{ idempotent: true },
-					);
+					await FileSystem.deleteAsync(`${FileSystem.documentDirectory}${f}`, {
+						idempotent: true,
+					});
 				}
 			}
 
@@ -436,7 +434,11 @@ export default function SettingsScreen() {
 					</View>
 					<Text className="text-xs text-muted leading-5">
 						Gera um pacote de segurança contendo todas as scooters, viagens,
-						recargas, manutenções e <Text className="font-bold text-foreground">Notas Fiscais em PDF</Text> salvas no aparelho.
+						recargas, manutenções e{" "}
+						<Text className="font-bold text-foreground">
+							Notas Fiscais em PDF
+						</Text>{" "}
+						salvas no aparelho.
 					</Text>
 				</Card>
 			</Animated.View>
@@ -461,7 +463,8 @@ export default function SettingsScreen() {
 						</Button.Label>
 					</Button>
 					<Text className="text-[11px] text-muted text-center mt-2.5 leading-4">
-						Esta ação apaga todas as scooters, registros e notas fiscais permanentemente.
+						Esta ação apaga todas as scooters, registros e notas fiscais
+						permanentemente.
 					</Text>
 				</Card>
 			</Animated.View>

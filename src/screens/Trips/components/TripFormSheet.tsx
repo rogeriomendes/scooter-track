@@ -176,9 +176,8 @@ export function TripFormSheet({
 					placeholder={
 						scooter.trackingMode === "percent"
 							? "Ex: 85"
-							: BATTERY_CHARTS[
-									scooter.batteryType
-								]?.maxVoltage.toString() || "54.6"
+							: BATTERY_CHARTS[scooter.batteryType]?.maxVoltage.toString() ||
+								"54.6"
 					}
 					keyboardType="numeric"
 					value={voltage}
@@ -206,14 +205,8 @@ export function TripFormSheet({
 						<Button.Label className="text-danger">Excluir</Button.Label>
 					</Button>
 				)}
-				<Button
-					variant="primary"
-					className="flex-1"
-					onPress={handleSaveTrip}
-				>
-					<Button.Label>
-						{editItem ? "Salvar" : "Salvar Registro"}
-					</Button.Label>
+				<Button variant="primary" className="flex-1" onPress={handleSaveTrip}>
+					<Button.Label>{editItem ? "Salvar" : "Salvar Registro"}</Button.Label>
 				</Button>
 			</View>
 

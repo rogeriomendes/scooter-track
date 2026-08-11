@@ -19,10 +19,7 @@
 				"backgroundImage": "./assets/images/android-icon-background.png",
 				"monochromeImage": "./assets/images/android-icon-monochrome.png"
 			},
-			"predictiveBackGestureEnabled": false,
-			"abiFilters": [
-				"arm64-v8a"
-			]
+			"predictiveBackGestureEnabled": false
 		},
 		"web": {
 			"output": "static",

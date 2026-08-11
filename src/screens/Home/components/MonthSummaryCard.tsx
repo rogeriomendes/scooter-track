@@ -1,4 +1,4 @@
-import { format, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card } from "heroui-native/card";
 import { useMemo } from "react";
@@ -102,7 +102,11 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 					{/* DISTÂNCIA NO MÊS */}
 					<View className="flex-1 bg-surface-secondary/40 p-2.5 rounded-xl border border-surface-secondary/50">
 						<View className="flex-row items-center gap-1 mb-1">
-							<StyledIcon name="navigation" size={12} className="text-success" />
+							<StyledIcon
+								name="navigation"
+								size={12}
+								className="text-success"
+							/>
 							<Text className="text-[10px] font-bold text-muted uppercase">
 								Distância
 							</Text>
