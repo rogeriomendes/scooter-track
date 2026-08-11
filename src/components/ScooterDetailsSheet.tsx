@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "heroui-native/button";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { StyledIcon } from "@/components/StyledIcon";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";

@@ -47,7 +47,7 @@ export default function DashboardScreen() {
 	>(null);
 	const [scooterToDelete, setScooterToDelete] = useState<number | null>(null);
 
-	const { scooter, allLogs, maintenanceList, stats, totalScooters, isLoading } =
+	const { scooter, allLogs, maintenanceList, stats, isLoading } =
 		useScooterData(activeScooterId);
 
 	const healthStats = useMaintenanceHealth(maintenanceList, stats);

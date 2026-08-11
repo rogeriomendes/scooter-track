@@ -113,7 +113,7 @@ export function ScooterFormSheet({
 				setInvoicePdfPath(destinationUri);
 				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 			}
-		} catch (error) {
+		} catch (_error) {
 			Alert.alert("Erro", "Não foi possível selecionar o PDF da Nota Fiscal.");
 		}
 	};

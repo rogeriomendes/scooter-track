@@ -91,29 +91,6 @@ export function MaintenanceScreen() {
 		setItemToDelete(null);
 	};
 
-	const handleQuickComplete = async (item: typeof maintenance.$inferSelect) => {
-		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-		const currentKm = stats?.totalKm || 0;
-		const now = new Date();
-
-		const updatePayload: Partial<typeof maintenance.$inferSelect> = {
-			completedAt: now,
-			isCompleted: true,
-		};
-
-		if (item.type === "km" || item.type === "mixed") {
-			updatePayload.lastMaintenanceKm = currentKm;
-		}
-
-		await db
-			.update(maintenance)
-			.set(updatePayload)
-			.where(eq(maintenance.id, item.id));
-
-		refresh();
-	};
-
 	if (isLoading) {
 		return (
 			<ScreenWrapper className="p-6 justify-center items-center">
