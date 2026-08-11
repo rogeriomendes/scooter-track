@@ -1,14 +1,19 @@
-name: EAS Build Android Preview
+name: EAS Build Android Release
 
 on:
+  release:
+    types: [published, created]
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: Build Apps using EAS
+    name: Build & Publish Release APK
     runs-on: ubuntu-latest
     steps:
       - name: 🏗 Setup repo
@@ -41,15 +46,24 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile --config.minimum-release-age=0
 
-      - name: 🚀 Build Locally on GitHub Runner (Android)
-        run: eas build --profile preview --platform android --local --non-interactive
+      - name: 🚀 Build Production APK (arm64-v8a)
+        run: eas build --profile production --platform android --local --non-interactive
         env:
           EXPO_NO_TELEMETRY: 1
           NODE_OPTIONS: "--max-old-space-size=3072"
           GRADLE_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+          ORG_GRADLE_PROJECT_reactNativeArchitectures: "arm64-v8a"
 
-      - name: 📤 Upload APK Artifact
+      - name: 📤 Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: android-release-apk
           path: "*.apk"
+
+      - name: 🚀 Publish APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
+        with:
+          files: "*.apk"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

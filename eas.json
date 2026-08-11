@@ -8,21 +8,30 @@
 			"developmentClient": true,
 			"distribution": "internal",
 			"env": {
-				"npm_config_minimum_release_age": "0"
+				"npm_config_minimum_release_age": "0",
+				"REACT_NATIVE_ARCHITECTURES": "arm64-v8a"
 			}
 		},
 		"preview": {
 			"distribution": "internal",
 			"android": {
-				"buildType": "apk"
+				"buildType": "apk",
+				"gradleCommand": ":app:assembleRelease -PreactNativeArchitectures=arm64-v8a"
 			},
 			"env": {
-				"npm_config_minimum_release_age": "0"
+				"npm_config_minimum_release_age": "0",
+				"REACT_NATIVE_ARCHITECTURES": "arm64-v8a"
 			}
 		},
 		"production": {
+			"distribution": "internal",
+			"android": {
+				"buildType": "apk",
+				"gradleCommand": ":app:assembleRelease -PreactNativeArchitectures=arm64-v8a"
+			},
 			"env": {
-				"npm_config_minimum_release_age": "0"
+				"npm_config_minimum_release_age": "0",
+				"REACT_NATIVE_ARCHITECTURES": "arm64-v8a"
 			}
 		}
 	},
