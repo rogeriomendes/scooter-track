@@ -3,12 +3,11 @@ import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
-import { Separator } from "heroui-native/separator";
 import { useMemo, useState } from "react";
 import {
 	ActivityIndicator,
-	FlatList,
 	Pressable,
+	SectionList,
 	Text,
 	View,
 } from "react-native";
@@ -30,27 +29,52 @@ export default function ChargesScreen() {
 	const { scooter, allLogs, refresh, stats, isLoading } =
 		useScooterData(activeScooterId);
 
-	const [currentMonth, setCurrentMonth] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-	);
+	const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
 	const [page, setPage] = useState(1);
 	const itemsPerPage = 20;
+
+	const totalChargesCount = useMemo(
+		() => allLogs.filter((l) => l.type === "charge").length,
+		[allLogs],
+	);
 
 	const chargesList = useMemo(() => {
 		return allLogs.filter((l) => {
 			if (l.type !== "charge") return false;
+			if (!selectedMonth) return true;
 			const logDate = new Date(l.date);
 			return (
-				logDate.getMonth() === currentMonth.getMonth() &&
-				logDate.getFullYear() === currentMonth.getFullYear()
+				logDate.getMonth() === selectedMonth.getMonth() &&
+				logDate.getFullYear() === selectedMonth.getFullYear()
 			);
 		});
-	}, [allLogs, currentMonth]);
+	}, [allLogs, selectedMonth]);
 
 	const displayedCharges = useMemo(
 		() => chargesList.slice(0, page * itemsPerPage),
 		[chargesList, page],
 	);
+
+	const groupedCharges = useMemo(() => {
+		const groups: { title: string; data: (typeof logs.$inferSelect)[] }[] = [];
+		const currentYear = new Date().getFullYear();
+
+		for (const charge of displayedCharges) {
+			const chargeDate = new Date(charge.date);
+			const groupTitle =
+				chargeDate.getFullYear() === currentYear
+					? format(chargeDate, "MMMM", { locale: ptBR })
+					: format(chargeDate, "MMMM 'de' yyyy", { locale: ptBR });
+
+			const existingGroup = groups.find((g) => g.title === groupTitle);
+			if (existingGroup) {
+				existingGroup.data.push(charge);
+			} else {
+				groups.push({ title: groupTitle, data: [charge] });
+			}
+		}
+		return groups;
+	}, [displayedCharges]);
 
 	const minDate = useMemo(() => {
 		let oldest = scooter?.createdAt ? new Date(scooter.createdAt) : new Date();
@@ -136,20 +160,12 @@ export default function ChargesScreen() {
 	return (
 		<ScreenWrapper>
 			{/* CABEÇALHO */}
-			<View className="px-4 pt-4 pb-2">
-				<Animated.Text
-					entering={FadeInDown.delay(100).springify()}
-					className="text-3xl font-bold text-foreground mb-1"
-				>
-					Recargas
-				</Animated.Text>
-				<Animated.Text
-					entering={FadeInDown.delay(200).springify()}
-					className="text-xs font-bold text-muted uppercase tracking-wider"
-				>
-					{scooter.name}
-				</Animated.Text>
-			</View>
+			<Animated.Text
+				entering={FadeInDown.delay(100).springify()}
+				className="text-3xl font-bold text-foreground px-4 py-2"
+			>
+				Recargas
+			</Animated.Text>
 
 			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
 			<Animated.View
@@ -166,7 +182,7 @@ export default function ChargesScreen() {
 						</View>
 						<View className="flex-1">
 							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
-								Mês Atual
+								{selectedMonth ? "Mês Selecionado" : "Total Cargas"}
 							</Text>
 							<Text className="text-lg font-black text-foreground">
 								{chargesList.length}{" "}
@@ -180,7 +196,11 @@ export default function ChargesScreen() {
 						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
-							<StyledIcon name="navigation" size={18} className="text-success" />
+							<StyledIcon
+								name="navigation"
+								size={18}
+								className="text-success"
+							/>
 						</View>
 						<View className="flex-1">
 							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -200,7 +220,11 @@ export default function ChargesScreen() {
 						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
-							<StyledIcon name="trending-up" size={18} className="text-warning" />
+							<StyledIcon
+								name="trending-up"
+								size={18}
+								className="text-warning"
+							/>
 						</View>
 						<View className="flex-1">
 							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -218,7 +242,11 @@ export default function ChargesScreen() {
 						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-danger/15 items-center justify-center">
-							<StyledIcon name="trending-down" size={18} className="text-danger" />
+							<StyledIcon
+								name="trending-down"
+								size={18}
+								className="text-danger"
+							/>
 						</View>
 						<View className="flex-1">
 							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -239,19 +267,19 @@ export default function ChargesScreen() {
 				className="pl-4 pr-0"
 			>
 				<MonthSelector
-					currentDate={currentMonth}
+					selectedMonth={selectedMonth}
 					minDate={minDate}
 					maxDate={new Date()}
 					onChange={(newDate) => {
-						setCurrentMonth(newDate);
+						setSelectedMonth(newDate);
 						setPage(1);
 					}}
 				/>
 			</Animated.View>
 
 			{/* LISTA DE RECARGAS */}
-			<FlatList
-				data={displayedCharges}
+			<SectionList
+				sections={groupedCharges}
 				onEndReached={() => {
 					if (displayedCharges.length < chargesList.length) {
 						setPage((p) => p + 1);
@@ -267,28 +295,59 @@ export default function ChargesScreen() {
 				contentContainerClassName="px-4 pb-24 gap-2 pt-1"
 				showsVerticalScrollIndicator={false}
 				ListEmptyComponent={
-					<View className="items-center justify-center mt-10 opacity-60">
-						<View className="bg-surface-secondary p-4 rounded-full mb-4">
-							<StyledIcon name="zap" size={48} className="text-muted" />
+					selectedMonth && totalChargesCount > 0 ? (
+						<View className="items-center justify-center mt-8 px-6">
+							<View className="bg-surface-secondary/60 p-4 rounded-full mb-3 border border-surface-secondary">
+								<StyledIcon name="calendar" size={36} className="text-muted" />
+							</View>
+							<Text className="text-foreground text-center text-base font-bold capitalize">
+								Nenhuma recarga em{" "}
+								{format(selectedMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+							</Text>
+							<Text className="text-muted text-center text-xs mt-1 px-4 leading-4">
+								Não há recargas registradas no mês selecionado.
+							</Text>
+							<Button
+								size="sm"
+								variant="secondary"
+								className="mt-4 rounded-xl bg-surface-tertiary border-0 px-4"
+								onPress={() => setSelectedMonth(null)}
+							>
+								<Button.Label className="text-info text-xs font-bold">
+									Ver todas as recargas
+								</Button.Label>
+							</Button>
 						</View>
-						<Text className="text-muted text-center text-lg font-bold">
-							Nenhuma recarga registrada
-						</Text>
-						<Text className="text-muted text-center text-sm mt-1 px-10">
-							Sempre que recarregar a bateria, adicione aqui para manter o
-							controle.
+					) : (
+						<View className="items-center justify-center mt-10 opacity-60">
+							<View className="bg-surface-secondary p-4 rounded-full mb-4">
+								<StyledIcon name="zap" size={48} className="text-muted" />
+							</View>
+							<Text className="text-muted text-center text-lg font-bold">
+								Nenhuma recarga registrada
+							</Text>
+							<Text className="text-muted text-center text-sm mt-1 px-10">
+								Sempre que recarregar a bateria, adicione aqui para manter o
+								controle.
+							</Text>
+						</View>
+					)
+				}
+				renderSectionHeader={({ section: { title } }) => (
+					<View className="bg-background/95 pb-1.5 flex-row items-center gap-1.5">
+						<View className="w-1.5 h-1.5 rounded-full bg-info" />
+						<Text className="text-[11px] font-bold text-muted capitalize">
+							{title}
 						</Text>
 					</View>
-				}
+				)}
 				renderItem={({ item, index }) => {
 					const cycle = stats?.cycles.find((c) => c.chargeLog.id === item.id);
 					const autonomia = cycle ? cycle.distance.toFixed(1) : "0.0";
 					const gain = chargeGainMap.get(item.id);
 
 					return (
-						<Animated.View
-							entering={FadeInRight.delay(index * 40).springify()}
-						>
+						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
 							<Card
 								variant="secondary"
 								className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
@@ -348,7 +407,14 @@ export default function ChargesScreen() {
 																className="text-success"
 															/>
 															<Text className="text-[9px] font-bold text-success">
-																+{gain.gainedPct}% ({gain.initialPct}% ➔ {scooter.trackingMode === "percent" ? item.batteryLevel : calculateBatteryPercentage(item.batteryLevel, scooter.batteryType)}%)
+																+{gain.gainedPct}% ({gain.initialPct}% ➔{" "}
+																{scooter.trackingMode === "percent"
+																	? item.batteryLevel
+																	: calculateBatteryPercentage(
+																			item.batteryLevel,
+																			scooter.batteryType,
+																		)}
+																%)
 															</Text>
 														</View>
 													)}
@@ -390,13 +456,13 @@ export default function ChargesScreen() {
 				<Button
 					size="md"
 					variant="primary"
-					className="rounded-full shadow-lg bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/40"
+					className="rounded-full shadow-md bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/20"
 					style={{
-						elevation: 10,
+						elevation: 3,
 						shadowColor: "#10b981",
-						shadowOffset: { width: 0, height: 6 },
-						shadowOpacity: 0.4,
-						shadowRadius: 10,
+						shadowOffset: { width: 0, height: 2 },
+						shadowOpacity: 0.2,
+						shadowRadius: 4,
 					}}
 					onPress={() => {
 						setLogToEdit(null);

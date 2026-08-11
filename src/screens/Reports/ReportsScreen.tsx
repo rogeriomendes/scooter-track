@@ -1,8 +1,3 @@
-import { EmptyScooterState } from "@/components/EmptyScooterState";
-import { ScreenWrapper } from "@/components/ScreenWrapper";
-import { StyledIcon } from "@/components/StyledIcon";
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 import { format, startOfMonth, subDays } from "date-fns";
 import * as Haptics from "expo-haptics";
 import { Card } from "heroui-native/card";
@@ -17,6 +12,11 @@ import {
 } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { StyledIcon } from "@/components/StyledIcon";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -167,26 +167,18 @@ export default function ReportsScreen() {
 	}
 
 	return (
-		<ScreenWrapper scrollable contentContainerClassName="p-4 pb-20">
-			<View className="mb-4">
-				<Animated.Text
-					entering={FadeInDown.delay(100).springify()}
-					className="text-3xl font-bold text-foreground mb-1"
-				>
-					Insights
-				</Animated.Text>
-				<Animated.Text
-					entering={FadeInDown.delay(200).springify()}
-					className="text-xs font-bold text-muted uppercase tracking-wider"
-				>
-					{scooter.name}
-				</Animated.Text>
-			</View>
+		<ScreenWrapper scrollable contentContainerClassName="px-4 pb-24">
+			<Animated.Text
+				entering={FadeInDown.delay(100).springify()}
+				className="text-3xl font-bold text-foreground py-2"
+			>
+				Insights
+			</Animated.Text>
 
 			{/* TOGGLE SEGMENTADO E FILTRO DE TEMPO */}
 			<Animated.View
 				entering={FadeInDown.delay(300).springify()}
-				className="mb-4 gap-3"
+				className="pt-1 mb-4 gap-3"
 			>
 				<View className="flex-row bg-surface-tertiary p-1.5 rounded-2xl">
 					<Pressable

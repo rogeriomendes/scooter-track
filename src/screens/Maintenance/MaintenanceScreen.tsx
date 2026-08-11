@@ -78,20 +78,12 @@ export function MaintenanceScreen() {
 	return (
 		<ScreenWrapper>
 			{/* CABEÇALHO */}
-			<View className="px-4 pt-4 pb-2">
-				<Animated.Text
-					entering={FadeInDown.delay(100).springify()}
-					className="text-3xl font-bold text-foreground mb-1"
-				>
-					Manutenção
-				</Animated.Text>
-				<Animated.Text
-					entering={FadeInDown.delay(200).springify()}
-					className="text-xs font-bold text-muted uppercase tracking-wider"
-				>
-					{scooter.name}
-				</Animated.Text>
-			</View>
+			<Animated.Text
+				entering={FadeInDown.delay(100).springify()}
+				className="text-3xl font-bold text-foreground px-4 py-2"
+			>
+				Manutenção
+			</Animated.Text>
 
 			<FlatList
 				data={maintenanceList}
@@ -368,7 +360,9 @@ export function MaintenanceScreen() {
 														size={12}
 														className="text-success"
 													/>
-													<Button.Label className={`text-[10px] font-bold ${item.isCompleted ? "text-success" : "text-foreground"}`}>
+													<Button.Label
+														className={`text-[10px] font-bold ${item.isCompleted ? "text-success" : "text-foreground"}`}
+													>
 														{item.isCompleted ? "Concluída" : "Concluir"}
 													</Button.Label>
 												</View>
@@ -390,13 +384,13 @@ export function MaintenanceScreen() {
 				<Button
 					size="md"
 					variant="primary"
-					className="rounded-full shadow-lg bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/40"
+					className="rounded-full shadow-md bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/20"
 					style={{
-						elevation: 10,
+						elevation: 3,
 						shadowColor: "#10b981",
-						shadowOffset: { width: 0, height: 6 },
-						shadowOpacity: 0.4,
-						shadowRadius: 10,
+						shadowOffset: { width: 0, height: 2 },
+						shadowOpacity: 0.2,
+						shadowRadius: 4,
 					}}
 					onPress={() => {
 						setItemToEdit(null);

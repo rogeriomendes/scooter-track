@@ -10,14 +10,14 @@ import * as Haptics from "expo-haptics";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 interface MonthSelectorProps {
-	currentDate: Date;
-	onChange: (newDate: Date) => void;
+	selectedMonth: Date | null;
+	onChange: (newDate: Date | null) => void;
 	minDate?: Date;
 	maxDate?: Date;
 }
 
 export function MonthSelector({
-	currentDate,
+	selectedMonth,
 	onChange,
 	minDate,
 	maxDate,
@@ -35,16 +35,43 @@ export function MonthSelector({
 	// Mostrar meses mais recentes primeiro
 	const reversedMonths = [...months].reverse();
 
+	const isAllSelected = selectedMonth === null;
+
 	return (
-		<View className="mb-4">
+		<View className="mb-2">
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				contentContainerClassName="gap-2"
 			>
+				{/* CHIP "TODOS" */}
+				<Pressable
+					onPress={() => {
+						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+						onChange(null);
+					}}
+					className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 transition-all ${
+						isAllSelected
+							? "bg-success/15 border border-success/30 shadow-sm"
+							: "bg-surface-tertiary border border-transparent active:opacity-70"
+					}`}
+				>
+					{isAllSelected && (
+						<View className="w-1.5 h-1.5 rounded-full bg-success" />
+					)}
+					<Text
+						className={`text-xs font-bold ${
+							isAllSelected ? "text-success" : "text-muted"
+						}`}
+					>
+						Todos
+					</Text>
+				</Pressable>
+
 				{reversedMonths.map((month) => {
 					const isSelected =
-						month.getTime() === startOfMonth(currentDate).getTime();
+						selectedMonth !== null &&
+						month.getTime() === startOfMonth(selectedMonth).getTime();
 					return (
 						<Pressable
 							key={month.getTime()}

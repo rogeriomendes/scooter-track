@@ -1,18 +1,3 @@
-import { format, subDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { eq } from "drizzle-orm";
-import { Button } from "heroui-native/button";
-import { Card } from "heroui-native/card";
-import { Separator } from "heroui-native/separator";
-import { useMemo, useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	SectionList,
-	Text,
-	View,
-} from "react-native";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { MonthSelector } from "@/components/MonthSelector";
@@ -23,6 +8,20 @@ import { db } from "@/db/client";
 import { logs } from "@/db/schema";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { eq } from "drizzle-orm";
+import { Button } from "heroui-native/button";
+import { Card } from "heroui-native/card";
+import { useMemo, useState } from "react";
+import {
+	ActivityIndicator,
+	Pressable,
+	SectionList,
+	Text,
+	View,
+} from "react-native";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { TripFormSheet } from "./components/TripFormSheet";
 
 export default function TripsScreen() {
@@ -30,22 +29,26 @@ export default function TripsScreen() {
 	const { scooter, allLogs, refresh, isLoading } =
 		useScooterData(activeScooterId);
 
-	const [currentMonth, setCurrentMonth] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-	);
+	const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
 	const [page, setPage] = useState(1);
 	const itemsPerPage = 30; // Increased since we use section list
+
+	const totalTripsCount = useMemo(
+		() => allLogs.filter((l) => l.type === "trip").length,
+		[allLogs],
+	);
 
 	const tripsList = useMemo(() => {
 		return allLogs.filter((l) => {
 			if (l.type !== "trip") return false;
+			if (!selectedMonth) return true;
 			const logDate = new Date(l.date);
 			return (
-				logDate.getMonth() === currentMonth.getMonth() &&
-				logDate.getFullYear() === currentMonth.getFullYear()
+				logDate.getMonth() === selectedMonth.getMonth() &&
+				logDate.getFullYear() === selectedMonth.getFullYear()
 			);
 		});
-	}, [allLogs, currentMonth]);
+	}, [allLogs, selectedMonth]);
 
 	const dashboardStats = useMemo(() => {
 		if (tripsList.length === 0)
@@ -62,7 +65,7 @@ export default function TripsScreen() {
 		}
 
 		const activeDays = uniqueDays.size;
-		const avgKm = totalKm / activeDays;
+		const avgKm = activeDays > 0 ? totalKm / activeDays : 0;
 
 		return { totalKm, avgKm, maxKm, activeDays, tripCount: tripsList.length };
 	}, [tripsList]);
@@ -74,16 +77,14 @@ export default function TripsScreen() {
 
 	const groupedTrips = useMemo(() => {
 		const groups: { title: string; data: (typeof logs.$inferSelect)[] }[] = [];
-		const todayStr = format(new Date(), "yyyy-MM-dd");
-		const yesterdayStr = format(subDays(new Date(), 1), "yyyy-MM-dd");
+		const currentYear = new Date().getFullYear();
 
 		for (const trip of displayedTrips) {
 			const tripDate = new Date(trip.date);
-			const dateStr = format(tripDate, "yyyy-MM-dd");
-
-			let groupTitle = format(tripDate, "dd 'de' MMMM", { locale: ptBR });
-			if (dateStr === todayStr) groupTitle = "Hoje";
-			else if (dateStr === yesterdayStr) groupTitle = "Ontem";
+			const groupTitle =
+				tripDate.getFullYear() === currentYear
+					? format(tripDate, "MMMM", { locale: ptBR })
+					: format(tripDate, "MMMM 'de' yyyy", { locale: ptBR });
 
 			const existingGroup = groups.find((g) => g.title === groupTitle);
 			if (existingGroup) {
@@ -111,7 +112,10 @@ export default function TripsScreen() {
 	);
 
 	const tripConsumptionMap = useMemo(() => {
-		const map = new Map<number, { consumedPct: number; consumedValue: number }>();
+		const map = new Map<
+			number,
+			{ consumedPct: number; consumedValue: number }
+		>();
 		if (!scooter) return map;
 		const ascLogs = [...allLogs].sort(
 			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -179,20 +183,12 @@ export default function TripsScreen() {
 	return (
 		<ScreenWrapper>
 			{/* CABEÇALHO */}
-			<View className="px-4 pt-4 pb-2">
-				<Animated.Text
-					entering={FadeInDown.delay(100).springify()}
-					className="text-3xl font-bold text-foreground mb-1"
-				>
-					Usos
-				</Animated.Text>
-				<Animated.Text
-					entering={FadeInDown.delay(200).springify()}
-					className="text-xs font-bold text-muted uppercase tracking-wider"
-				>
-					{scooter.name}
-				</Animated.Text>
-			</View>
+			<Animated.Text
+				entering={FadeInDown.delay(100).springify()}
+				className="text-3xl font-bold text-foreground px-4 py-2"
+			>
+				Usos
+			</Animated.Text>
 
 			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
 			<Animated.View
@@ -204,12 +200,12 @@ export default function TripsScreen() {
 						variant="secondary"
 						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
-						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
-							<StyledIcon name="map-pin" size={18} className="text-info" />
+						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
+							<StyledIcon name="map-pin" size={18} className="text-success" />
 						</View>
 						<View className="flex-1">
 							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
-								Total Mês
+								{selectedMonth ? "Total Mês" : "Total Geral"}
 							</Text>
 							<Text className="text-lg font-black text-foreground">
 								{dashboardStats.totalKm.toFixed(1)}{" "}
@@ -222,8 +218,12 @@ export default function TripsScreen() {
 						variant="secondary"
 						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
-						<View className="w-9 h-9 rounded-xl bg-primary/15 items-center justify-center">
-							<StyledIcon name="bar-chart-2" size={18} className="text-primary" />
+						<View className="w-9 h-9 rounded-xl bg-accent/15 items-center justify-center">
+							<StyledIcon
+								name="bar-chart-2"
+								size={18}
+								className="text-accent"
+							/>
 						</View>
 						<View className="flex-1">
 							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -260,8 +260,8 @@ export default function TripsScreen() {
 						variant="secondary"
 						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
-						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
-							<StyledIcon name="hash" size={18} className="text-success" />
+						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
+							<StyledIcon name="hash" size={18} className="text-info" />
 						</View>
 						<View className="flex-1">
 							<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -281,11 +281,11 @@ export default function TripsScreen() {
 				className="pl-4 pr-0"
 			>
 				<MonthSelector
-					currentDate={currentMonth}
+					selectedMonth={selectedMonth}
 					minDate={minDate}
 					maxDate={new Date()}
 					onChange={(newDate) => {
-						setCurrentMonth(newDate);
+						setSelectedMonth(newDate);
 						setPage(1);
 					}}
 				/>
@@ -310,21 +310,46 @@ export default function TripsScreen() {
 					) : null
 				}
 				ListEmptyComponent={
-					<View className="items-center justify-center mt-6 opacity-60">
-						<View className="bg-surface-secondary p-4 rounded-full mb-4">
-							<StyledIcon name="map-pin" size={48} className="text-muted" />
+					selectedMonth && totalTripsCount > 0 ? (
+						<View className="items-center justify-center mt-8 px-6">
+							<View className="bg-surface-secondary/60 p-4 rounded-full mb-3 border border-surface-secondary">
+								<StyledIcon name="calendar" size={36} className="text-muted" />
+							</View>
+							<Text className="text-foreground text-center text-base font-bold capitalize">
+								Nenhum uso em{" "}
+								{format(selectedMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+							</Text>
+							<Text className="text-muted text-center text-xs mt-1 px-4 leading-4">
+								Não há viagens registradas no mês selecionado.
+							</Text>
+							<Button
+								size="sm"
+								variant="secondary"
+								className="mt-4 rounded-xl bg-surface-tertiary border-0 px-4"
+								onPress={() => setSelectedMonth(null)}
+							>
+								<Button.Label className="text-success text-xs font-bold">
+									Ver todos os usos
+								</Button.Label>
+							</Button>
 						</View>
-						<Text className="text-muted text-center text-lg font-bold">
-							Nenhum uso registrado
-						</Text>
-						<Text className="text-muted text-center text-sm mt-1 px-10">
-							Suas viagens aparecerão aqui para ajudar a calcular a autonomia
-							real.
-						</Text>
-					</View>
+					) : (
+						<View className="items-center justify-center mt-6 opacity-60">
+							<View className="bg-surface-secondary p-4 rounded-full mb-4">
+								<StyledIcon name="map-pin" size={48} className="text-muted" />
+							</View>
+							<Text className="text-muted text-center text-lg font-bold">
+								Nenhum uso registrado
+							</Text>
+							<Text className="text-muted text-center text-sm mt-1 px-10">
+								Suas viagens aparecerão aqui para ajudar a calcular a autonomia
+								real.
+							</Text>
+						</View>
+					)
 				}
 				renderSectionHeader={({ section: { title } }) => (
-					<View className="bg-background/95 py-1.5 flex-row items-center gap-1.5">
+					<View className="bg-background/95 pb-1.5 flex-row items-center gap-1.5">
 						<View className="w-1.5 h-1.5 rounded-full bg-success" />
 						<Text className="text-[11px] font-bold text-muted capitalize">
 							{title}
@@ -340,7 +365,10 @@ export default function TripsScreen() {
 								variant="secondary"
 								className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
 							>
-								<Pressable className="py-2.5 px-3" onPress={() => handleEdit(item)}>
+								<Pressable
+									className="py-2.5 px-3"
+									onPress={() => handleEdit(item)}
+								>
 									<View className="flex-row items-center justify-between">
 										<View className="flex-row items-center gap-2.5 flex-1">
 											<View className="bg-success/10 p-2 rounded-lg border border-success/20">
@@ -355,7 +383,9 @@ export default function TripsScreen() {
 													<Text className="text-base font-black text-foreground">
 														{item.distance.toFixed(1)}
 													</Text>
-													<Text className="font-bold text-muted text-xs">km</Text>
+													<Text className="font-bold text-muted text-xs">
+														km
+													</Text>
 												</View>
 												<View className="flex-row items-center gap-2 mt-0.5 flex-wrap">
 													<View className="flex-row items-center gap-1">
@@ -401,7 +431,7 @@ export default function TripsScreen() {
 
 										<View className="bg-surface-tertiary px-2 py-0.5 rounded-md">
 											<Text className="text-[10px] text-muted font-bold">
-												{format(item.date, "HH:mm", { locale: ptBR })}
+												{format(item.date, "dd MMM • HH:mm", { locale: ptBR })}
 											</Text>
 										</View>
 									</View>
@@ -433,13 +463,13 @@ export default function TripsScreen() {
 				<Button
 					size="md"
 					variant="primary"
-					className="rounded-full shadow-lg bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/40"
+					className="rounded-full shadow-md bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/20"
 					style={{
-						elevation: 10,
+						elevation: 3,
 						shadowColor: "#10b981",
-						shadowOffset: { width: 0, height: 6 },
-						shadowOpacity: 0.4,
-						shadowRadius: 10,
+						shadowOffset: { width: 0, height: 2 },
+						shadowOpacity: 0.2,
+						shadowRadius: 4,
 					}}
 					onPress={() => {
 						setLogToEdit(null);
