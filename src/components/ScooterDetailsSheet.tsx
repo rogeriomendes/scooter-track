@@ -8,6 +8,8 @@ import { StyledIcon } from "@/components/StyledIcon";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import type { scooters } from "@/db/schema";
 
+import { openPdfFile } from "@/utils/fileViewer";
+
 interface ScooterDetailsSheetProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -30,22 +32,7 @@ export function ScooterDetailsSheet({
 
 	const viewInvoicePdf = async () => {
 		if (scooter.invoicePdfPath) {
-			try {
-				const canShare = await Sharing.isAvailableAsync();
-				if (canShare) {
-					await Sharing.shareAsync(scooter.invoicePdfPath, {
-						mimeType: "application/pdf",
-						dialogTitle: "Nota Fiscal",
-					});
-				} else {
-					Alert.alert(
-						"Erro",
-						"Compartilhamento/Visualização não disponível neste dispositivo.",
-					);
-				}
-			} catch (error) {
-				Alert.alert("Erro", "Não foi possível abrir a Nota Fiscal em PDF.");
-			}
+			await openPdfFile(scooter.invoicePdfPath);
 		}
 	};
 

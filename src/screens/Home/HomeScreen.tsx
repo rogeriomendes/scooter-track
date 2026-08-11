@@ -34,6 +34,8 @@ import { MonthSummaryCard } from "./components/MonthSummaryCard";
 import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
 import { WeatherWidget } from "./components/WeatherWidget";
 
+import { openPdfFile } from "@/utils/fileViewer";
+
 export default function DashboardScreen() {
 	const colorScheme = useColorScheme();
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
@@ -402,7 +404,7 @@ export default function DashboardScreen() {
 								isIconOnly
 								onPress={async () => {
 									if (scooter.invoicePdfPath) {
-										await Sharing.shareAsync(scooter.invoicePdfPath);
+										await openPdfFile(scooter.invoicePdfPath);
 									}
 								}}
 							>

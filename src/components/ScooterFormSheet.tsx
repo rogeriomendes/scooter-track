@@ -20,6 +20,7 @@ import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
+import { openPdfFile } from "@/utils/fileViewer";
 
 interface ScooterFormSheetProps {
 	isOpen: boolean;
@@ -100,42 +101,27 @@ export function ScooterFormSheet({
 			});
 
 			if (!result.canceled && result.assets && result.assets.length > 0) {
-				const pickedFile = result.assets[0];
+				const asset = result.assets[0];
 
-				const cleanFileName = pickedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-				const fileName = `invoice_${Date.now()}_${cleanFileName}`;
-				const destPath = `${FileSystem.documentDirectory}${fileName}`;
+				const fileName = `nota_fiscal_${Date.now()}.pdf`;
+				const destinationUri = `${FileSystem.documentDirectory}${fileName}`;
 
 				await FileSystem.copyAsync({
-					from: pickedFile.uri,
-					to: destPath,
+					from: asset.uri,
+					to: destinationUri,
 				});
 
-				setInvoicePdfPath(destPath);
+				setInvoicePdfPath(destinationUri);
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 			}
 		} catch (error) {
-			Alert.alert("Erro", "Não foi possível selecionar a Nota Fiscal em PDF.");
+			Alert.alert("Erro", "Não foi possível selecionar o PDF da Nota Fiscal.");
 		}
 	};
 
 	const viewInvoicePdf = async () => {
 		if (invoicePdfPath) {
-			try {
-				const canShare = await Sharing.isAvailableAsync();
-				if (canShare) {
-					await Sharing.shareAsync(invoicePdfPath, {
-						mimeType: "application/pdf",
-						dialogTitle: "Nota Fiscal",
-					});
-				} else {
-					Alert.alert(
-						"Erro",
-						"Compartilhamento/Visualização não disponível neste dispositivo.",
-					);
-				}
-			} catch (error) {
-				Alert.alert("Erro", "Não foi possível abrir o PDF.");
-			}
+			await openPdfFile(invoicePdfPath);
 		}
 	};
 
