@@ -1,5 +1,11 @@
+import { useEffect } from "react";
 import { Text, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import Animated, {
+	useAnimatedProps,
+	useSharedValue,
+	withSpring,
+} from "react-native-reanimated";
+import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { StyledIcon } from "@/components/StyledIcon";
 
 type BatteryArcProps = {
@@ -9,7 +15,11 @@ type BatteryArcProps = {
 	statusIcon: StyledIcon;
 	statusText: string;
 	statusColor: string;
+	gradientColors?: readonly [string, string];
+	secondaryLabel?: string | null;
 };
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 export function BatteryArc({
 	percentage,
@@ -18,68 +28,136 @@ export function BatteryArc({
 	statusIcon,
 	statusText,
 	statusColor,
+	gradientColors = ["#34d399", "#059669"],
+	secondaryLabel,
 }: BatteryArcProps) {
 	const size = 240;
 	const strokeWidth = 14;
 	const center = size / 2;
-	const radius = center - strokeWidth;
+	const radius = center - strokeWidth - 2;
 
-	// Start from the middle Y
-	const startX = strokeWidth;
+	const startX = strokeWidth + 2;
 	const startY = center;
-	const endX = size - strokeWidth;
+	const endX = size - (strokeWidth + 2);
 	const endY = startY;
 
 	const d = `M ${startX},${startY} A ${radius},${radius} 0 0,1 ${endX},${endY}`;
+	const pathLength = Math.PI * radius; // length of half circle
 
-	const pathLength = Math.PI * radius; // length of the half circle
-	const strokeDashoffset = pathLength - (pathLength * percentage) / 100;
+	const progress = useSharedValue(0);
+
+	useEffect(() => {
+		progress.value = withSpring(Math.max(0, Math.min(100, percentage)), {
+			damping: 18,
+			stiffness: 90,
+		});
+	}, [percentage, progress]);
+
+	const animatedPathProps = useAnimatedProps(() => {
+		const strokeDashoffset = pathLength - (pathLength * progress.value) / 100;
+		return {
+			strokeDashoffset,
+		};
+	});
+
+	// Calculo do ponto da ponta da arc (ponto final)
+	const clampPct = Math.max(0, Math.min(100, percentage));
+	const angleRad = Math.PI - (clampPct / 100) * Math.PI;
+	const tipX = center + radius * Math.cos(angleRad);
+	const tipY = center - radius * Math.sin(angleRad);
 
 	return (
 		<View style={{ width: size, alignItems: "center" }}>
 			<View
 				style={{
-					height: center + strokeWidth,
+					height: center + strokeWidth + 4,
 					width: size,
 					overflow: "hidden",
 				}}
 			>
 				<Svg width={size} height={size}>
-					{/* Background Arc */}
+					<Defs>
+						<LinearGradient id="batteryArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+							<Stop offset="0%" stopColor={gradientColors[0]} />
+							<Stop offset="100%" stopColor={gradientColors[1]} />
+						</LinearGradient>
+					</Defs>
+
+					{/* Brilho Ambiente Externo */}
 					<Path
 						d={d}
-						stroke="rgba(255,255,255,0.05)"
+						stroke={color}
+						strokeWidth={strokeWidth + 6}
+						fill="none"
+						opacity={0.12}
+						strokeLinecap="round"
+					/>
+
+					{/* Trilho de Fundo */}
+					<Path
+						d={d}
+						stroke="rgba(150, 150, 150, 0.12)"
 						strokeWidth={strokeWidth}
 						fill="none"
 						strokeLinecap="round"
 					/>
-					{/* Foreground Arc */}
-					<Path
+
+					{/* Arco Animado com Gradiente */}
+					<AnimatedPath
 						d={d}
-						stroke={color}
+						stroke="url(#batteryArcGrad)"
 						strokeWidth={strokeWidth}
 						fill="none"
 						strokeLinecap="round"
 						strokeDasharray={pathLength}
-						strokeDashoffset={strokeDashoffset}
+						animatedProps={animatedPathProps}
 					/>
+
+					{/* Indicador de Ponta (End Cap Dot) */}
+					{clampPct > 2 && clampPct < 98 && (
+						<>
+							<Circle
+								cx={tipX}
+								cy={tipY}
+								r={strokeWidth / 2 + 3}
+								fill={gradientColors[0]}
+								opacity={0.4}
+							/>
+							<Circle
+								cx={tipX}
+								cy={tipY}
+								r={strokeWidth / 2 - 2}
+								fill="#ffffff"
+							/>
+						</>
+					)}
 				</Svg>
 			</View>
 
-			{/* Center Text (Battery %) - pulled up to sit inside the arc */}
-			<View style={{ marginTop: -(center * 0.7), alignItems: "center" }}>
+			{/* Porcentagem Central & Status */}
+			<View style={{ marginTop: -(center * 0.74), alignItems: "center" }}>
 				<Text
-					className="text-[64px] font-black tracking-tighter"
+					className="text-[60px] font-black tracking-tighter"
 					style={{
 						color: color,
 						textShadowColor: glowColor,
-						textShadowRadius: 15,
+						textShadowRadius: 18,
 						textShadowOffset: { width: 0, height: 4 },
 					}}
 				>
-					{percentage}%
+					{Math.round(percentage)}%
 				</Text>
-				<View className="flex-row items-center gap-1.5 mt-3 bg-surface-secondary/80 backdrop-blur-md px-3 py-1 rounded-full border border-surface-secondary">
+
+				{/* Subtítulo Inteligente (Voltagem / Autonomia Est.) embaixo da Porcentagem */}
+				{secondaryLabel && (
+					<View className="bg-surface-secondary/90 px-2.5 py-0.5 rounded-full border border-surface-secondary/80 -mt-1 mb-1.5">
+						<Text className="text-[11px] font-bold text-muted">
+							{secondaryLabel}
+						</Text>
+					</View>
+				)}
+
+				<View className="flex-row items-center gap-1.5 bg-surface-secondary/80 backdrop-blur-md px-3.5 py-1 rounded-full border border-surface-secondary/80 shadow-sm">
 					<StyledIcon name={statusIcon} size={14} className={statusColor} />
 					<Text className="text-xs font-bold text-foreground">
 						{statusText}

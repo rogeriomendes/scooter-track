@@ -179,6 +179,18 @@ export default function DashboardScreen() {
 		return `Há ${days} dias`;
 	}, [stats]);
 
+	const secondaryBatteryLabel = useMemo(() => {
+		if (!scooter || !latestLog) return null;
+		if (scooter.trackingMode === "voltage") {
+			return `${latestLog.batteryLevel.toFixed(1)}V`;
+		}
+		if (stats?.averageCycleKm) {
+			const estKm = (batteryPercent / 100) * stats.averageCycleKm;
+			return `~${estKm.toFixed(0)} km est.`;
+		}
+		return null;
+	}, [scooter, latestLog, stats, batteryPercent]);
+
 	if (isLoading) {
 		return (
 			<ScreenWrapper className="p-6 justify-center items-center">
@@ -268,6 +280,8 @@ export default function DashboardScreen() {
 							percentage={batteryPercent}
 							color={batteryStyles.color}
 							glowColor={batteryStyles.glow}
+							gradientColors={batteryStyles.gradient}
+							secondaryLabel={secondaryBatteryLabel}
 							statusIcon={smartStatus.icon}
 							statusText={smartStatus.text}
 							statusColor={smartStatus.color}
