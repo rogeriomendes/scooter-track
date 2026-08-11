@@ -9,7 +9,7 @@ import { Button } from "heroui-native/button";
 import { Label } from "heroui-native/label";
 import { TextField } from "heroui-native/text-field";
 import { useEffect, useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Switch, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { StyledIcon } from "@/components/StyledIcon";
@@ -46,6 +46,7 @@ export function MaintenanceFormSheet({
 	const [completedDate, setCompletedDate] = useState(new Date());
 	const [showCompletedDatePicker, setShowCompletedDatePicker] = useState(false);
 	const [resetWear, setResetWear] = useState(false);
+	const [hasWear, setHasWear] = useState(true);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -58,11 +59,18 @@ export function MaintenanceFormSheet({
 				setIntervalMonths(
 					editItem.intervalMonths ? editItem.intervalMonths.toString() : "",
 				);
-				setLastDate(editItem.lastMaintenanceDate || new Date());
-				setTargetDate(editItem.targetDate || new Date());
+				setLastDate(
+					editItem.lastMaintenanceDate
+						? new Date(editItem.lastMaintenanceDate)
+						: new Date(),
+				);
+				setTargetDate(
+					editItem.targetDate ? new Date(editItem.targetDate) : new Date(),
+				);
 				setCompletedDate(
 					editItem.completedAt ? new Date(editItem.completedAt) : new Date(),
 				);
+				setHasWear(editItem.hasWear ?? true);
 				setResetWear(false);
 			} else {
 				setName("");
@@ -72,6 +80,7 @@ export function MaintenanceFormSheet({
 				setLastDate(new Date());
 				setTargetDate(new Date());
 				setCompletedDate(new Date());
+				setHasWear(true);
 				setResetWear(false);
 			}
 		}
@@ -155,16 +164,17 @@ export function MaintenanceFormSheet({
 						? editItem.lastMaintenanceKm
 						: currentTotalKm,
 			lastMaintenanceDate:
-				isResetting && (type === "months" || type === "mixed")
-					? now
-					: type !== "km"
-						? lastDate
-						: editItem?.lastMaintenanceDate || now,
+				type === "date" || type === "months" || type === "mixed"
+					? lastDate
+					: editItem?.lastMaintenanceDate
+						? new Date(editItem.lastMaintenanceDate)
+						: now,
 			isCompleted:
 				type === "date"
 					? resetWear || (editItem ? Boolean(editItem.isCompleted) : false)
 					: false,
 			completedAt: resetWear ? now : editItem?.completedAt || null,
+			hasWear: hasWear,
 		};
 
 		if (editItem) {
@@ -276,6 +286,29 @@ export function MaintenanceFormSheet({
 						<Button.Label>Misto</Button.Label>
 					</Button>
 				</View>
+			</View>
+
+			{/* TEM DESGASTE MECÂNICO / USO? */}
+			<View className="mb-4 bg-surface-secondary/40 p-3.5 rounded-2xl border border-surface-secondary/60 flex-row items-center justify-between">
+				<View className="flex-1 pr-3">
+					<Text className="text-sm font-medium text-foreground">
+						Item com Desgaste Mecânico / Uso?
+					</Text>
+					<Text className="text-xs text-muted leading-4 mt-0.5">
+						{hasWear
+							? "Calcula % de desgaste de peça (ex: Freio, Pneu, Correia)."
+							: "Item administrativo/fixo sem desgaste de uso (ex: IPVA, Licenciamento)."}
+					</Text>
+				</View>
+				<Switch
+					value={hasWear}
+					onValueChange={(val) => {
+						if (!isReadOnly) setHasWear(val);
+					}}
+					disabled={isReadOnly}
+					trackColor={{ false: "#3f3f46", true: "#10b981" }}
+					thumbColor="#ffffff"
+				/>
 			</View>
 
 			{type === "km" && (

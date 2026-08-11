@@ -50,6 +50,7 @@ export const maintenance = sqliteTable("maintenance", {
 		.notNull()
 		.default(false),
 	completedAt: integer("completedAt", { mode: "timestamp" }),
+	hasWear: integer("hasWear", { mode: "boolean" }).notNull().default(true),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });
 

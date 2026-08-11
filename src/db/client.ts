@@ -20,5 +20,13 @@ try {
 	// A coluna já existe
 }
 
+try {
+	sqliteDb.execSync(
+		"ALTER TABLE maintenance ADD COLUMN hasWear INTEGER NOT NULL DEFAULT 1;",
+	);
+} catch {
+	// A coluna já existe
+}
+
 // Cria a instância do ORM vinculada ao banco e ao schema
 export const db = drizzle(sqliteDb, { schema });

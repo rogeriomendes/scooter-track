@@ -53,20 +53,11 @@ export function MaintenanceScreen() {
 
 		const updatePayload: Partial<typeof maintenance.$inferSelect> = {
 			completedAt: now,
+			isCompleted: true,
 		};
 
-		if (item.type === "km") {
+		if (item.type === "km" || item.type === "mixed") {
 			updatePayload.lastMaintenanceKm = currentKm;
-			updatePayload.isCompleted = false;
-		} else if (item.type === "months") {
-			updatePayload.lastMaintenanceDate = now;
-			updatePayload.isCompleted = false;
-		} else if (item.type === "mixed") {
-			updatePayload.lastMaintenanceKm = currentKm;
-			updatePayload.lastMaintenanceDate = now;
-			updatePayload.isCompleted = false;
-		} else if (item.type === "date") {
-			updatePayload.isCompleted = true;
 		}
 
 		await db
@@ -283,19 +274,37 @@ export function MaintenanceScreen() {
 
 					let statusColor = "text-success";
 					let barColor = "bg-success";
-					let bgGlow = "border-success/20";
+					let bgGlow = "border-surface-secondary";
 					let iconColor = "text-success";
+					let iconName:
+						| "tool"
+						| "check-circle"
+						| "calendar"
+						| "alert-circle"
+						| "alert-triangle" = "tool";
 
-					if (isCritical) {
+					if (item.isCompleted) {
+						statusColor = "text-cyan-400";
+						bgGlow = "border-cyan-500/30 bg-cyan-500/5";
+						iconColor = "text-cyan-400";
+						iconName = "check-circle";
+					} else if (!(item.hasWear ?? true)) {
+						statusColor = "text-indigo-400";
+						bgGlow = "border-indigo-500/30 bg-indigo-500/5";
+						iconColor = "text-indigo-400";
+						iconName = "calendar";
+					} else if (isCritical) {
 						statusColor = "text-danger";
 						barColor = "bg-danger";
 						bgGlow = "border-danger/30 bg-danger/5";
 						iconColor = "text-danger";
+						iconName = "alert-circle";
 					} else if (isWarning) {
 						statusColor = "text-warning";
 						barColor = "bg-warning";
 						bgGlow = "border-warning/30 bg-warning/5";
 						iconColor = "text-warning";
+						iconName = "alert-triangle";
 					}
 
 					return (
@@ -305,12 +314,14 @@ export function MaintenanceScreen() {
 								className={`border ${bgGlow} bg-surface shadow-sm mb-3 p-0`}
 							>
 								{/* BACKGROUND PROGRESS BAR LAYER */}
-								<View className="absolute bottom-0 left-0 right-0 h-1 bg-surface-secondary/50">
-									<View
-										className={`h-full ${barColor}`}
-										style={{ width: `${100 - wearPercentage}%` }}
-									/>
-								</View>
+								{!item.isCompleted && (item.hasWear ?? true) && (
+									<View className="absolute bottom-0 left-0 right-0 h-1 bg-surface-secondary/50">
+										<View
+											className={`h-full ${barColor}`}
+											style={{ width: `${100 - wearPercentage}%` }}
+										/>
+									</View>
+								)}
 
 								<Pressable
 									className="px-4 py-4"
@@ -322,10 +333,10 @@ export function MaintenanceScreen() {
 									<View className="flex-row items-start justify-between">
 										<View className="flex-row items-start gap-3 flex-1">
 											<View
-												className={`p-2.5 rounded-xl bg-surface-secondary/30 mt-0.5 ${isCritical || isWarning ? "border border-transparent" : "border border-surface-secondary"}`}
+												className={`p-2.5 rounded-xl bg-surface-secondary/30 mt-0.5 border border-surface-secondary`}
 											>
 												<StyledIcon
-													name="tool"
+													name={iconName}
 													size={18}
 													className={iconColor}
 												/>
@@ -339,61 +350,61 @@ export function MaintenanceScreen() {
 														{item.name}
 													</Text>
 												</View>
-												<View className="flex-row items-center gap-1.5 mt-0.5">
-													<Text className={`text-xs font-bold ${statusColor}`}>
-														{primaryInfo}
-													</Text>
-													<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
-														• {secondaryInfo}
-													</Text>
-												</View>
-												{item.completedAt && (
-													<Text className="text-[10px] font-medium text-muted/80 mt-0.5">
-														Última:{" "}
-														{format(new Date(item.completedAt), "dd/MM/yyyy", {
-															locale: ptBR,
-														})}
-													</Text>
+												{item.isCompleted ? (
+													<View className="flex-row items-center gap-1.5 mt-0.5">
+														<Text className="text-xs font-bold text-cyan-400">
+															Realizada
+															{item.completedAt
+																? ` em ${format(new Date(item.completedAt), "dd/MM/yyyy", { locale: ptBR })}`
+																: ""}
+														</Text>
+													</View>
+												) : (
+													<>
+														<View className="flex-row items-center gap-1.5 mt-0.5">
+															<Text className={`text-xs font-bold ${statusColor}`}>
+																{primaryInfo}
+															</Text>
+															<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
+																• {secondaryInfo}
+															</Text>
+														</View>
+														{item.completedAt && (
+															<Text className="text-[10px] font-medium text-muted/80 mt-0.5">
+																Última:{" "}
+																{format(new Date(item.completedAt), "dd/MM/yyyy", {
+																	locale: ptBR,
+																})}
+															</Text>
+														)}
+													</>
 												)}
 											</View>
 										</View>
 
-										<View className="items-end pl-2 gap-1.5">
-											<View className="items-end">
-												<Text className={`text-sm font-black ${statusColor}`}>
-													{wearPercentage.toFixed(0)}%
-												</Text>
-												<Text className="text-[9px] font-bold text-muted uppercase tracking-wider mt-0.5">
-													Desgaste
-												</Text>
-											</View>
-											<Button
-												size="sm"
-												variant="secondary"
-												className={`h-7 px-2.5 ${item.isCompleted ? "bg-success/15 border border-success/30" : "bg-surface-secondary/60 border border-surface-secondary"}`}
-												onPress={(e) => {
-													e.stopPropagation();
-													if (!item.isCompleted) {
-														handleQuickComplete(item);
-													} else {
-														setItemToEdit(item);
-														setIsBottomSheetOpen(true);
-													}
-												}}
-											>
-												<View className="flex-row items-center gap-1">
-													<StyledIcon
-														name={item.isCompleted ? "check-circle" : "check"}
-														size={12}
-														className="text-success"
-													/>
-													<Button.Label
-														className={`text-[10px] font-bold ${item.isCompleted ? "text-success" : "text-foreground"}`}
-													>
-														{item.isCompleted ? "Concluída" : "Concluir"}
-													</Button.Label>
+										<View className="items-end pl-2 justify-center">
+											{item.isCompleted ? (
+												<View className="bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30">
+													<Text className="text-[10px] font-bold text-cyan-400 uppercase">
+														Concluído
+													</Text>
 												</View>
-											</Button>
+											) : !(item.hasWear ?? true) ? (
+												<View className="bg-indigo-500/15 px-2.5 py-1 rounded-lg border border-indigo-500/30">
+													<Text className="text-[10px] font-bold text-indigo-400 uppercase">
+														Fixo / Admin
+													</Text>
+												</View>
+											) : (
+												<View className="items-end">
+													<Text className={`text-sm font-black ${statusColor}`}>
+														{wearPercentage.toFixed(0)}%
+													</Text>
+													<Text className="text-[9px] font-bold text-muted uppercase tracking-wider mt-0.5">
+														Desgaste
+													</Text>
+												</View>
+											)}
 										</View>
 									</View>
 								</Pressable>

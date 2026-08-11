@@ -149,9 +149,7 @@ export default function SettingsScreen() {
 						await FileSystem.writeAsStringAsync(createdUri, backupContent, {
 							encoding: FileSystem.EncodingType.UTF8,
 						});
-						Haptics.notificationAsync(
-							Haptics.NotificationFeedbackType.Success,
-						);
+						Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 						Alert.alert(
 							"Backup Salvo!",
 							`O arquivo de backup (${backupFileName}) foi salvo na pasta selecionada com sucesso.`,
@@ -159,7 +157,10 @@ export default function SettingsScreen() {
 						return;
 					}
 				} catch (safError) {
-					console.log("SAF canceled or failed, falling back to share", safError);
+					console.log(
+						"SAF canceled or failed, falling back to share",
+						safError,
+					);
 				}
 			}
 

@@ -94,7 +94,8 @@ export function useMaintenanceHealth(
 				if (remainingKm <= 50 || remainingDaysMonths <= 15) isPriority = true;
 			}
 
-			if (wearPercentage >= 70) itemsInRisk++;
+			const itemHasWear = item.hasWear ?? true;
+			if (itemHasWear && wearPercentage >= 70) itemsInRisk++;
 
 			if (isPriority) {
 				isPriorityActive = true;
