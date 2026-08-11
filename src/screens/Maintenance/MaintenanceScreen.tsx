@@ -9,6 +9,7 @@ import {
 	ActivityIndicator,
 	FlatList,
 	Pressable,
+	ScrollView,
 	Text,
 	View,
 } from "react-native";
@@ -38,6 +39,51 @@ export function MaintenanceScreen() {
 	const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
 	const healthStats = useMaintenanceHealth(maintenanceList, stats);
+
+	type FilterType = "all" | "pending" | "risk" | "admin" | "completed";
+	const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+
+	const pendingCount = maintenanceList.filter((i) => !i.isCompleted).length;
+	const completedCount = maintenanceList.filter((i) => i.isCompleted).length;
+	const adminCount = maintenanceList.filter((i) => !(i.hasWear ?? true)).length;
+
+	const filterOptions: { id: FilterType; label: string; count: number }[] = [
+		{ id: "all", label: "Todos", count: maintenanceList.length },
+		{ id: "pending", label: "Em Aberto", count: pendingCount },
+		{ id: "risk", label: "Em Risco", count: healthStats.itemsInRisk },
+		{ id: "admin", label: "Fixo / Admin", count: adminCount },
+		{ id: "completed", label: "Concluídas", count: completedCount },
+	];
+
+	const filteredMaintenance = maintenanceList.filter((item) => {
+		if (activeFilter === "pending") return !item.isCompleted;
+		if (activeFilter === "completed") return item.isCompleted;
+		if (activeFilter === "admin") return !(item.hasWear ?? true);
+		if (activeFilter === "risk") {
+			if (item.isCompleted || !(item.hasWear ?? true)) return false;
+			const currentTotalKm = stats?.totalKm || 0;
+			const wornKm = currentTotalKm - item.lastMaintenanceKm;
+			const wearPercentageKm =
+				item.intervalKm > 0 ? (wornKm / item.intervalKm) * 100 : 0;
+			let wearPercentageMonths = 0;
+			if (item.lastMaintenanceDate && item.intervalMonths) {
+				const nextDate = addMonths(
+					item.lastMaintenanceDate,
+					item.intervalMonths,
+				);
+				const totalDays =
+					differenceInDays(nextDate, item.lastMaintenanceDate) || 1;
+				const daysPassed = differenceInDays(
+					new Date(),
+					item.lastMaintenanceDate,
+				);
+				wearPercentageMonths = (daysPassed / totalDays) * 100;
+			}
+			const wear = Math.max(wearPercentageKm, wearPercentageMonths);
+			return wear >= 70;
+		}
+		return true;
+	});
 
 	const handleDelete = async (id: number) => {
 		await db.delete(maintenance).where(eq(maintenance.id, id));
@@ -96,107 +142,184 @@ export function MaintenanceScreen() {
 			</Animated.Text>
 
 			<FlatList
-				data={maintenanceList}
+				data={filteredMaintenance}
 				keyExtractor={(item) => item.id.toString()}
-				contentContainerClassName="px-4 pb-24 pt-2"
+				contentContainerClassName="px-4 pb-24 gap-2 pt-2"
 				showsVerticalScrollIndicator={false}
 				ListHeaderComponent={
 					maintenanceList.length > 0 ? (
 						<Animated.View
 							entering={FadeInDown.delay(300).springify()}
-							className="mb-4 mt-2"
+							className="mb-1 mt-1"
 						>
-							<Text className="text-[10px] font-black text-muted uppercase tracking-widest mb-2 px-1">
-								Saúde da Frota
-							</Text>
-							<View className="flex-row gap-3">
+							<View className="flex-row gap-2">
+								{/* CARD 1: EM RISCO */}
 								<Card
 									variant="secondary"
-									className="flex-1 items-center justify-center bg-surface border border-surface-secondary shadow-sm py-4"
+									className="flex-1 p-3 bg-surface border border-surface-secondary shadow-sm rounded-xl flex-row items-center gap-2.5"
 								>
-									<StyledIcon
-										name="alert-triangle"
-										size={18}
-										className={
+									<View
+										className={`w-9 h-9 rounded-xl items-center justify-center shrink-0 ${
 											healthStats.itemsInRisk > 0
-												? "mb-2 text-warning"
-												: "mb-2 text-success"
-										}
-									/>
-									<View className="flex-row items-baseline gap-1">
-										<Text className="text-2xl font-black text-foreground">
-											{healthStats.itemsInRisk}
+												? "bg-warning/15"
+												: "bg-success/15"
+										}`}
+									>
+										<StyledIcon
+											name="alert-triangle"
+											size={18}
+											className={
+												healthStats.itemsInRisk > 0
+													? "text-warning"
+													: "text-success"
+											}
+										/>
+									</View>
+									<View className="flex-1 min-w-0">
+										<Text
+											className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
+											numberOfLines={1}
+										>
+											Em Risco
 										</Text>
-										<Text className="font-bold text-muted text-xs">
-											peça(s)
+										<Text
+											className="text-base font-black text-foreground"
+											numberOfLines={1}
+										>
+											{healthStats.itemsInRisk}{" "}
+											<Text className="text-xs font-bold text-muted">
+												peça(s)
+											</Text>
 										</Text>
 									</View>
-									<Text className="text-[10px] uppercase font-bold text-muted tracking-wider mt-0.5">
-										Em Risco
-									</Text>
 								</Card>
 
+								{/* CARD 2: PRÓXIMA REVISÃO */}
 								<Card
 									variant="secondary"
-									className="flex-[1.5] items-start justify-center bg-surface border border-surface-secondary shadow-sm py-4 px-4 overflow-hidden"
+									className="flex-[1.3] p-3 bg-surface border border-surface-secondary shadow-sm rounded-xl flex-row items-center gap-2.5 min-w-0"
 								>
-									{healthStats.nextItem ? (
-										<>
-											<View className="flex-row items-center gap-1 mb-1 opacity-70">
-												<StyledIcon
-													name="calendar"
-													size={12}
-													className="text-info"
-												/>
-												<Text className="text-[10px] font-black text-info uppercase tracking-widest">
-													Próxima Revisão
+									<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center shrink-0">
+										<StyledIcon
+											name="calendar"
+											size={18}
+											className="text-info"
+										/>
+									</View>
+									<View className="flex-1 min-w-0">
+										<Text
+											className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
+											numberOfLines={1}
+										>
+											Próxima Revisão
+										</Text>
+										{healthStats.nextItem ? (
+											<View className="min-w-0">
+												<Text
+													className="text-sm font-black text-foreground"
+													numberOfLines={1}
+												>
+													{healthStats.nextItem.name}
 												</Text>
-											</View>
-											<Text
-												className="text-sm font-black text-foreground mb-1"
-												numberOfLines={1}
-											>
-												{healthStats.nextItem.name}
-											</Text>
-											<View className="flex-row items-baseline gap-1">
-												<Text className="text-xl font-black text-foreground">
-													{healthStats.nextItemInfo?.primary}
-												</Text>
-												<Text className="text-[10px] font-bold text-muted">
+												<Text
+													className="text-[10px] font-bold text-muted"
+													numberOfLines={1}
+												>
+													{healthStats.nextItemInfo?.primary}{" "}
 													{healthStats.nextItemInfo?.secondary}
 												</Text>
 											</View>
-										</>
-									) : (
-										<View className="items-center justify-center flex-1 w-full">
-											<StyledIcon
-												name="check-circle"
-												size={18}
-												className="text-success mb-1"
-											/>
-											<Text className="text-xs font-bold text-muted">
+										) : (
+											<Text
+												className="text-sm font-bold text-success"
+												numberOfLines={1}
+											>
 												Tudo em dia!
 											</Text>
-										</View>
-									)}
+										)}
+									</View>
 								</Card>
+							</View>
+
+							{/* CHIPS DE FILTRO DE MANUTENÇÃO */}
+							<View className="mt-3">
+								<ScrollView
+									horizontal
+									showsHorizontalScrollIndicator={false}
+									contentContainerClassName="gap-2"
+								>
+									{filterOptions.map((opt) => {
+										const isSelected = activeFilter === opt.id;
+										return (
+											<Pressable
+												key={opt.id}
+												onPress={() => {
+													Haptics.impactAsync(
+														Haptics.ImpactFeedbackStyle.Light,
+													);
+													setActiveFilter(opt.id);
+												}}
+												className={`px-2.5 py-2 rounded-xl flex-row items-center gap-1 ${
+													isSelected
+														? "bg-success/15 border border-success/30 shadow-sm"
+														: "bg-surface-tertiary border border-transparent active:opacity-70"
+												}`}
+											>
+												{isSelected && (
+													<View className="w-1.5 h-1.5 rounded-full bg-success" />
+												)}
+												<Text
+													className={`text-xs font-bold ${
+														isSelected ? "text-success" : "text-muted"
+													}`}
+												>
+													{opt.label} ({opt.count})
+												</Text>
+											</Pressable>
+										);
+									})}
+								</ScrollView>
 							</View>
 						</Animated.View>
 					) : null
 				}
 				ListEmptyComponent={
-					<View className="items-center justify-center mt-20 opacity-60">
-						<View className="bg-surface-secondary p-4 rounded-full mb-4">
-							<StyledIcon name="tool" size={48} className="text-muted" />
+					maintenanceList.length > 0 ? (
+						<View className="items-center justify-center mt-12 px-6 opacity-80">
+							<View className="bg-surface-secondary/60 p-3.5 rounded-full mb-2.5 border border-surface-secondary">
+								<StyledIcon name="filter" size={28} className="text-muted" />
+							</View>
+							<Text className="text-foreground text-center text-sm font-bold">
+								Nenhum item nesta categoria
+							</Text>
+							<Text className="text-muted text-center text-xs mt-0.5 px-4">
+								Não há manutenções correspondentes ao filtro selecionado.
+							</Text>
+							<Button
+								size="sm"
+								variant="secondary"
+								className="mt-3 rounded-xl bg-surface-tertiary border-0 px-3.5"
+								onPress={() => setActiveFilter("all")}
+							>
+								<Button.Label className="text-success text-xs font-bold">
+									Ver todas as manutenções
+								</Button.Label>
+							</Button>
 						</View>
-						<Text className="text-muted text-center text-lg font-bold">
-							Nenhum item cadastrado
-						</Text>
-						<Text className="text-muted text-center text-sm mt-1 px-10">
-							Cadastre peças como pastilhas de freio ou pneus para acompanhar a
-							vida útil.
-						</Text>
-					</View>
+					) : (
+						<View className="items-center justify-center mt-20 opacity-60">
+							<View className="bg-surface-secondary p-4 rounded-full mb-4">
+								<StyledIcon name="tool" size={48} className="text-muted" />
+							</View>
+							<Text className="text-muted text-center text-lg font-bold">
+								Nenhum item cadastrado
+							</Text>
+							<Text className="text-muted text-center text-sm mt-1 px-10">
+								Cadastre peças como pastilhas de freio ou pneus para acompanhar
+								a vida útil.
+							</Text>
+						</View>
+					)
 				}
 				renderItem={({ item, index }) => {
 					const currentTotalKm = stats?.totalKm || 0;
@@ -274,8 +397,9 @@ export function MaintenanceScreen() {
 
 					let statusColor = "text-success";
 					let barColor = "bg-success";
-					let bgGlow = "border-surface-secondary";
+					let bgGlow = "border-surface-secondary/60";
 					let iconColor = "text-success";
+					let iconBgBorder = "bg-success/10 border border-success/20";
 					let iconName:
 						| "tool"
 						| "check-circle"
@@ -287,31 +411,35 @@ export function MaintenanceScreen() {
 						statusColor = "text-cyan-400";
 						bgGlow = "border-cyan-500/30 bg-cyan-500/5";
 						iconColor = "text-cyan-400";
+						iconBgBorder = "bg-cyan-500/10 border border-cyan-500/20";
 						iconName = "check-circle";
 					} else if (!(item.hasWear ?? true)) {
 						statusColor = "text-indigo-400";
 						bgGlow = "border-indigo-500/30 bg-indigo-500/5";
 						iconColor = "text-indigo-400";
+						iconBgBorder = "bg-indigo-500/10 border border-indigo-500/20";
 						iconName = "calendar";
 					} else if (isCritical) {
 						statusColor = "text-danger";
 						barColor = "bg-danger";
 						bgGlow = "border-danger/30 bg-danger/5";
 						iconColor = "text-danger";
+						iconBgBorder = "bg-danger/10 border border-danger/20";
 						iconName = "alert-circle";
 					} else if (isWarning) {
 						statusColor = "text-warning";
 						barColor = "bg-warning";
 						bgGlow = "border-warning/30 bg-warning/5";
 						iconColor = "text-warning";
+						iconBgBorder = "bg-warning/10 border border-warning/20";
 						iconName = "alert-triangle";
 					}
 
 					return (
-						<Animated.View entering={FadeInRight.delay(index * 50).springify()}>
+						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
 							<Card
 								variant="secondary"
-								className={`border ${bgGlow} bg-surface shadow-sm mb-3 p-0`}
+								className={`border ${bgGlow} bg-surface shadow-sm p-0 rounded-xl overflow-hidden`}
 							>
 								{/* BACKGROUND PROGRESS BAR LAYER */}
 								{!item.isCompleted && (item.hasWear ?? true) && (
@@ -324,35 +452,33 @@ export function MaintenanceScreen() {
 								)}
 
 								<Pressable
-									className="px-4 py-4"
+									className="py-2.5 px-3"
 									onPress={() => {
 										setItemToEdit(item);
 										setIsBottomSheetOpen(true);
 									}}
 								>
-									<View className="flex-row items-start justify-between">
-										<View className="flex-row items-start gap-3 flex-1">
-											<View
-												className={`p-2.5 rounded-xl bg-surface-secondary/30 mt-0.5 border border-surface-secondary`}
-											>
+									<View className="flex-row items-center justify-between">
+										<View className="flex-row items-center gap-2.5 flex-1">
+											<View className={`p-2 rounded-lg ${iconBgBorder}`}>
 												<StyledIcon
 													name={iconName}
-													size={18}
+													size={15}
 													className={iconColor}
 												/>
 											</View>
 											<View className="flex-1">
 												<View className="flex-row items-baseline gap-1">
 													<Text
-														className="text-lg font-black text-foreground"
+														className="text-base font-black text-foreground"
 														numberOfLines={1}
 													>
 														{item.name}
 													</Text>
 												</View>
 												{item.isCompleted ? (
-													<View className="flex-row items-center gap-1.5 mt-0.5">
-														<Text className="text-xs font-bold text-cyan-400">
+													<View className="flex-row items-center gap-1 mt-0.5">
+														<Text className="text-[11px] font-semibold text-cyan-400">
 															Realizada
 															{item.completedAt
 																? ` em ${format(new Date(item.completedAt), "dd/MM/yyyy", { locale: ptBR })}`
@@ -360,47 +486,41 @@ export function MaintenanceScreen() {
 														</Text>
 													</View>
 												) : (
-													<>
-														<View className="flex-row items-center gap-1.5 mt-0.5">
-															<Text className={`text-xs font-bold ${statusColor}`}>
-																{primaryInfo}
-															</Text>
-															<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
-																• {secondaryInfo}
-															</Text>
-														</View>
-														{item.completedAt && (
-															<Text className="text-[10px] font-medium text-muted/80 mt-0.5">
-																Última:{" "}
-																{format(new Date(item.completedAt), "dd/MM/yyyy", {
-																	locale: ptBR,
-																})}
-															</Text>
-														)}
-													</>
+													<View className="flex-row items-center gap-1.5 mt-0.5 flex-wrap">
+														<Text
+															className={`text-[11px] font-bold ${statusColor}`}
+														>
+															{primaryInfo}
+														</Text>
+														<Text className="text-[10px] uppercase font-bold text-muted tracking-wider">
+															• {secondaryInfo}
+														</Text>
+													</View>
 												)}
 											</View>
 										</View>
 
 										<View className="items-end pl-2 justify-center">
 											{item.isCompleted ? (
-												<View className="bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30">
+												<View className="bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/20">
 													<Text className="text-[10px] font-bold text-cyan-400 uppercase">
 														Concluído
 													</Text>
 												</View>
 											) : !(item.hasWear ?? true) ? (
-												<View className="bg-indigo-500/15 px-2.5 py-1 rounded-lg border border-indigo-500/30">
+												<View className="bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
 													<Text className="text-[10px] font-bold text-indigo-400 uppercase">
 														Fixo / Admin
 													</Text>
 												</View>
 											) : (
 												<View className="items-end">
-													<Text className={`text-sm font-black ${statusColor}`}>
+													<Text
+														className={`text-base font-black ${statusColor}`}
+													>
 														{wearPercentage.toFixed(0)}%
 													</Text>
-													<Text className="text-[9px] font-bold text-muted uppercase tracking-wider mt-0.5">
+													<Text className="text-[9px] font-bold text-muted uppercase tracking-wider">
 														Desgaste
 													</Text>
 												</View>

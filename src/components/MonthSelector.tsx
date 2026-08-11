@@ -50,7 +50,7 @@ export function MonthSelector({
 						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 						onChange(null);
 					}}
-					className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 transition-all ${
+					className={`px-2.5 py-2 rounded-xl flex-row items-center gap-1 transition-all ${
 						isAllSelected
 							? "bg-success/15 border border-success/30 shadow-sm"
 							: "bg-surface-tertiary border border-transparent active:opacity-70"
@@ -79,7 +79,7 @@ export function MonthSelector({
 								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 								onChange(month);
 							}}
-							className={`px-4 py-2 rounded-xl flex-row items-center gap-1.5 transition-all ${
+							className={`px-2.5 py-2 rounded-xl flex-row items-center gap-1 transition-all ${
 								isSelected
 									? "bg-success/15 border border-success/30 shadow-sm"
 									: "bg-surface-tertiary border border-transparent active:opacity-70"
