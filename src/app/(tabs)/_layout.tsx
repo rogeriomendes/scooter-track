@@ -1,8 +1,8 @@
-import { useScooterData } from "@/hooks/useScooterData";
-import { useAppStore } from "@/store/useAppStore";
 import Feather from "@expo/vector-icons/Feather";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useThemeColor } from "heroui-native";
+import { useScooterData } from "@/hooks/useScooterData";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function TabLayout() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
