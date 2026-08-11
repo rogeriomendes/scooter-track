@@ -443,24 +443,24 @@ export default function SettingsScreen() {
 
 			{/* ZONA DE PERIGO */}
 			<Animated.View entering={FadeInDown.delay(400).springify()}>
-				<Text className="text-xs font-bold text-danger mb-2 uppercase tracking-widest ml-1">
+				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Zona de Perigo
 				</Text>
 				<Card
 					variant="secondary"
-					className="border border-danger/20 bg-danger/5 p-4 rounded-2xl mb-8"
+					className="border border-surface-secondary/80 bg-surface p-4 rounded-2xl mb-8"
 				>
 					<Button
 						variant="outline"
-						className="w-full border-danger bg-transparent"
+						className="w-full border-danger/30 bg-danger/5 active:bg-danger/10"
 						onPress={() => setIsClearAllDialogOpen(true)}
 					>
 						<StyledIcon name="trash-2" size={16} className="text-danger" />
-						<Button.Label className="text-danger">
+						<Button.Label className="text-danger font-bold">
 							Apagar Todos os Dados
 						</Button.Label>
 					</Button>
-					<Text className="text-[10px] text-danger/80 text-center mt-3 font-medium uppercase tracking-wider">
+					<Text className="text-[11px] text-muted text-center mt-2.5 leading-4">
 						Esta ação apaga todas as scooters, registros e notas fiscais permanentemente.
 					</Text>
 				</Card>
