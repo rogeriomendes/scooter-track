@@ -430,38 +430,55 @@ export default function DashboardScreen() {
 				{scooter?.showMaintenance &&
 					healthStats.nextItem &&
 					healthStats.isPriorityActive && (
-						<Animated.View entering={FadeInDown.delay(300).springify()}>
-							<Pressable onPress={() => router.push("/(tabs)/maintenance")}>
-								<Card
-									variant="secondary"
-									className="bg-warning/10 border border-warning/30 p-4 mb-4 flex-row items-center"
+						<Animated.View
+							entering={FadeInDown.delay(300).springify()}
+							className="mb-4"
+						>
+							<Card
+								variant="secondary"
+								className="border border-warning/30 bg-warning/5 shadow-sm p-0 rounded-xl"
+							>
+								<Pressable
+									className="py-2.5 px-3"
+									onPress={() => router.push("/(tabs)/maintenance")}
 								>
-									<View className="bg-warning/20 p-3 rounded-full mr-4">
-										<StyledIcon
-											name="alert-triangle"
-											size={24}
-											className="text-warning"
-										/>
+									<View className="flex-row items-center justify-between">
+										<View className="flex-row items-center gap-2.5 flex-1">
+											<View className="bg-warning/10 p-2 rounded-lg border border-warning/20">
+												<StyledIcon
+													name="alert-triangle"
+													size={15}
+													className="text-warning"
+												/>
+											</View>
+											<View className="flex-1 min-w-0">
+												<View className="flex-row items-baseline gap-1">
+													<Text
+														className="text-base font-black text-foreground"
+														numberOfLines={1}
+													>
+														{healthStats.nextItem.name}
+													</Text>
+												</View>
+												<View className="flex-row items-center gap-1.5 mt-0.5">
+													<Text className="text-[11px] font-bold text-warning">
+														Atenção: Faltam {healthStats.nextItemInfo.primary}{" "}
+														{healthStats.nextItemInfo.secondary}
+													</Text>
+												</View>
+											</View>
+										</View>
+
+										<View className="items-end pl-2">
+											<StyledIcon
+												name="chevron-right"
+												size={18}
+												className="text-warning"
+											/>
+										</View>
 									</View>
-									<View className="flex-1">
-										<Text className="text-xs font-bold text-warning uppercase tracking-wider mb-1">
-											Atenção: Revisão Próxima
-										</Text>
-										<Text className="text-base font-bold text-foreground">
-											{healthStats.nextItem.name}
-										</Text>
-										<Text className="text-sm text-muted">
-											Faltam {healthStats.nextItemInfo.primary}{" "}
-											{healthStats.nextItemInfo.secondary}
-										</Text>
-									</View>
-									<StyledIcon
-										name="chevron-right"
-										size={20}
-										className="text-muted"
-									/>
-								</Card>
-							</Pressable>
+								</Pressable>
+							</Card>
 						</Animated.View>
 					)}
 
