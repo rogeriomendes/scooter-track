@@ -16,8 +16,10 @@ import {
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BadgesSheet } from "@/components/BadgesSheet";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
+import { RangeCalculatorSheet } from "@/components/RangeCalculatorSheet";
 import { ScooterDetailsSheet } from "@/components/ScooterDetailsSheet";
 import { ScooterFormSheet } from "@/components/ScooterFormSheet";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
@@ -25,6 +27,7 @@ import { StyledIcon } from "@/components/StyledIcon";
 import { calculateBatteryPercentage } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs, scooters } from "@/db/schema";
+import { useBadges } from "@/hooks/useBadges";
 import { useMaintenanceHealth } from "@/hooks/useMaintenanceHealth";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
@@ -41,6 +44,8 @@ export default function DashboardScreen() {
 	const [isPickerOpen, setIsPickerOpen] = useState(false);
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+	const [isRangeCalcOpen, setIsRangeCalcOpen] = useState(false);
+	const [isBadgesOpen, setIsBadgesOpen] = useState(false);
 	const [isAddingNew, setIsAddingNew] = useState(false);
 	const [editingScooter, setEditingScooter] = useState<
 		typeof scooters.$inferSelect | null
@@ -51,6 +56,7 @@ export default function DashboardScreen() {
 		useScooterData(activeScooterId);
 
 	const healthStats = useMaintenanceHealth(maintenanceList, stats);
+	const badgeData = useBadges(allLogs, stats, maintenanceList);
 	const triggerRefresh = useAppStore((s) => s.triggerRefresh);
 	const setActiveScooterId = useAppStore((s) => s.setActiveScooterId);
 	const insets = useSafeAreaInsets();
@@ -253,6 +259,26 @@ export default function DashboardScreen() {
 							</Pressable>
 						</View>
 						<View className="flex-row items-center gap-2 ml-2">
+							<View className="relative">
+								<Button
+									size="sm"
+									isIconOnly
+									variant="secondary"
+									className="rounded-full bg-surface-secondary/50 backdrop-blur-md border-transparent"
+									onPress={() => {
+										setIsBadgesOpen(true);
+									}}
+								>
+									<StyledIcon name="award" size={18} className="text-warning" />
+								</Button>
+								{badgeData.unlockedCount > 0 && (
+									<View className="absolute -top-1 -right-1 bg-warning px-1 rounded-full min-w-[16px] h-4 items-center justify-center border border-background shadow-sm pointer-events-none">
+										<Text className="text-[9px] font-black text-black">
+											{badgeData.unlockedCount}
+										</Text>
+									</View>
+								)}
+							</View>
 							<Button
 								size="sm"
 								isIconOnly
@@ -408,6 +434,14 @@ export default function DashboardScreen() {
 						>
 							<StyledIcon name="zap" size={20} className="text-foreground" />
 							<Button.Label className="text-foreground">Recarga</Button.Label>
+						</Button>
+
+						<Button
+							variant="secondary"
+							isIconOnly
+							onPress={() => setIsRangeCalcOpen(true)}
+						>
+							<StyledIcon name="compass" size={20} className="text-success" />
 						</Button>
 
 						{scooter?.invoicePdfPath && (
@@ -675,6 +709,25 @@ export default function DashboardScreen() {
 				onConfirm={() =>
 					scooterToDelete && executeDeleteScooter(scooterToDelete)
 				}
+			/>
+
+			{scooter && (
+				<RangeCalculatorSheet
+					isOpen={isRangeCalcOpen}
+					onOpenChange={setIsRangeCalcOpen}
+					scooter={scooter}
+					currentBatteryPercent={batteryPercent}
+					estimatedAutonomyKm={stats?.estimatedAutonomy || 0}
+				/>
+			)}
+
+			<BadgesSheet
+				isOpen={isBadgesOpen}
+				onOpenChange={setIsBadgesOpen}
+				badges={badgeData.badges}
+				unlockedCount={badgeData.unlockedCount}
+				totalCount={badgeData.totalCount}
+				co2SavedKg={badgeData.co2SavedKg}
 			/>
 		</ScreenWrapper>
 	);

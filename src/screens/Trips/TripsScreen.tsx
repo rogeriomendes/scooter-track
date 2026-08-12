@@ -1,12 +1,14 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import {
 	ActivityIndicator,
 	Pressable,
+	ScrollView,
 	SectionList,
 	Text,
 	View,
@@ -351,7 +353,7 @@ export default function TripsScreen() {
 				renderSectionHeader={({ section: { title } }) => (
 					<View className="bg-background/95 pb-1.5 flex-row items-center gap-1.5">
 						<View className="w-1.5 h-1.5 rounded-full bg-success" />
-						<Text className="text-[11px] font-bold text-muted capitalize">
+						<Text className="text-xs font-bold text-muted uppercase tracking-wider">
 							{title}
 						</Text>
 					</View>
@@ -420,8 +422,8 @@ export default function TripsScreen() {
 																size={9}
 																className="text-danger"
 															/>
-															<Text className="text-[9px] font-bold text-danger">
-																-{consumption.consumedPct}%
+															<Text className="text-[10px] font-bold text-danger">
+																-{consumption.consumedPct.toFixed(0)}%
 															</Text>
 														</View>
 													)}

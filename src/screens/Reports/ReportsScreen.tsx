@@ -12,9 +12,11 @@ import {
 } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { BadgesSheet } from "@/components/BadgesSheet";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
+import { useBadges } from "@/hooks/useBadges";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -22,9 +24,12 @@ const screenWidth = Dimensions.get("window").width;
 
 export default function ReportsScreen() {
 	const activeScooterId = useAppStore((s) => s.activeScooterId);
-	const { scooter, allLogs, stats, isLoading } =
+	const { scooter, allLogs, maintenanceList, stats, isLoading } =
 		useScooterData(activeScooterId);
+	const [isBadgesOpen, setIsBadgesOpen] = useState(false);
 	const [viewMode, setViewMode] = useState<"day" | "cycle">("day");
+
+	const badgeData = useBadges(allLogs, stats, maintenanceList);
 	const [timeframe, setTimeframe] = useState<"7d" | "30d" | "month" | "all">(
 		"30d",
 	);
@@ -463,7 +468,10 @@ export default function ReportsScreen() {
 			</Animated.View>
 
 			{/* CARD DE AUTONOMIA REAL & EFICIÊNCIA */}
-			<Animated.View entering={FadeInDown.delay(600).springify()}>
+			<Animated.View
+				entering={FadeInDown.delay(600).springify()}
+				className="mb-3"
+			>
 				<Card
 					variant="secondary"
 					className="p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
@@ -489,6 +497,53 @@ export default function ReportsScreen() {
 					</View>
 				</Card>
 			</Animated.View>
+
+			{/* CARD DE GAMIFICAÇÃO & CONQUISTAS */}
+			<Animated.View entering={FadeInDown.delay(650).springify()}>
+				<Pressable onPress={() => setIsBadgesOpen(true)}>
+					<Card
+						variant="secondary"
+						className="p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center justify-between gap-3 active:opacity-80"
+					>
+						<View className="flex-row items-center gap-3 flex-1">
+							<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center shrink-0">
+								<StyledIcon name="award" size={18} className="text-warning" />
+							</View>
+							<View className="flex-1">
+								<Text className="text-xs font-bold text-foreground mb-0.5">
+									Conquistas & Marcos ({badgeData.unlockedCount}/
+									{badgeData.totalCount})
+								</Text>
+								<Text className="text-xs text-muted leading-4">
+									{badgeData.co2SavedKg > 0
+										? `Você já economizou ~${badgeData.co2SavedKg.toFixed(1)} kg de CO₂!`
+										: "Acumule quilômetros e recargas para desbloquear insígnias."}
+								</Text>
+							</View>
+						</View>
+
+						<View className="bg-warning/10 px-2 py-1 rounded-lg border border-warning/20 flex-row items-center gap-1">
+							<Text className="text-[10px] font-bold text-warning uppercase">
+								Ver todas
+							</Text>
+							<StyledIcon
+								name="chevron-right"
+								size={10}
+								className="text-warning"
+							/>
+						</View>
+					</Card>
+				</Pressable>
+			</Animated.View>
+
+			<BadgesSheet
+				isOpen={isBadgesOpen}
+				onOpenChange={setIsBadgesOpen}
+				badges={badgeData.badges}
+				unlockedCount={badgeData.unlockedCount}
+				totalCount={badgeData.totalCount}
+				co2SavedKg={badgeData.co2SavedKg}
+			/>
 		</ScreenWrapper>
 	);
 }
