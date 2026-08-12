@@ -1,7 +1,7 @@
 import DateTimePicker, {
 	type DateTimePickerChangeEvent,
 } from "@react-native-community/datetimepicker";
-import { addDays, differenceInDays, format } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
@@ -292,12 +292,12 @@ export function MaintenanceFormSheet({
 			<View className="mb-4 bg-surface-secondary/40 p-3.5 rounded-2xl border border-surface-secondary/60 flex-row items-center justify-between">
 				<View className="flex-1 pr-3">
 					<Text className="text-sm font-medium text-foreground">
-						Item com Desgaste Mecânico / Uso?
+						Possui desgaste pelo uso?
 					</Text>
 					<Text className="text-xs text-muted leading-4 mt-0.5">
 						{hasWear
-							? "Calcula % de desgaste de peça (ex: Freio, Pneu, Correia)."
-							: "Item fixo sem desgaste de uso (ex: IPVA, Licenciamento)."}
+							? "Calcula o desgaste da peça com o uso (ex.: freios, pneus)."
+							: "Item sem desgaste pelo uso (ex.: IPVA, licenciamento)."}
 					</Text>
 				</View>
 				<Switch
@@ -460,7 +460,9 @@ export function MaintenanceFormSheet({
 										: new Date(),
 								);
 								setTargetDate(
-									editItem.targetDate ? new Date(editItem.targetDate) : new Date(),
+									editItem.targetDate
+										? new Date(editItem.targetDate)
+										: new Date(),
 								);
 							}
 						}}
