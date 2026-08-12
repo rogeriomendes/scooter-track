@@ -51,7 +51,7 @@ export function MaintenanceScreen() {
 		{ id: "all", label: "Todos", count: maintenanceList.length },
 		{ id: "pending", label: "Em Aberto", count: pendingCount },
 		{ id: "risk", label: "Em Risco", count: healthStats.itemsInRisk },
-		{ id: "admin", label: "Fixo / Admin", count: adminCount },
+		{ id: "admin", label: "Fixo", count: adminCount },
 		{ id: "completed", label: "Concluídas", count: completedCount },
 	];
 
@@ -487,7 +487,7 @@ export function MaintenanceScreen() {
 											) : !(item.hasWear ?? true) ? (
 												<View className="bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
 													<Text className="text-[10px] font-bold text-indigo-400 uppercase">
-														Fixo / Admin
+														Fixo
 													</Text>
 												</View>
 											) : (

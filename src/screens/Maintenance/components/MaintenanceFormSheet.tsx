@@ -297,7 +297,7 @@ export function MaintenanceFormSheet({
 					<Text className="text-xs text-muted leading-4 mt-0.5">
 						{hasWear
 							? "Calcula % de desgaste de peça (ex: Freio, Pneu, Correia)."
-							: "Item administrativo/fixo sem desgaste de uso (ex: IPVA, Licenciamento)."}
+							: "Item fixo sem desgaste de uso (ex: IPVA, Licenciamento)."}
 					</Text>
 				</View>
 				<Switch
@@ -450,19 +450,18 @@ export function MaintenanceFormSheet({
 							setResetWear(nextReset);
 							if (nextReset) {
 								setCompletedDate(new Date());
-								setLastDate(new Date());
-								if (
-									type === "date" &&
-									editItem.targetDate &&
-									editItem.lastMaintenanceDate
-								) {
-									const prevDuration = differenceInDays(
-										editItem.targetDate,
-										editItem.lastMaintenanceDate,
-									);
-									const durationToUse = prevDuration > 0 ? prevDuration : 30;
-									setTargetDate(addDays(new Date(), durationToUse));
+								if (type === "months" || type === "mixed") {
+									setLastDate(new Date());
 								}
+							} else if (editItem) {
+								setLastDate(
+									editItem.lastMaintenanceDate
+										? new Date(editItem.lastMaintenanceDate)
+										: new Date(),
+								);
+								setTargetDate(
+									editItem.targetDate ? new Date(editItem.targetDate) : new Date(),
+								);
 							}
 						}}
 					>
