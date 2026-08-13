@@ -11,7 +11,15 @@ import { Button } from "heroui-native/button";
 import { Label } from "heroui-native/label";
 import { TextField } from "heroui-native/text-field";
 import { useEffect, useState } from "react";
-import { Alert, Platform, Pressable, Switch, Text, View } from "react-native";
+import {
+	Alert,
+	Platform,
+	Pressable,
+	ScrollView,
+	Switch,
+	Text,
+	View,
+} from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { StyledIcon } from "@/components/StyledIcon";
@@ -209,22 +217,29 @@ export function ScooterFormSheet({
 			</View>
 
 			{trackingMode === "voltage" && (
-				<View className="gap-2 my-2">
+				<View className="gap-1.5 mb-2">
 					<Text className="text-sm font-medium text-foreground">
 						Selecione a Voltagem
 					</Text>
-					<View className="flex-row flex-wrap gap-2">
+					<ScrollView
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerClassName="gap-2 py-0.5"
+					>
 						{Object.keys(BATTERY_CHARTS).map((key) => (
 							<Button
 								key={key}
 								size="sm"
 								variant={batteryType === key ? "primary" : "secondary"}
+								className="px-3 py-1 h-8 min-h-0 rounded-xl"
 								onPress={() => setBatteryType(key)}
 							>
-								<Button.Label>{BATTERY_CHARTS[key].label}</Button.Label>
+								<Button.Label className="text-xs font-bold">
+									{BATTERY_CHARTS[key].label}
+								</Button.Label>
 							</Button>
 						))}
-					</View>
+					</ScrollView>
 				</View>
 			)}
 			<View className="flex-row gap-3">
