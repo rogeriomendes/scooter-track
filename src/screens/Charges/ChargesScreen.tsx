@@ -456,20 +456,13 @@ export default function ChargesScreen() {
 				<Button
 					size="md"
 					variant="primary"
-					className="rounded-full shadow-md bg-success border-0 px-5 py-3 flex-row items-center gap-2 shadow-success/20"
-					style={{
-						elevation: 3,
-						shadowColor: "#10b981",
-						shadowOffset: { width: 0, height: 2 },
-						shadowOpacity: 0.2,
-						shadowRadius: 4,
-					}}
+					className="rounded-full shadow-md px-5 py-3 flex-row items-center gap-2"
 					onPress={() => {
 						setLogToEdit(null);
 						setIsBottomSheetOpen(true);
 					}}
 				>
-					<StyledIcon name="plus" size={18} color="white" />
+					<StyledIcon name="plus" size={18} className="text-white" />
 					<Button.Label className="text-white font-bold text-sm">
 						Registrar Recarga
 					</Button.Label>

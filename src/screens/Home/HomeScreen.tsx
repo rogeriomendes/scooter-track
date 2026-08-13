@@ -412,15 +412,15 @@ export default function DashboardScreen() {
 
 				<MonthSummaryCard allLogs={allLogs} />
 
-				{/* AÇÕES RÁPIDAS (CTAs Principais com variant primary) */}
+				{/* AÇÕES RÁPIDAS (Hierarquia Clara de CTAs) */}
 				<Animated.View entering={FadeInDown.delay(300).springify()}>
 					<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
 						Ações
 					</Text>
-					<View className="gap-2 mb-4 flex-row w-full flex-wrap">
+					<View className="gap-3 mb-4 flex-row w-full">
 						<Button
 							variant="primary"
-							className="flex-1 min-w-[90px]"
+							className="flex-1"
 							onPress={() => router.push("/(tabs)/trips")}
 						>
 							<StyledIcon name="map-pin" size={18} className="text-white" />
@@ -429,30 +429,19 @@ export default function DashboardScreen() {
 
 						<Button
 							variant="primary"
-							className="flex-1 min-w-[90px]"
+							className="flex-1"
 							onPress={() => router.push("/(tabs)/charges")}
 						>
 							<StyledIcon name="zap" size={18} className="text-white" />
 							<Button.Label className="text-white">Recarga</Button.Label>
 						</Button>
 
-						{(scooter?.showMaintenance ?? true) && (
-							<Button
-								variant="primary"
-								className="flex-1 min-w-[100px]"
-								onPress={() => router.push("/(tabs)/maintenance")}
-							>
-								<StyledIcon name="tool" size={18} className="text-white" />
-								<Button.Label className="text-white">Manutenção</Button.Label>
-							</Button>
-						)}
-
 						<Button
 							variant="secondary"
 							isIconOnly
 							onPress={() => setIsRangeCalcOpen(true)}
 						>
-							<StyledIcon name="compass" size={18} className="text-success" />
+							<StyledIcon name="compass" size={20} className="text-success" />
 						</Button>
 
 						{scooter?.invoicePdfPath && (
@@ -465,7 +454,7 @@ export default function DashboardScreen() {
 									}
 								}}
 							>
-								<StyledIcon name="file-text" size={18} className="text-info" />
+								<StyledIcon name="file-text" size={20} className="text-info" />
 							</Button>
 						)}
 					</View>
