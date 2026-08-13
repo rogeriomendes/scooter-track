@@ -417,23 +417,38 @@ export default function DashboardScreen() {
 					<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
 						Ações
 					</Text>
-					<View className="gap-3 mb-4 flex-row w-full">
+					<View className="gap-2 mb-4 flex-row w-full">
 						<Button
 							variant="primary"
-							className="flex-1"
+							className="flex-1 px-2"
 							onPress={() => router.push("/(tabs)/trips")}
 						>
-							<StyledIcon name="map-pin" size={20} className="text-white" />
-							<Button.Label className="text-white">Uso</Button.Label>
+							<StyledIcon name="map-pin" size={16} className="text-white" />
+							<Button.Label className="text-white text-xs font-bold">
+								Uso
+							</Button.Label>
 						</Button>
 
 						<Button
-							variant="secondary"
-							className="flex-1"
+							variant="primary"
+							className="flex-1 px-2"
 							onPress={() => router.push("/(tabs)/charges")}
 						>
-							<StyledIcon name="zap" size={20} className="text-foreground" />
-							<Button.Label className="text-foreground">Recarga</Button.Label>
+							<StyledIcon name="zap" size={16} className="text-white" />
+							<Button.Label className="text-white text-xs font-bold">
+								Recarga
+							</Button.Label>
+						</Button>
+
+						<Button
+							variant="primary"
+							className="flex-1 px-2"
+							onPress={() => router.push("/(tabs)/maintenance")}
+						>
+							<StyledIcon name="tool" size={16} className="text-white" />
+							<Button.Label className="text-white text-xs font-bold">
+								Revisão
+							</Button.Label>
 						</Button>
 
 						<Button
@@ -441,7 +456,7 @@ export default function DashboardScreen() {
 							isIconOnly
 							onPress={() => setIsRangeCalcOpen(true)}
 						>
-							<StyledIcon name="compass" size={20} className="text-success" />
+							<StyledIcon name="compass" size={18} className="text-success" />
 						</Button>
 
 						{scooter?.invoicePdfPath && (
@@ -454,7 +469,7 @@ export default function DashboardScreen() {
 									}
 								}}
 							>
-								<StyledIcon name="file-text" size={20} className="text-info" />
+								<StyledIcon name="file-text" size={18} className="text-info" />
 							</Button>
 						)}
 					</View>
