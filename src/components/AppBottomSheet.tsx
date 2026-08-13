@@ -1,7 +1,8 @@
 import BottomSheet, { BottomSheetView } from "@expo/ui/community/bottom-sheet";
 import type React from "react";
 import { useEffect, useRef } from "react";
-import { Keyboard, ScrollView, Text } from "react-native";
+import { Keyboard, ScrollView, Text, useColorScheme } from "react-native";
+import { useAppStore } from "@/store/useAppStore";
 
 interface AppBottomSheetProps {
 	isOpen: boolean;
@@ -21,6 +22,11 @@ export function AppBottomSheet({
 	children,
 }: AppBottomSheetProps) {
 	const sheetRef = useRef<BottomSheet>(null);
+	const theme = useAppStore((state) => state.theme);
+	const systemColorScheme = useColorScheme();
+
+	const isDark =
+		theme === "dark" || (theme === "system" && systemColorScheme === "dark");
 
 	useEffect(() => {
 		if (isOpen) {
@@ -39,6 +45,12 @@ export function AppBottomSheet({
 			snapPoints={snapPoints}
 			enableDynamicSizing={enableDynamicSizing}
 			enablePanDownToClose
+			backgroundStyle={{
+				backgroundColor: isDark ? "#18181b" : "#ffffff",
+			}}
+			handleIndicatorStyle={{
+				backgroundColor: isDark ? "#52525b" : "#d4d4d8",
+			}}
 			onChange={(index) => {
 				if (index === -1) {
 					Keyboard.dismiss();

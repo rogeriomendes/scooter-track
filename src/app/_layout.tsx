@@ -27,9 +27,9 @@ export default function RootLayout() {
 		theme === "dark" || (theme === "system" && systemColorScheme === "dark");
 
 	useEffect(() => {
-		// Sincroniza o tema do Zustand com o motor do Tailwind (Uniwind)
-		Uniwind.setTheme(isDark ? "dark" : "light");
-	}, [isDark]);
+		// Sincroniza o tema do Zustand ('light' | 'dark' | 'system') com o Uniwind
+		Uniwind.setTheme(theme);
+	}, [theme]);
 
 	if (error) {
 		return (
