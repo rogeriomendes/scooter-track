@@ -56,7 +56,7 @@ export default function DashboardScreen() {
 		useScooterData(activeScooterId);
 
 	const healthStats = useMaintenanceHealth(maintenanceList, stats);
-	const badgeData = useBadges(allLogs, stats, maintenanceList);
+	const badgeData = useBadges(allLogs, stats, maintenanceList, scooter);
 	const triggerRefresh = useAppStore((s) => s.triggerRefresh);
 	const setActiveScooterId = useAppStore((s) => s.setActiveScooterId);
 	const insets = useSafeAreaInsets();

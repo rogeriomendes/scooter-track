@@ -29,7 +29,7 @@ export default function ReportsScreen() {
 	const [isBadgesOpen, setIsBadgesOpen] = useState(false);
 	const [viewMode, setViewMode] = useState<"day" | "cycle">("day");
 
-	const badgeData = useBadges(allLogs, stats, maintenanceList);
+	const badgeData = useBadges(allLogs, stats, maintenanceList, scooter);
 	const [timeframe, setTimeframe] = useState<"7d" | "30d" | "month" | "all">(
 		"30d",
 	);

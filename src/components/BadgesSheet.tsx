@@ -27,7 +27,7 @@ export function BadgesSheet({
 			onOpenChange={onOpenChange}
 			title="Conquistas & Badges"
 		>
-			<View className="gap-3 max-h-[500px]">
+			<View className="gap-3">
 				{/* RESUMO DE PROGRESSO */}
 				<View className="bg-surface-secondary/40 p-3.5 rounded-2xl border border-surface-secondary/60 flex-row items-center justify-between">
 					<View className="flex-1">
@@ -54,8 +54,9 @@ export function BadgesSheet({
 
 				{/* LISTA DE INSÍGNIAS */}
 				<ScrollView
-					className="max-h-[360px]"
-					contentContainerClassName="gap-2.5"
+					className="max-h-[420px]"
+					showsVerticalScrollIndicator={false}
+					contentContainerClassName="gap-2.5 pb-2"
 				>
 					{badges.map((badge) => (
 						<View
