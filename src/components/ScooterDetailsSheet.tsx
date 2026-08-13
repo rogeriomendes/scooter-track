@@ -41,7 +41,7 @@ export function ScooterDetailsSheet({
 			onOpenChange={onOpenChange}
 			title="Dados da Scooter"
 		>
-			<View className="bg-surface-secondary/40 pl-2 rounded-2xl border border-surface-secondary mb-4">
+			<View className="mb-4">
 				<View className="flex-row items-center justify-between">
 					<Text className="text-xl font-bold text-foreground">
 						{scooter.name}
@@ -54,14 +54,6 @@ export function ScooterDetailsSheet({
 						</Text>
 					</View>
 				</View>
-				{/* <Text className="text-xs text-muted mt-2">
-					Cadastrada em{" "}
-					{scooter.createdAt
-						? format(new Date(scooter.createdAt), "dd/MM/yyyy", {
-								locale: ptBR,
-							})
-						: "-"}
-				</Text> */}
 			</View>
 
 			<View className="gap-2.5 mb-4">
