@@ -39,92 +39,92 @@
 @layer theme {
 	:root {
 		@variant light {
-			/* Theme Colors (Light Mode) */
-			--accent: oklch(0.72 0.14 165);
-			--accent-foreground: oklch(15% 0.03 148.67);
-			--background: oklch(97.02% 0.002 148.67);
-			--border: oklch(90.00% 0.002 148.67);
-			--danger: oklch(0.5509 0.2166 25.29);
-			--danger-foreground: oklch(98% 0.02 25.29);
-			--default: oklch(94.00% 0.002 148.67);
-			--default-foreground: oklch(21.03% 0.0059 148.67);
-			--field-background: oklch(100.00% 0.001 148.67);
+			/* WhatsApp Theme Colors (Light Mode) */
+			--accent: oklch(0.55 0.14 165); /* #008069 WhatsApp Header Green */
+			--accent-foreground: oklch(100% 0 0);
+			--background: oklch(0.96 0.005 240); /* #F0F2F5 WhatsApp Light Background */
+			--border: oklch(0.88 0.005 240); /* #D1D7DB WhatsApp Border */
+			--danger: oklch(0.58 0.22 25); /* #EA4335 */
+			--danger-foreground: oklch(100% 0 0);
+			--default: oklch(0.94 0.005 240); /* #E9EDEF */
+			--default-foreground: oklch(0.18 0.01 240);
+			--field-background: oklch(100% 0 0); /* #FFFFFF */
 			--field-border: transparent;
-			--field-foreground: oklch(21.03% 0.002 148.67);
-			--field-placeholder: oklch(55.17% 0.004 148.67);
-			--focus: oklch(0.72 0.14 165);
-			--foreground: oklch(21.03% 0.002 148.67);
-			--muted: oklch(55.17% 0.004 148.67);
-			--overlay: oklch(100.00% 0.0006 148.67);
-			--overlay-foreground: oklch(21.03% 0.002 148.67);
-			--scrollbar: oklch(87.10% 0.002 148.67);
-			--segment: oklch(100.00% 0.002 148.67);
-			--segment-foreground: oklch(21.03% 0.002 148.67);
-			--separator: oklch(92.00% 0.002 148.67);
-			--success: oklch(0.6072 0.1647 149.02);
-			--success-foreground: oklch(98% 0.0165 149.02);
-			--surface: oklch(100.00% 0.001 148.67);
-			--surface-foreground: oklch(21.03% 0.002 148.67);
-			--surface-secondary: oklch(95.24% 0.0016 148.67);
-			--surface-secondary-foreground: oklch(21.03% 0.002 148.67);
-			--surface-tertiary: oklch(93.73% 0.0016 148.67);
-			--surface-tertiary-foreground: oklch(21.03% 0.002 148.67);
-			--warning: oklch(0.6972 0.1687 54.22);
-			--warning-foreground: oklch(15% 0.05 54.22);
-			--info: oklch(0.6 0.15 210);
-			--info-foreground: oklch(0.98 0 0);
+			--field-foreground: oklch(0.18 0.01 240); /* #111B21 */
+			--field-placeholder: oklch(0.53 0.015 240); /* #667781 */
+			--focus: oklch(0.64 0.16 165);
+			--foreground: oklch(0.18 0.01 240); /* #111B21 WhatsApp Dark Text */
+			--muted: oklch(0.53 0.015 240); /* #667781 WhatsApp Muted Text */
+			--overlay: oklch(100% 0 0);
+			--overlay-foreground: oklch(0.18 0.01 240);
+			--scrollbar: oklch(0.88 0.005 240);
+			--segment: oklch(100% 0 0);
+			--segment-foreground: oklch(0.18 0.01 240);
+			--separator: oklch(0.92 0.005 240);
+			--success: oklch(0.64 0.16 165); /* #00A884 WhatsApp Vibrant Green */
+			--success-foreground: oklch(100% 0 0);
+			--surface: oklch(100% 0 0); /* #FFFFFF WhatsApp Bubble/Card Surface */
+			--surface-foreground: oklch(0.18 0.01 240);
+			--surface-secondary: oklch(0.96 0.005 240); /* #F0F2F5 */
+			--surface-secondary-foreground: oklch(0.18 0.01 240);
+			--surface-tertiary: oklch(0.94 0.005 240); /* #E9EDEF */
+			--surface-tertiary-foreground: oklch(0.18 0.01 240);
+			--warning: oklch(0.72 0.16 70); /* #E5A100 */
+			--warning-foreground: oklch(15% 0.05 70);
+			--info: oklch(0.60 0.15 230); /* #007AFF */
+			--info-foreground: oklch(100% 0 0);
 
 			/* Shadows */
 			--surface-shadow:
-				0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-				0 0 1px 0 rgba(0, 0, 0, 0.06);
+				0 2px 4px 0 rgba(11, 20, 26, 0.04), 0 1px 2px 0 rgba(11, 20, 26, 0.06),
+				0 0 1px 0 rgba(11, 20, 26, 0.06);
 			--overlay-shadow:
-				0 2px 8px 0 rgba(0, 0, 0, 0.02), 0 -6px 12px 0 rgba(0, 0, 0, 0.01),
-				0 14px 28px 0 rgba(0, 0, 0, 0.03);
+				0 2px 8px 0 rgba(11, 20, 26, 0.02), 0 -6px 12px 0 rgba(11, 20, 26, 0.01),
+				0 14px 28px 0 rgba(11, 20, 26, 0.03);
 			--field-shadow:
-				0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-				0 0 1px 0 rgba(0, 0, 0, 0.06);
+				0 2px 4px 0 rgba(11, 20, 26, 0.04), 0 1px 2px 0 rgba(11, 20, 26, 0.06),
+				0 0 1px 0 rgba(11, 20, 26, 0.06);
 		}
 
 		@variant dark {
-			/* Theme Colors (Dark Mode) */
-			--accent: oklch(0.72 0.14 165);
-			--accent-foreground: oklch(15% 0.03 148.67);
-			--background: oklch(12.00% 0.002 148.67);
-			--border: oklch(28.00% 0.002 148.67);
-			--danger: oklch(0.5931 0.2338 25.42);
-			--danger-foreground: oklch(98% 0.02 25.42);
-			--default: oklch(27.40% 0.002 148.67);
-			--default-foreground: oklch(99.11% 0 0);
-			--field-background: oklch(21.03% 0.004 148.67);
+			/* WhatsApp Theme Colors (Dark Mode) */
+			--accent: oklch(0.64 0.16 165); /* #00A884 WhatsApp Accent Green */
+			--accent-foreground: oklch(0.14 0.015 220);
+			--background: oklch(0.16 0.015 220); /* #0B141A / #111B21 WhatsApp Dark Background */
+			--border: oklch(0.26 0.02 220); /* #222D34 WhatsApp Dark Border */
+			--danger: oklch(0.62 0.22 25); /* #F15C6D */
+			--danger-foreground: oklch(100% 0 0);
+			--default: oklch(0.26 0.02 220);
+			--default-foreground: oklch(0.94 0.005 240);
+			--field-background: oklch(0.24 0.015 220); /* #202C33 */
 			--field-border: transparent;
-			--field-foreground: oklch(99.11% 0.002 148.67);
-			--field-placeholder: oklch(70.50% 0.004 148.67);
-			--focus: oklch(0.72 0.14 165);
-			--foreground: oklch(99.11% 0.002 148.67);
-			--muted: oklch(70.50% 0.004 148.67);
-			--overlay: oklch(21.03% 0.004 148.67);
-			--overlay-foreground: oklch(99.11% 0.002 148.67);
-			--scrollbar: oklch(70.50% 0.002 148.67);
-			--segment: oklch(39.64% 0.002 148.67);
-			--segment-foreground: oklch(99.11% 0.002 148.67);
-			--separator: oklch(25.00% 0.002 148.67);
-			--success: oklch(0.7697 0.2124 148.67);
-			--success-foreground: oklch(15% 0.05 148.67);
-			--surface: oklch(21.03% 0.004 148.67);
-			--surface-foreground: oklch(99.11% 0.002 148.67);
-			--surface-secondary: oklch(25.70% 0.003 148.67);
-			--surface-secondary-foreground: oklch(99.11% 0.002 148.67);
-			--surface-tertiary: oklch(27.21% 0.003 148.67);
-			--surface-tertiary-foreground: oklch(99.11% 0.002 148.67);
-			--warning: oklch(0.7921 0.1626 67.42);
-			--warning-foreground: oklch(15% 0.0488 67.42);
-			--info: oklch(0.7 0.12 210);
-			--info-foreground: oklch(0.15 0 0);
+			--field-foreground: oklch(0.94 0.005 240); /* #E9EDEF WhatsApp Dark Text */
+			--field-placeholder: oklch(0.65 0.015 240); /* #8696A0 WhatsApp Muted */
+			--focus: oklch(0.64 0.16 165);
+			--foreground: oklch(0.94 0.005 240); /* #E9EDEF WhatsApp Soft White Text */
+			--muted: oklch(0.65 0.015 240); /* #8696A0 WhatsApp Slate Gray Muted */
+			--overlay: oklch(0.24 0.015 220);
+			--overlay-foreground: oklch(0.94 0.005 240);
+			--scrollbar: oklch(0.30 0.02 220);
+			--segment: oklch(0.30 0.02 220);
+			--segment-foreground: oklch(0.94 0.005 240);
+			--separator: oklch(0.26 0.02 220); /* #222D34 */
+			--success: oklch(0.64 0.16 165); /* #00A884 WhatsApp Emerald Green */
+			--success-foreground: oklch(0.14 0.015 220);
+			--surface: oklch(0.24 0.015 220); /* #202C33 / #1F2C34 WhatsApp Dark Bubble Surface */
+			--surface-foreground: oklch(0.94 0.005 240);
+			--surface-secondary: oklch(0.30 0.02 220); /* #2A3942 WhatsApp Dark Secondary Card */
+			--surface-secondary-foreground: oklch(0.94 0.005 240);
+			--surface-tertiary: oklch(0.26 0.02 220); /* #222D34 WhatsApp Dark Tertiary */
+			--surface-tertiary-foreground: oklch(0.94 0.005 240);
+			--warning: oklch(0.82 0.15 75); /* #FFD279 */
+			--warning-foreground: oklch(15% 0.04 75);
+			--info: oklch(0.72 0.14 220); /* #53BDEB */
+			--info-foreground: oklch(15% 0 0);
 
 			/* Shadows */
 			--surface-shadow: 0 0 0 0 transparent inset;
-			--overlay-shadow: 0 0 1px 0 rgba(255, 255, 255, 0.3) inset;
+			--overlay-shadow: 0 0 1px 0 rgba(233, 237, 239, 0.15) inset;
 			--field-shadow: 0 0 0 0 transparent inset;
 		}
 	}
