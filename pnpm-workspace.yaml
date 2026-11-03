@@ -4,32 +4,37 @@ allowBuilds:
   esbuild: true
   msgpackr-extract: true
 minimumReleaseAgeExclude:
-  - '@expo/cli@56.1.10 || 56.1.12 || 57.0.11 || 57.0.14'
-  - '@expo/fingerprint@0.19.1 || 0.19.3 || 0.20.7'
-  - '@expo/metro-runtime@56.0.11 || 56.0.13 || 57.0.8 || 57.0.9'
-  - '@expo/prebuild-config@56.0.12 || 56.0.13 || 57.0.10 || 57.0.11'
-  - '@expo/router-server@56.0.11 || 56.0.12'
-  - '@expo/ui@56.0.11 || 56.0.14 || 57.0.8 || 57.0.10'
-  - babel-preset-expo@56.0.11 || 56.0.13 || 57.0.5
-  - expo-asset@56.0.13 || 56.0.15 || 57.0.8 || 57.0.10
-  - expo-constants@56.0.14 || 56.0.16 || 57.0.8 || 57.0.10
+  - '@expo/cli@56.1.10 || 56.1.12 || 57.0.11 || 57.0.14 || 58.1.19'
+  - '@expo/fingerprint@0.19.1 || 0.19.3 || 0.20.7 || 0.21.9'
+  - '@expo/metro-runtime@56.0.11 || 56.0.13 || 57.0.8 || 57.0.9 || 58.0.17'
+  - '@expo/prebuild-config@56.0.12 || 56.0.13 || 57.0.10 || 57.0.11 || 58.0.19'
+  - '@expo/router-server@56.0.11 || 56.0.12 || 58.0.21'
+  - '@expo/ui@56.0.11 || 56.0.14 || 57.0.8 || 57.0.10 || 58.0.27'
+  - babel-preset-expo@56.0.11 || 56.0.13 || 57.0.5 || 58.0.24
+  - expo-asset@56.0.13 || 56.0.15 || 57.0.8 || 57.0.10 || 58.0.20
+  - expo-constants@56.0.14 || 56.0.16 || 57.0.8 || 57.0.10 || 58.0.15
   - expo-image@56.0.8
-  - expo-linking@56.0.11 || 56.0.12
-  - expo-modules-autolinking@56.0.11 || 56.0.13 || 56.0.14
-  - expo-modules-core@56.0.12 || 56.0.13 || 57.0.8
-  - expo-router@56.2.5 || 56.2.7 || 57.0.9 || 57.0.12
+  - expo-linking@56.0.11 || 56.0.12 || 58.0.16
+  - expo-modules-autolinking@56.0.11 || 56.0.13 || 56.0.14 || 58.0.17
+  - expo-modules-core@56.0.12 || 56.0.13 || 57.0.8 || 58.0.30
+  - expo-router@56.2.5 || 56.2.7 || 57.0.9 || 57.0.12 || 58.0.30
   - expo-system-ui@56.0.5 || 57.0.2
   - expo-web-browser@56.0.5
-  - expo@56.0.3 || 56.0.5 || 56.0.6 || 57.0.9 || 57.0.12
-  - '@expo/inline-modules@0.0.10 || 0.1.4 || 0.1.5'
-  - '@expo/local-build-cache-provider@56.0.8 || 57.0.5 || 57.0.6'
-  - '@expo/metro-config@56.0.13 || 57.0.8'
-  - expo-sharing@56.0.14 || 57.0.8 || 57.0.11
+  - expo@56.0.3 || 56.0.5 || 56.0.6 || 57.0.9 || 57.0.12 || 58.0.23
+  - '@expo/inline-modules@0.0.10 || 0.1.4 || 0.1.5 || 0.2.9'
+  - '@expo/local-build-cache-provider@56.0.8 || 57.0.5 || 57.0.6 || 58.0.11'
+  - '@expo/metro-config@56.0.13 || 57.0.8 || 58.0.21'
+  - expo-sharing@56.0.14 || 57.0.8 || 57.0.11 || 58.0.22
   - heroui-native@1.0.4
-  - '@expo/log-box@57.0.2'
+  - '@expo/log-box@57.0.2 || 58.0.15'
   - expo-location@57.0.7 || 57.0.9
   - expo-server@57.0.2
-  - expo-splash-screen@57.0.6
+  - expo-splash-screen@57.0.6 || 58.0.13
+  - '@expo/config-plugins@58.0.12'
+  - '@expo/config@58.0.11'
+  - '@expo/env@2.5.4'
+  - expo-modules-jsi@58.0.22
+  - react-native-safe-area-context@5.11.1
 onlyBuiltDependencies:
   - esbuild
   - msgpackr-extract

@@ -1,5 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { NativeTabs } from "expo-router/native-tabs";
 import { useThemeColor } from "heroui-native";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
