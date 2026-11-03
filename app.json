@@ -1,55 +1,58 @@
 {
-	"expo": {
-		"name": "ScooterTrack",
-		"slug": "ScooterTrack",
-		"version": "1.5.0",
-		"orientation": "portrait",
-		"icon": "./assets/images/icon.png",
-		"scheme": "scootertrack",
-		"userInterfaceStyle": "automatic",
-		"ios": {
-			"bundleIdentifier": "com.scootertrack.app",
-			"icon": "./assets/images/icon.png"
-		},
-		"android": {
-			"package": "com.scootertrack.app",
-			"adaptiveIcon": {
-				"backgroundColor": "#ecf7ef",
-				"foregroundImage": "./assets/images/android-icon-foreground.png",
-				"backgroundImage": "./assets/images/android-icon-background.png",
-				"monochromeImage": "./assets/images/android-icon-monochrome.png"
-			},
-			"predictiveBackGestureEnabled": true
-		},
-		"plugins": [
-			"expo-router",
-			[
-				"expo-splash-screen",
-				{
-					"backgroundColor": "#ecf7ef",
-					"android": {
-						"image": "./assets/images/splash-icon.png",
-						"imageWidth": 200,
-						"dark": {
-							"backgroundColor": "#17291d"
-						}
-					}
-				}
-			],
-			"expo-sqlite",
-			"@react-native-community/datetimepicker",
-			"expo-image",
-			"expo-sharing"
-		],
-		"experiments": {
-			"typedRoutes": true
-		},
-		"extra": {
-			"router": {},
-			"eas": {
-				"projectId": "ec4cc3cc-864e-456d-b57e-71d03c5960c4"
-			}
-		},
-		"owner": "rogeriomendes"
-	}
+  "expo": {
+    "name": "ScooterTrack",
+    "slug": "ScooterTrack",
+    "version": "1.5.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "scootertrack",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.scootertrack.app",
+      "icon": "./assets/images/icon.png"
+    },
+    "android": {
+      "package": "com.scootertrack.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#ecf7ef",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": true
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ecf7ef",
+          "android": {
+            "image": "./assets/images/splash-icon.png",
+            "imageWidth": 200,
+            "dark": {
+              "backgroundColor": "#17291d"
+            }
+          }
+        }
+      ],
+      "expo-sqlite",
+      "@react-native-community/datetimepicker",
+      "expo-image",
+      "expo-sharing",
+      "expo-font",
+      "expo-status-bar",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ec4cc3cc-864e-456d-b57e-71d03c5960c4"
+      }
+    },
+    "owner": "rogeriomendes"
+  }
 }
