@@ -52,7 +52,7 @@ export function MaintenanceFormSheet({
 		if (isOpen) {
 			if (editItem) {
 				setName(editItem.name);
-				setType(editItem.type as any);
+				setType(editItem.type as "km" | "months" | "date" | "mixed");
 				setIntervalKm(
 					editItem.intervalKm ? editItem.intervalKm.toString() : "",
 				);

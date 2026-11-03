@@ -1,14 +1,12 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
-import * as Haptics from "expo-haptics";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import {
 	ActivityIndicator,
 	Pressable,
-	ScrollView,
 	SectionList,
 	Text,
 	View,
@@ -199,8 +197,8 @@ export default function TripsScreen() {
 			>
 				<View className="flex-row gap-2">
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
 							<StyledIcon name="map-pin" size={18} className="text-success" />
@@ -217,8 +215,8 @@ export default function TripsScreen() {
 					</Card>
 
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-accent/15 items-center justify-center">
 							<StyledIcon
@@ -241,8 +239,8 @@ export default function TripsScreen() {
 
 				<View className="flex-row gap-2">
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
 							<StyledIcon name="award" size={18} className="text-warning" />
@@ -259,8 +257,8 @@ export default function TripsScreen() {
 					</Card>
 
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
 							<StyledIcon name="hash" size={18} className="text-info" />
@@ -305,11 +303,10 @@ export default function TripsScreen() {
 					}
 				}}
 				onEndReachedThreshold={0.5}
-				ListHeaderComponent={null}
 				ListFooterComponent={
 					displayedTrips.length < tripsList.length ? (
 						<ActivityIndicator size="small" color="#10b981" className="py-3" />
-					) : null
+					) : undefined
 				}
 				ListEmptyComponent={
 					selectedMonth && totalTripsCount > 0 ? (
@@ -364,8 +361,8 @@ export default function TripsScreen() {
 					return (
 						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
 							<Card
-								variant="secondary"
-								className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
+								variant="default"
+								className="border border-border bg-surface shadow-sm p-0 rounded-xl"
 							>
 								<Pressable
 									className="py-2.5 px-3"

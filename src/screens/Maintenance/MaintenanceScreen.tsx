@@ -132,8 +132,8 @@ export function MaintenanceScreen() {
 							<View className="flex-row gap-2">
 								{/* CARD 1: EM RISCO */}
 								<Card
-									variant="secondary"
-									className="flex-1 p-3 bg-surface border border-surface-secondary shadow-sm rounded-xl flex-row items-center gap-2.5"
+									variant="default"
+									className="flex-1 p-3 bg-surface border border-border shadow-sm rounded-xl flex-row items-center gap-2.5"
 								>
 									<View
 										className={`w-9 h-9 rounded-xl items-center justify-center shrink-0 ${
@@ -173,8 +173,8 @@ export function MaintenanceScreen() {
 
 								{/* CARD 2: PRÓXIMA REVISÃO */}
 								<Card
-									variant="secondary"
-									className="flex-[1.3] p-3 bg-surface border border-surface-secondary shadow-sm rounded-xl flex-row items-center gap-2.5 min-w-0"
+									variant="default"
+									className="flex-[1.3] p-3 bg-surface border border-border shadow-sm rounded-xl flex-row items-center gap-2.5 min-w-0"
 								>
 									<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center shrink-0">
 										<StyledIcon
@@ -258,7 +258,7 @@ export function MaintenanceScreen() {
 								</ScrollView>
 							</View>
 						</Animated.View>
-					) : null
+					) : undefined
 				}
 				ListEmptyComponent={
 					maintenanceList.length > 0 ? (
@@ -415,7 +415,7 @@ export function MaintenanceScreen() {
 					return (
 						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
 							<Card
-								variant="secondary"
+								variant="default"
 								className={`border ${bgGlow} bg-surface shadow-sm p-0 rounded-xl overflow-hidden`}
 							>
 								{/* BACKGROUND PROGRESS BAR LAYER */}

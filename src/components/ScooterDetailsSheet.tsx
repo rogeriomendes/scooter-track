@@ -178,7 +178,6 @@ export function ScooterDetailsSheet({
 						onEditRequest();
 					}}
 				>
-					<StyledIcon name="edit-2" size={16} className="text-primary" />
 					<Button.Label>Editar Scooter</Button.Label>
 				</Button>
 			)}

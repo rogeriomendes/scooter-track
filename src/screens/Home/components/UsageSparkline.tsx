@@ -32,10 +32,8 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 	const [containerWidth, setContainerWidth] = useState<number>(180);
 	const foregroundColor = useThemeColor("foreground") as unknown as string;
 
-	const now = new Date();
-
 	const monthName = useMemo(() => {
-		const raw = format(now, "MMMM", { locale: ptBR });
+		const raw = format(new Date(), "MMMM", { locale: ptBR });
 		return raw.charAt(0).toUpperCase() + raw.slice(1);
 	}, []);
 
@@ -125,8 +123,8 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 	return (
 		<Animated.View entering={FadeInDown.delay(200).springify()}>
 			<Card
-				variant="secondary"
-				className="mb-4 bg-surface border border-surface-secondary shadow-sm p-4 rounded-2xl"
+				variant="default"
+				className="mb-4 bg-surface border border-border shadow-sm p-4 rounded-2xl"
 			>
 				{/* HEADER WITH TOGGLE PILLS */}
 				<View className="flex-row justify-between items-center mb-3">

@@ -11,4 +11,3 @@ config.resolver.assetExts.push("wasm");
 module.exports = withUniwindConfig(config, {
 	cssEntryFile: "./src/global.css",
 });
-

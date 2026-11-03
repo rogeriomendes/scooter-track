@@ -76,8 +76,8 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 	return (
 		<Animated.View entering={FadeInDown.delay(200).springify()}>
 			<Card
-				variant="secondary"
-				className="mb-4 bg-surface border border-surface-secondary shadow-sm p-4 rounded-2xl"
+				variant="default"
+				className="mb-4 bg-surface border border-border shadow-sm p-4 rounded-2xl"
 			>
 				{/* CABEÇALHO COM NOME DO MÊS */}
 				<View className="flex-row justify-between items-center mb-3">
@@ -100,7 +100,7 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 				{/* 3 COLUNAS DE MÉTRICAS */}
 				<View className="flex-row gap-2 mb-3">
 					{/* DISTÂNCIA NO MÊS */}
-					<View className="flex-1 bg-surface-secondary/40 p-2.5 rounded-xl border border-surface-secondary/50">
+					<View className="flex-1 bg-surface-secondary p-2.5 rounded-xl">
 						<View className="flex-row items-center gap-1 mb-1">
 							<StyledIcon
 								name="navigation"
@@ -118,7 +118,7 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 					</View>
 
 					{/* RECARGAS NO MÊS */}
-					<View className="flex-1 bg-surface-secondary/40 p-2.5 rounded-xl border border-surface-secondary/50">
+					<View className="flex-1 bg-surface-secondary p-2.5 rounded-xl">
 						<View className="flex-row items-center gap-1 mb-1">
 							<StyledIcon name="zap" size={12} className="text-info" />
 							<Text className="text-[10px] font-bold text-muted uppercase">
@@ -134,7 +134,7 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 					</View>
 
 					{/* MELHOR DIA */}
-					<View className="flex-1 bg-surface-secondary/40 p-2.5 rounded-xl border border-surface-secondary/50">
+					<View className="flex-1 bg-surface-secondary p-2.5 rounded-xl">
 						<View className="flex-row items-center gap-1 mb-1">
 							<StyledIcon name="award" size={12} className="text-warning" />
 							<Text className="text-[10px] font-bold text-muted uppercase">
@@ -152,7 +152,7 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 				</View>
 
 				{/* FREQUÊNCIA DE USO - BARRA DE PROGRESSO */}
-				<View className="bg-surface-secondary/30 p-2.5 rounded-xl border border-surface-secondary/40">
+				<View className="bg-surface-secondary p-2.5 rounded-xl ">
 					<View className="flex-row justify-between items-center mb-1.5">
 						<Text className="text-[11px] font-semibold text-muted">
 							Frequência de uso no mês
@@ -162,7 +162,7 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 							{activeDaysPercent}%)
 						</Text>
 					</View>
-					<View className="w-full h-2 bg-surface-secondary rounded-full overflow-hidden flex-row">
+					<View className="w-full h-2 bg-surface-tertiary rounded-full overflow-hidden flex-row">
 						<View
 							className="h-full bg-success rounded-full"
 							style={{

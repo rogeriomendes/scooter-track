@@ -35,7 +35,6 @@ import { openPdfFile } from "@/utils/fileViewer";
 import { BatteryArc } from "./components/BatteryArc";
 import { MonthSummaryCard } from "./components/MonthSummaryCard";
 import { ScooterPickerSheet } from "./components/ScooterPickerSheet";
-import { WeatherWidget } from "./components/WeatherWidget";
 
 export default function DashboardScreen() {
 	const colorScheme = useColorScheme();
@@ -317,11 +316,11 @@ export default function DashboardScreen() {
 						/>
 					</View>
 					{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
-					<View className="mt-2 px-1 z-10 gap-2 w-full">
+					<View className="mt-2 z-10 gap-2 w-full">
 						<View className="flex-row gap-2">
 							<Card
-								variant="secondary"
-								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+								variant="default"
+								className="flex-1 p-3 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-info/15 items-center justify-center">
 									<StyledIcon name="clock" size={16} className="text-info" />
@@ -340,8 +339,8 @@ export default function DashboardScreen() {
 							</Card>
 
 							<Card
-								variant="secondary"
-								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+								variant="default"
+								className="flex-1 p-3 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-success/15 items-center justify-center">
 									<StyledIcon
@@ -364,8 +363,8 @@ export default function DashboardScreen() {
 
 						<View className="flex-row gap-2">
 							<Card
-								variant="secondary"
-								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+								variant="default"
+								className="flex-1 p-3 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-accent/15 items-center justify-center">
 									<StyledIcon
@@ -386,8 +385,8 @@ export default function DashboardScreen() {
 							</Card>
 
 							<Card
-								variant="secondary"
-								className="flex-1 p-3 bg-surface/90 border border-surface-secondary/80 shadow-sm rounded-2xl flex-row items-center gap-2.5"
+								variant="default"
+								className="flex-1 p-3 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-warning/15 items-center justify-center">
 									<StyledIcon name="zap" size={16} className="text-warning" />
@@ -408,8 +407,6 @@ export default function DashboardScreen() {
 			</View>
 
 			<View className="px-4 mt-4">
-				<WeatherWidget />
-
 				<MonthSummaryCard allLogs={allLogs} />
 
 				{/* AÇÕES RÁPIDAS (Hierarquia Clara de CTAs) */}
@@ -469,7 +466,7 @@ export default function DashboardScreen() {
 							className="mb-4"
 						>
 							<Card
-								variant="secondary"
+								variant="default"
 								className="border border-warning/30 bg-warning/5 shadow-sm p-0 rounded-xl"
 							>
 								<Pressable
@@ -531,16 +528,15 @@ export default function DashboardScreen() {
 							Últimos Usos
 						</Text>
 						{recentTrips.length > 0 && (
-							<Button
-								size="sm"
-								variant="secondary"
-								className="bg-transparent border-0 px-0 h-auto"
+							<Pressable
 								onPress={() => router.push("/(tabs)/trips")}
+								className="active:opacity-70 py-1"
+								hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
 							>
-								<Button.Label className="text-success text-xs font-bold">
+								<Text className="text-success text-xs font-bold">
 									Ver todos
-								</Button.Label>
-							</Button>
+								</Text>
+							</Pressable>
 						)}
 					</View>
 
@@ -556,8 +552,8 @@ export default function DashboardScreen() {
 								return (
 									<Card
 										key={trip.id}
-										variant="secondary"
-										className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
+										variant="default"
+										className="border border-border bg-surface shadow-sm p-0 rounded-xl"
 									>
 										<Pressable
 											className="py-2.5 px-3"

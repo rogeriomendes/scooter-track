@@ -174,8 +174,8 @@ export default function ChargesScreen() {
 			>
 				<View className="flex-row gap-2">
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
 							<StyledIcon name="zap" size={18} className="text-info" />
@@ -192,8 +192,8 @@ export default function ChargesScreen() {
 					</Card>
 
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
 							<StyledIcon
@@ -216,8 +216,8 @@ export default function ChargesScreen() {
 
 				<View className="flex-row gap-2">
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
 							<StyledIcon
@@ -238,8 +238,8 @@ export default function ChargesScreen() {
 					</Card>
 
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-danger/15 items-center justify-center">
 							<StyledIcon
@@ -289,7 +289,7 @@ export default function ChargesScreen() {
 				ListFooterComponent={
 					displayedCharges.length < chargesList.length ? (
 						<ActivityIndicator size="small" color="#10b981" className="py-3" />
-					) : null
+					) : undefined
 				}
 				keyExtractor={(item) => item.id.toString()}
 				contentContainerClassName="px-4 pb-24 gap-2 pt-1"
@@ -349,8 +349,8 @@ export default function ChargesScreen() {
 					return (
 						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
 							<Card
-								variant="secondary"
-								className="border border-surface-secondary/60 bg-surface shadow-sm p-0 rounded-xl"
+								variant="default"
+								className="border border-border bg-surface shadow-sm p-0 rounded-xl"
 							>
 								<Pressable
 									className="py-2.5 px-3"

@@ -397,11 +397,11 @@ export default function SettingsScreen() {
 					Resumo de Dados
 				</Text>
 				<Card
-					variant="secondary"
-					className="border border-surface-secondary bg-surface mb-6 p-4 rounded-2xl"
+					variant="default"
+					className="mb-6 bg-surface border border-border shadow-sm p-4 rounded-2xl"
 				>
 					<View className="flex-row gap-2">
-						<View className="flex-1 bg-surface-secondary/40 p-2.5 rounded-xl border border-surface-secondary/50 items-center">
+						<View className="flex-1 bg-surface-secondary p-2.5 rounded-xl items-center">
 							<Text className="text-[10px] font-bold text-muted uppercase mb-0.5">
 								Scooters
 							</Text>
@@ -410,7 +410,7 @@ export default function SettingsScreen() {
 							</Text>
 						</View>
 
-						<View className="flex-1 bg-surface-secondary/40 p-2.5 rounded-xl border border-surface-secondary/50 items-center">
+						<View className="flex-1 bg-surface-secondary p-2.5 rounded-xl items-center">
 							<Text className="text-[10px] font-bold text-muted uppercase mb-0.5">
 								Registros
 							</Text>
@@ -419,7 +419,7 @@ export default function SettingsScreen() {
 							</Text>
 						</View>
 
-						<View className="flex-1 bg-surface-secondary/40 p-2.5 rounded-xl border border-surface-secondary/50 items-center">
+						<View className="flex-1 bg-surface-secondary p-2.5 rounded-xl items-center">
 							<Text className="text-[10px] font-bold text-muted uppercase mb-0.5">
 								Notas PDF
 							</Text>
@@ -437,8 +437,8 @@ export default function SettingsScreen() {
 					Backup Completo (Banco + Notas Fiscais)
 				</Text>
 				<Card
-					variant="secondary"
-					className="border border-surface-secondary bg-surface mb-6 p-4 rounded-2xl"
+					variant="default"
+					className="border border-border bg-surface mb-6 p-4 rounded-2xl shadow-sm"
 				>
 					<View className="flex-row gap-3 mb-3">
 						<Button
@@ -480,8 +480,8 @@ export default function SettingsScreen() {
 					Zona de Perigo
 				</Text>
 				<Card
-					variant="secondary"
-					className="border border-surface-secondary/80 bg-surface p-4 rounded-2xl mb-8"
+					variant="default"
+					className="border border-border bg-surface p-4 rounded-2xl mb-8 shadow-sm"
 				>
 					<Button
 						variant="outline"

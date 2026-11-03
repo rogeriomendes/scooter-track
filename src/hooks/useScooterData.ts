@@ -69,6 +69,7 @@ export function useScooterData(activeScooterId: number | null) {
 	}, [activeScooterId]);
 
 	useEffect(() => {
+		void refreshCounter;
 		loadData();
 	}, [loadData, refreshCounter]);
 

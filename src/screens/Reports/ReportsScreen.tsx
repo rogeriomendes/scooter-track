@@ -83,28 +83,20 @@ export default function ReportsScreen() {
 			}));
 		} else {
 			// Por ciclo
-			const cyclesList = (stats?.cycles || []).filter(
-				(c: any) => c.distance > 0,
-			);
+			const cyclesList = (stats?.cycles || []).filter((c) => c.distance > 0);
 			const now = new Date();
 			let filteredCycles = cyclesList;
 			if (timeframe === "7d") {
 				const limit = subDays(now, 7);
-				filteredCycles = cyclesList.filter(
-					(c: any) => new Date(c.endDate) >= limit,
-				);
+				filteredCycles = cyclesList.filter((c) => new Date(c.endDate) >= limit);
 			} else if (timeframe === "30d") {
 				const limit = subDays(now, 30);
-				filteredCycles = cyclesList.filter(
-					(c: any) => new Date(c.endDate) >= limit,
-				);
+				filteredCycles = cyclesList.filter((c) => new Date(c.endDate) >= limit);
 			} else if (timeframe === "month") {
 				const limit = startOfMonth(now);
-				filteredCycles = cyclesList.filter(
-					(c: any) => new Date(c.endDate) >= limit,
-				);
+				filteredCycles = cyclesList.filter((c) => new Date(c.endDate) >= limit);
 			}
-			return filteredCycles.map((c: any, i: number) => ({
+			return filteredCycles.map((c, i: number) => ({
 				value: c.distance,
 				label: `C${i + 1}`,
 				date: `Ciclo ${i + 1}`,
@@ -144,7 +136,7 @@ export default function ReportsScreen() {
 			const cyclesList = stats?.cycles || [];
 			const cyclesCount = cyclesList.length;
 			const totalCyclesDist = cyclesList.reduce(
-				(sum: number, c: any) => sum + c.distance,
+				(sum: number, c) => sum + c.distance,
 				0,
 			);
 			const avg = cyclesCount > 0 ? totalCyclesDist / cyclesCount : 0;
@@ -284,8 +276,8 @@ export default function ReportsScreen() {
 			{/* GRÁFICO NEON */}
 			<Animated.View entering={FadeInDown.delay(400).springify()}>
 				<Card
-					variant="secondary"
-					className="mb-3 border border-surface-secondary bg-surface shadow-sm rounded-2xl overflow-hidden p-0 pt-4 pb-2"
+					variant="default"
+					className="mb-3 border border-border bg-surface shadow-sm rounded-2xl overflow-hidden p-0 pt-4 pb-2"
 				>
 					<View className="px-4 mb-3">
 						<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
@@ -340,7 +332,9 @@ export default function ReportsScreen() {
 									pointerLabelHeight: 60,
 									activatePointersOnLongPress: false,
 									autoAdjustPointerLabelPosition: true,
-									pointerLabelComponent: (items: any) => {
+									pointerLabelComponent: (
+										items: { date?: string; value: number }[],
+									) => {
 										return (
 											<View className="bg-surface-secondary/90 rounded-xl px-3 py-2 items-center justify-center border border-success/30 -ml-10 -mt-10">
 												<Text className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">
@@ -377,8 +371,8 @@ export default function ReportsScreen() {
 			>
 				<View className="flex-row gap-2">
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
 							<StyledIcon name="map-pin" size={18} className="text-success" />
@@ -398,8 +392,8 @@ export default function ReportsScreen() {
 					</Card>
 
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-accent/15 items-center justify-center">
 							<StyledIcon
@@ -425,8 +419,8 @@ export default function ReportsScreen() {
 
 				<View className="flex-row gap-2">
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
 							<StyledIcon name="award" size={18} className="text-warning" />
@@ -446,8 +440,8 @@ export default function ReportsScreen() {
 					</Card>
 
 					<Card
-						variant="secondary"
-						className="flex-1 p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+						variant="default"
+						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 					>
 						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
 							<StyledIcon name="hash" size={18} className="text-info" />
@@ -473,8 +467,8 @@ export default function ReportsScreen() {
 				className="mb-3"
 			>
 				<Card
-					variant="secondary"
-					className="p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center gap-3"
+					variant="default"
+					className="p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
 				>
 					<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center shrink-0">
 						<StyledIcon
@@ -502,8 +496,8 @@ export default function ReportsScreen() {
 			<Animated.View entering={FadeInDown.delay(650).springify()}>
 				<Pressable onPress={() => setIsBadgesOpen(true)}>
 					<Card
-						variant="secondary"
-						className="p-3.5 bg-surface border border-surface-secondary shadow-sm rounded-2xl flex-row items-center justify-between gap-3 active:opacity-80"
+						variant="default"
+						className="p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center justify-between gap-3 active:opacity-80"
 					>
 						<View className="flex-row items-center gap-3 flex-1">
 							<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center shrink-0">

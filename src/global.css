@@ -41,7 +41,7 @@
 		@variant light {
 			/* Theme Colors (Light Mode) */
 			--accent: oklch(0.72 0.14 165);
-			--accent-foreground: oklch(15% 0.03 148.67);
+			--accent-foreground: oklch(100% 0 0);
 			--background: oklch(97.02% 0.002 148.67);
 			--border: oklch(90.00% 0.002 148.67);
 			--danger: oklch(0.5509 0.2166 25.29);
@@ -89,7 +89,7 @@
 		@variant dark {
 			/* Theme Colors (Dark Mode) */
 			--accent: oklch(0.72 0.14 165);
-			--accent-foreground: oklch(15% 0.03 148.67);
+			--accent-foreground: oklch(100% 0 0);
 			--background: oklch(12.00% 0.002 148.67);
 			--border: oklch(28.00% 0.002 148.67);
 			--danger: oklch(0.5931 0.2338 25.42);
@@ -113,9 +113,9 @@
 			--success-foreground: oklch(15% 0.05 148.67);
 			--surface: oklch(21.03% 0.004 148.67);
 			--surface-foreground: oklch(99.11% 0.002 148.67);
-			--surface-secondary: oklch(25.70% 0.003 148.67);
+			--surface-secondary: oklch(28.00% 0.003 148.67);
 			--surface-secondary-foreground: oklch(99.11% 0.002 148.67);
-			--surface-tertiary: oklch(27.21% 0.003 148.67);
+			--surface-tertiary: oklch(32.00% 0.003 148.67);
 			--surface-tertiary-foreground: oklch(99.11% 0.002 148.67);
 			--warning: oklch(0.7921 0.1626 67.42);
 			--warning-foreground: oklch(15% 0.0488 67.42);

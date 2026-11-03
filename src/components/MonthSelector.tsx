@@ -42,7 +42,7 @@ export function MonthSelector({
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
-				contentContainerClassName="gap-2"
+				contentContainerClassName="gap-2 pr-4"
 			>
 				{/* CHIP "TODOS" */}
 				<Pressable
@@ -50,7 +50,7 @@ export function MonthSelector({
 						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 						onChange(null);
 					}}
-					className={`px-2.5 py-2 rounded-xl flex-row items-center gap-1 transition-all ${
+					className={`px-3 py-2 rounded-xl flex-row items-center gap-1.5 shrink-0 transition-all ${
 						isAllSelected
 							? "bg-success/15 border border-success/30 shadow-sm"
 							: "bg-surface-tertiary border border-transparent active:opacity-70"
@@ -60,7 +60,8 @@ export function MonthSelector({
 						<View className="w-1.5 h-1.5 rounded-full bg-success" />
 					)}
 					<Text
-						className={`text-xs font-bold ${
+						numberOfLines={1}
+						className={`text-xs font-bold shrink-0 ${
 							isAllSelected ? "text-success" : "text-muted"
 						}`}
 					>
@@ -79,7 +80,7 @@ export function MonthSelector({
 								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 								onChange(month);
 							}}
-							className={`px-2.5 py-2 rounded-xl flex-row items-center gap-1 transition-all ${
+							className={`px-3 py-2 rounded-xl flex-row items-center gap-1.5 shrink-0 transition-all ${
 								isSelected
 									? "bg-success/15 border border-success/30 shadow-sm"
 									: "bg-surface-tertiary border border-transparent active:opacity-70"
@@ -89,11 +90,12 @@ export function MonthSelector({
 								<View className="w-1.5 h-1.5 rounded-full bg-success" />
 							)}
 							<Text
-								className={`text-xs font-bold capitalize ${
+								numberOfLines={1}
+								className={`text-xs font-bold capitalize shrink-0 ${
 									isSelected ? "text-success" : "text-muted"
 								}`}
 							>
-								{format(month, "MMMM yyyy", { locale: ptBR })}
+								{`${format(month, "MMMM", { locale: ptBR })}\u00A0${format(month, "yyyy")}`}
 							</Text>
 						</Pressable>
 					);
