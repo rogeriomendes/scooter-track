@@ -104,7 +104,7 @@ export function ScooterFormSheet({
 		try {
 			const result = await DocumentPicker.getDocumentAsync({
 				type: "application/pdf",
-				copyToCacheDirectory: true,
+				copyToCacheDirectory: Platform.OS !== "android",
 			});
 
 			if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -113,10 +113,29 @@ export function ScooterFormSheet({
 				const fileName = `nota_fiscal_${Date.now()}.pdf`;
 				const destinationUri = `${FileSystem.documentDirectory}${fileName}`;
 
-				await FileSystem.copyAsync({
-					from: asset.uri,
-					to: destinationUri,
-				});
+				try {
+					await FileSystem.copyAsync({
+						from: asset.uri,
+						to: destinationUri,
+					});
+				} catch {
+					// Fallback com fetch para contornar restrições de permissão do Expo Go no Android
+					const response = await fetch(asset.uri);
+					const blob = await response.blob();
+					const reader = new FileReader();
+					const base64Data = await new Promise<string>((resolve, reject) => {
+						reader.onloadend = () => {
+							const res = reader.result as string;
+							const idx = res.indexOf(",");
+							resolve(idx !== -1 ? res.slice(idx + 1) : res);
+						};
+						reader.onerror = reject;
+						reader.readAsDataURL(blob);
+					});
+					await FileSystem.writeAsStringAsync(destinationUri, base64Data, {
+						encoding: FileSystem.EncodingType.Base64,
+					});
+				}
 
 				setInvoicePdfPath(destinationUri);
 				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

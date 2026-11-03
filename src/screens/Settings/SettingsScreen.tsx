@@ -5,6 +5,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
+import * as SQLite from "expo-sqlite";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useCallback, useEffect, useState } from "react";
@@ -13,9 +14,41 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
-import { db } from "@/db/client";
+import { db, sqliteDb } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
+import { base64ToUint8Array, uint8ArrayToBase64 } from "@/utils/base64";
+
+async function readFileAsStringSafe(
+	uri: string,
+	encoding: "utf8" | "base64",
+): Promise<string> {
+	try {
+		return await FileSystem.readAsStringAsync(uri, {
+			encoding:
+				encoding === "base64"
+					? FileSystem.EncodingType.Base64
+					: FileSystem.EncodingType.UTF8,
+		});
+	} catch (_fsError) {
+		// Fallback para fetch (capaz de ler URIs file:// e content:// nativamente no Android e contornar restrições de sandbox do Expo Go)
+		const response = await fetch(uri);
+		if (encoding === "base64") {
+			const blob = await response.blob();
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onloadend = () => {
+					const result = reader.result as string;
+					const commaIdx = result.indexOf(",");
+					resolve(commaIdx !== -1 ? result.slice(commaIdx + 1) : result);
+				};
+				reader.onerror = reject;
+				reader.readAsDataURL(blob);
+			});
+		}
+		return await response.text();
+	}
+}
 
 export default function SettingsScreen() {
 	const router = useRouter();
@@ -91,17 +124,15 @@ export default function SettingsScreen() {
 
 	const handleBackup = async () => {
 		try {
-			const dbPath = `${FileSystem.documentDirectory}SQLite/scootertrack.db`;
-			const fileInfo = await FileSystem.getInfoAsync(dbPath);
-			if (!fileInfo.exists) {
+			// Serializa o banco SQLite diretamente via Expo SQLite (captura transações e WAL sem depender do caminho do SO ou restrições do sandbox)
+			const dbBytes = await sqliteDb.serializeAsync();
+			if (!dbBytes || dbBytes.length === 0) {
 				Alert.alert("Aviso", "Nenhum banco de dados encontrado para backup.");
 				return;
 			}
 
-			// Ler Banco SQLite em Base64
-			const dbBase64 = await FileSystem.readAsStringAsync(dbPath, {
-				encoding: FileSystem.EncodingType.Base64,
-			});
+			// Converter banco SQLite em Base64
+			const dbBase64 = uint8ArrayToBase64(dbBytes);
 
 			// Ler Notas Fiscais em PDF anexadas
 			const pdfInvoices: { filename: string; dataBase64: string }[] = [];
@@ -185,8 +216,9 @@ export default function SettingsScreen() {
 
 	const handleRestore = async () => {
 		try {
+			// No Android, copyToCacheDirectory=false retorna URI content:// que o sistema lê diretamente sem erro de sandbox do Expo Go
 			const result = await DocumentPicker.getDocumentAsync({
-				copyToCacheDirectory: true,
+				copyToCacheDirectory: Platform.OS !== "android",
 			});
 
 			if (result.canceled || !result.assets || result.assets.length === 0) {
@@ -195,22 +227,19 @@ export default function SettingsScreen() {
 
 			const fileAsset = result.assets[0];
 			const fileUri = fileAsset.uri;
-			const fileName = fileAsset.name.toLowerCase();
+			const fileName = (fileAsset.name || "").toLowerCase();
 
-			const dbPath = `${FileSystem.documentDirectory}SQLite/scootertrack.db`;
+			let dbBytes: Uint8Array | null = null;
+			let dbBase64Data = "";
+			let invoices: { filename: string; dataBase64: string }[] = [];
 
 			// 1. Backup legado apenas com extensão .db
 			if (fileName.endsWith(".db")) {
-				await FileSystem.copyAsync({
-					from: fileUri,
-					to: dbPath,
-				});
+				dbBase64Data = await readFileAsStringSafe(fileUri, "base64");
+				dbBytes = base64ToUint8Array(dbBase64Data);
 			} else {
 				// 2. Pacote Completo .scootertrack ou .json
-				const rawContent = await FileSystem.readAsStringAsync(fileUri, {
-					encoding: FileSystem.EncodingType.UTF8,
-				});
-
+				const rawContent = await readFileAsStringSafe(fileUri, "utf8");
 				const payload = JSON.parse(rawContent);
 
 				if (!payload.dbBase64) {
@@ -218,32 +247,99 @@ export default function SettingsScreen() {
 					return;
 				}
 
-				// Restaurar Banco SQLite
-				await FileSystem.writeAsStringAsync(dbPath, payload.dbBase64, {
-					encoding: FileSystem.EncodingType.Base64,
-				});
-
-				// Restaurar Notas Fiscais em PDF
+				dbBase64Data = payload.dbBase64;
+				dbBytes = base64ToUint8Array(payload.dbBase64);
 				if (Array.isArray(payload.invoices)) {
-					for (const inv of payload.invoices) {
-						if (inv.filename && inv.dataBase64) {
-							const destPath = `${FileSystem.documentDirectory}${inv.filename}`;
-							await FileSystem.writeAsStringAsync(destPath, inv.dataBase64, {
-								encoding: FileSystem.EncodingType.Base64,
-							});
-						}
+					invoices = payload.invoices;
+				}
+			}
+
+			// Tentar gravar o arquivo do banco em disco para garantir persistência direta
+			const targetDbPaths = [
+				`${FileSystem.documentDirectory}SQLite/scootertrack.db`,
+			];
+			if (
+				sqliteDb.databasePath &&
+				!targetDbPaths.includes(sqliteDb.databasePath)
+			) {
+				targetDbPaths.push(sqliteDb.databasePath);
+			}
+
+			for (const p of targetDbPaths) {
+				try {
+					const parent = p.substring(0, p.lastIndexOf("/"));
+					const dirInfo = await FileSystem.getInfoAsync(parent);
+					if (!dirInfo.exists) {
+						await FileSystem.makeDirectoryAsync(parent, {
+							intermediates: true,
+						});
 					}
+					await FileSystem.writeAsStringAsync(p, dbBase64Data, {
+						encoding: FileSystem.EncodingType.Base64,
+					});
+				} catch (diskErr) {
+					console.log("Aviso ao gravar cópia do banco em disco:", p, diskErr);
+				}
+			}
+
+			// Restaurar Banco SQLite na conexão ativa via SQLite Backup API
+			if (dbBytes && dbBytes.length > 0) {
+				try {
+					const memoryDb = await SQLite.deserializeDatabaseAsync(dbBytes);
+					await SQLite.backupDatabaseAsync({
+						sourceDatabase: memoryDb,
+						destDatabase: sqliteDb,
+					});
+					await memoryDb.closeAsync();
+					await sqliteDb.execAsync("PRAGMA wal_checkpoint(TRUNCATE);");
+				} catch (backupErr) {
+					console.log("Aviso ao aplicar backup na conexão ativa:", backupErr);
+				}
+			}
+
+			// Auto-migrar colunas que podem não existir em backups de versões anteriores
+			try {
+				sqliteDb.execSync(
+					"ALTER TABLE maintenance ADD COLUMN isCompleted INTEGER NOT NULL DEFAULT 0;",
+				);
+			} catch {}
+			try {
+				sqliteDb.execSync(
+					"ALTER TABLE maintenance ADD COLUMN completedAt INTEGER;",
+				);
+			} catch {}
+			try {
+				sqliteDb.execSync(
+					"ALTER TABLE maintenance ADD COLUMN hasWear INTEGER NOT NULL DEFAULT 1;",
+				);
+			} catch {}
+
+			// Restaurar Notas Fiscais em PDF
+			for (const inv of invoices) {
+				if (inv.filename && inv.dataBase64) {
+					const destPath = `${FileSystem.documentDirectory}${inv.filename}`;
+					await FileSystem.writeAsStringAsync(destPath, inv.dataBase64, {
+						encoding: FileSystem.EncodingType.Base64,
+					});
 				}
 			}
 
 			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-			setActiveScooterId(null);
+
+			// Buscar scooters restauradas para reativar a primeira disponível
+			const restoredScooters = await db.select().from(scooters);
+			if (restoredScooters.length > 0) {
+				setActiveScooterId(restoredScooters[0].id);
+			} else {
+				setActiveScooterId(null);
+			}
+
 			triggerRefresh();
 			await loadStats();
 
 			Alert.alert(
 				"Restauração Concluída!",
-				"O banco de dados e todas as Notas Fiscais salvas foram restaurados com sucesso.",
+				`Backup restaurado com sucesso!\n\n• Scooters: ${restoredScooters.length}\n• Notas Fiscais: ${invoices.length}`,
 			);
 		} catch (e) {
 			Alert.alert("Erro", `Não foi possível restaurar o backup: ${e}`);

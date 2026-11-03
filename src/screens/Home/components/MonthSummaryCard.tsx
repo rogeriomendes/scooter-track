@@ -77,7 +77,7 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 		<Animated.View entering={FadeInDown.delay(200).springify()}>
 			<Card
 				variant="default"
-				className="mb-4 bg-surface border border-border shadow-sm p-4 rounded-2xl"
+				className="mb-4 bg-surface border border-border shadow-sm p-3 rounded-2xl"
 			>
 				{/* CABEÇALHO COM NOME DO MÊS */}
 				<View className="flex-row justify-between items-center mb-3">
