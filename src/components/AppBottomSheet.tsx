@@ -46,10 +46,10 @@ export function AppBottomSheet({
 			enableDynamicSizing={enableDynamicSizing}
 			enablePanDownToClose
 			backgroundStyle={{
-				backgroundColor: isDark ? "#111B21" : "#ffffff",
+				backgroundColor: isDark ? "#18181b" : "#ffffff",
 			}}
 			handleIndicatorStyle={{
-				backgroundColor: isDark ? "#8696A0" : "#D1D7DB",
+				backgroundColor: isDark ? "#52525b" : "#d4d4d8",
 			}}
 			onChange={(index) => {
 				if (index === -1) {
