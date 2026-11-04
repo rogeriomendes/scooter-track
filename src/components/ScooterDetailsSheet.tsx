@@ -116,8 +116,16 @@ export function ScooterDetailsSheet({
 					/>
 				</View>
 
-				{/* Linha 4: Aba Manutenção */}
+				{/* Linha 4: Bateria Wh & Aba Manutenção */}
 				<View className="flex-row gap-2.5">
+					<DetailCell
+						label="Capacidade Bateria"
+						value={
+							scooter.batteryCapacityWh
+								? `${scooter.batteryCapacityWh} Wh`
+								: "Não informada"
+						}
+					/>
 					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary flex-row justify-between items-center">
 						<Text className="text-xs font-medium text-muted">
 							Aba Manutenção

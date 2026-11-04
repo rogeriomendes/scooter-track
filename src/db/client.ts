@@ -28,5 +28,28 @@ try {
 	// A coluna já existe
 }
 
+try {
+	sqliteDb.execSync(
+		"ALTER TABLE scooters ADD COLUMN batteryCapacityWh REAL DEFAULT 0;",
+	);
+} catch {
+	// A coluna já existe
+}
+
+// Cria índices para consultas rápidas
+try {
+	sqliteDb.execSync(
+		"CREATE INDEX IF NOT EXISTS idx_logs_scooter_date ON logs (scooterId, date);",
+	);
+	sqliteDb.execSync(
+		"CREATE INDEX IF NOT EXISTS idx_logs_scooter_type ON logs (scooterId, type);",
+	);
+	sqliteDb.execSync(
+		"CREATE INDEX IF NOT EXISTS idx_maintenance_scooter_completed ON maintenance (scooterId, isCompleted);",
+	);
+} catch {
+	// Índices já existem ou não puderam ser criados
+}
+
 // Cria a instância do ORM vinculada ao banco e ao schema
 export const db = drizzle(sqliteDb, { schema });

@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	integer,
+	real,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 
 export const scooters = sqliteTable("scooters", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
@@ -10,6 +16,7 @@ export const scooters = sqliteTable("scooters", {
 		.default("percent"),
 	initialKm: real("initialKm").notNull().default(0),
 	autonomyGoal: real("autonomyGoal").notNull().default(0),
+	batteryCapacityWh: real("batteryCapacityWh").default(0), // Wh ou (V x Ah), ex: 36V 10.4Ah = 374.4Wh
 	showMaintenance: integer("showMaintenance", { mode: "boolean" })
 		.notNull()
 		.default(true),
@@ -21,39 +28,55 @@ export const scooters = sqliteTable("scooters", {
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });
 
-export const logs = sqliteTable("logs", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	scooterId: integer("scooterId")
-		.notNull()
-		.references(() => scooters.id, { onDelete: "cascade" }),
-	type: text("type", { enum: ["trip", "charge", "initial"] }).notNull(),
-	distance: real("distance").notNull().default(0), // km ridden (trip) or 0 (charge)
-	batteryLevel: real("batteryLevel").notNull(), // voltage or percent
-	notes: text("notes"),
-	date: integer("date", { mode: "timestamp" }).notNull(),
-});
+export const logs = sqliteTable(
+	"logs",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		scooterId: integer("scooterId")
+			.notNull()
+			.references(() => scooters.id, { onDelete: "cascade" }),
+		type: text("type", { enum: ["trip", "charge", "initial"] }).notNull(),
+		distance: real("distance").notNull().default(0), // km ridden (trip) or 0 (charge)
+		batteryLevel: real("batteryLevel").notNull(), // voltage or percent
+		notes: text("notes"),
+		date: integer("date", { mode: "timestamp" }).notNull(),
+	},
+	(table) => [
+		index("idx_logs_scooter_date").on(table.scooterId, table.date),
+		index("idx_logs_scooter_type").on(table.scooterId, table.type),
+	],
+);
 
-export const maintenance = sqliteTable("maintenance", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	scooterId: integer("scooterId")
-		.notNull()
-		.references(() => scooters.id, { onDelete: "cascade" }),
-	name: text("name").notNull(),
-	type: text("type", { enum: ["km", "months", "date", "mixed"] })
-		.notNull()
-		.default("km"),
-	intervalKm: real("intervalKm").notNull().default(0), // Interval for this maintenance (e.g., 1000km)
-	lastMaintenanceKm: real("lastMaintenanceKm").notNull().default(0), // Scooter's total KM when this was last performed
-	intervalMonths: integer("intervalMonths"), // Interval in months
-	lastMaintenanceDate: integer("lastMaintenanceDate", { mode: "timestamp" }), // Last time it was performed
-	targetDate: integer("targetDate", { mode: "timestamp" }), // Target fixed date for 'date' mode
-	isCompleted: integer("isCompleted", { mode: "boolean" })
-		.notNull()
-		.default(false),
-	completedAt: integer("completedAt", { mode: "timestamp" }),
-	hasWear: integer("hasWear", { mode: "boolean" }).notNull().default(true),
-	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
-});
+export const maintenance = sqliteTable(
+	"maintenance",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		scooterId: integer("scooterId")
+			.notNull()
+			.references(() => scooters.id, { onDelete: "cascade" }),
+		name: text("name").notNull(),
+		type: text("type", { enum: ["km", "months", "date", "mixed"] })
+			.notNull()
+			.default("km"),
+		intervalKm: real("intervalKm").notNull().default(0), // Interval for this maintenance (e.g., 1000km)
+		lastMaintenanceKm: real("lastMaintenanceKm").notNull().default(0), // Scooter's total KM when this was last performed
+		intervalMonths: integer("intervalMonths"), // Interval in months
+		lastMaintenanceDate: integer("lastMaintenanceDate", { mode: "timestamp" }), // Last time it was performed
+		targetDate: integer("targetDate", { mode: "timestamp" }), // Target fixed date for 'date' mode
+		isCompleted: integer("isCompleted", { mode: "boolean" })
+			.notNull()
+			.default(false),
+		completedAt: integer("completedAt", { mode: "timestamp" }),
+		hasWear: integer("hasWear", { mode: "boolean" }).notNull().default(true),
+		createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
+	},
+	(table) => [
+		index("idx_maintenance_scooter_completed").on(
+			table.scooterId,
+			table.isCompleted,
+		),
+	],
+);
 
 export const scootersRelations = relations(scooters, ({ many }) => ({
 	logs: many(logs),

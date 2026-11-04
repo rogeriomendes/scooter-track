@@ -37,6 +37,7 @@ export function ScooterFormSheet({
 	const [showMaintenance, setShowMaintenance] = useState(true);
 	const [initialKm, setInitialKm] = useState("0");
 	const [autonomyGoal, setAutonomyGoal] = useState("0");
+	const [batteryCapacityWh, setBatteryCapacityWh] = useState("");
 	const [purchaseDate, setPurchaseDate] = useState<Date>(new Date());
 	const [serialNumber, setSerialNumber] = useState("");
 	const [motorNumber, setMotorNumber] = useState("");
@@ -51,6 +52,7 @@ export function ScooterFormSheet({
 		setShowMaintenance(true);
 		setInitialKm("0");
 		setAutonomyGoal("0");
+		setBatteryCapacityWh("");
 		setPurchaseDate(new Date());
 		setSerialNumber("");
 		setMotorNumber("");
@@ -67,6 +69,11 @@ export function ScooterFormSheet({
 				setInitialKm(editItem.initialKm.toString());
 				setAutonomyGoal(
 					editItem.autonomyGoal ? editItem.autonomyGoal.toString() : "0",
+				);
+				setBatteryCapacityWh(
+					editItem.batteryCapacityWh
+						? editItem.batteryCapacityWh.toString()
+						: "",
 				);
 				setPurchaseDate(editItem.purchaseDate || new Date());
 				setSerialNumber(editItem.serialNumber || "");
@@ -92,6 +99,7 @@ export function ScooterFormSheet({
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
 					autonomyGoal: parseFloat(autonomyGoal) || 0,
+					batteryCapacityWh: parseFloat(batteryCapacityWh) || 0,
 					purchaseDate,
 					serialNumber,
 					motorNumber,
@@ -108,6 +116,7 @@ export function ScooterFormSheet({
 					showMaintenance,
 					initialKm: parseFloat(initialKm) || 0,
 					autonomyGoal: parseFloat(autonomyGoal) || 0,
+					batteryCapacityWh: parseFloat(batteryCapacityWh) || 0,
 					purchaseDate,
 					serialNumber,
 					motorNumber,
@@ -204,36 +213,47 @@ export function ScooterFormSheet({
 				</TextField>
 			</View>
 
-			<FormDateTimeField
-				label="Data de Compra (opcional)"
-				value={purchaseDate}
-				className="w-full"
-				onChange={setPurchaseDate}
-			/>
-
 			<View className="flex-row gap-3">
 				<TextField className="flex-1">
-					<Label>Nº Série / Chassi (opcional)</Label>
+					<Label>Bateria em Wh (opcional)</Label>
 					<BottomSheetInput
-						placeholder="Ex: 9AABCD..."
-						value={serialNumber}
-						onChangeText={setSerialNumber}
+						placeholder="Ex: 360"
+						keyboardType="numeric"
+						value={batteryCapacityWh}
+						onChangeText={setBatteryCapacityWh}
 						variant="secondary"
-						autoCapitalize="characters"
 					/>
 				</TextField>
 
-				<TextField className="flex-1">
-					<Label>Nº do Motor (opcional)</Label>
-					<BottomSheetInput
-						placeholder="Ex: 60V1000W..."
-						value={motorNumber}
-						onChangeText={setMotorNumber}
-						variant="secondary"
-						autoCapitalize="characters"
-					/>
-				</TextField>
+				<FormDateTimeField
+					label="Data da Compra"
+					value={purchaseDate}
+					className="flex-1"
+					onChange={setPurchaseDate}
+				/>
 			</View>
+
+			<TextField className="w-full">
+				<Label>Nº Série / Chassi (opcional)</Label>
+				<BottomSheetInput
+					placeholder="Ex: 9AABCD..."
+					value={serialNumber}
+					onChangeText={setSerialNumber}
+					variant="secondary"
+					autoCapitalize="characters"
+				/>
+			</TextField>
+
+			<TextField className="w-full">
+				<Label>Nº do Motor (opcional)</Label>
+				<BottomSheetInput
+					placeholder="Ex: 60V1000W..."
+					value={motorNumber}
+					onChangeText={setMotorNumber}
+					variant="secondary"
+					autoCapitalize="characters"
+				/>
+			</TextField>
 
 			<InvoiceAttachmentField
 				invoicePdfPath={invoicePdfPath}

@@ -8,9 +8,13 @@ interface AppState {
 	activeScooterId: number | null;
 	theme: ThemeType;
 	refreshCounter: number;
+	costPerKwh: number; // Ex: R$ 0.85
+	gasPricePerLiter: number; // Ex: R$ 5.90 para comparativo de economia
 	setActiveScooterId: (id: number | null) => void;
 	setTheme: (theme: ThemeType) => void;
 	triggerRefresh: () => void;
+	setCostPerKwh: (cost: number) => void;
+	setGasPricePerLiter: (price: number) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -19,10 +23,14 @@ export const useAppStore = create<AppState>()(
 			activeScooterId: null,
 			theme: "system",
 			refreshCounter: 0,
+			costPerKwh: 0.85,
+			gasPricePerLiter: 5.9,
 			setActiveScooterId: (id) => set({ activeScooterId: id }),
 			setTheme: (theme) => set({ theme }),
 			triggerRefresh: () =>
 				set((state) => ({ refreshCounter: state.refreshCounter + 1 })),
+			setCostPerKwh: (costPerKwh) => set({ costPerKwh }),
+			setGasPricePerLiter: (gasPricePerLiter) => set({ gasPricePerLiter }),
 		}),
 		{
 			name: "scootertrack-storage",

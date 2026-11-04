@@ -12,6 +12,7 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
+import { EnergySettingsSection } from "@/screens/Settings/components/EnergySettingsSection";
 import { ThemeSelector } from "@/screens/Settings/components/ThemeSelector";
 import { useAppStore } from "@/store/useAppStore";
 import { performBackup, performRestore } from "@/utils/backupRestore";
@@ -129,6 +130,14 @@ export default function SettingsScreen() {
 					Tema do Aplicativo
 				</Text>
 				<ThemeSelector currentTheme={theme} onSelectTheme={setTheme} />
+			</View>
+
+			{/* TARIFAS DE ENERGIA & ECONOMIA */}
+			<View>
+				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
+					Tarifas de Energia & Economia
+				</Text>
+				<EnergySettingsSection />
 			</View>
 
 			{/* PAINEL DE DADOS E ARMAZENAMENTO */}

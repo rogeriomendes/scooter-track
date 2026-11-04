@@ -16,7 +16,9 @@ import { StyledIcon } from "@/components/StyledIcon";
 import { useBadges } from "@/hooks/useBadges";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
+import { calculateEnergyEconomyStats } from "@/utils/energy";
 import { DistanceChart } from "./components/DistanceChart";
+import { EnergyEconomyCard } from "./components/EnergyEconomyCard";
 import { ReportFilters } from "./components/ReportFilters";
 import { ReportStatsGrid } from "./components/ReportStatsGrid";
 
@@ -35,6 +37,8 @@ export default function ReportsScreen() {
 	);
 
 	const theme = useAppStore((s) => s.theme);
+	const costPerKwh = useAppStore((s) => s.costPerKwh);
+	const gasPricePerLiter = useAppStore((s) => s.gasPricePerLiter);
 	const colorScheme = useColorScheme();
 	const isDark =
 		theme === "dark" || (theme === "system" && colorScheme === "dark");
@@ -157,6 +161,15 @@ export default function ReportsScreen() {
 		};
 	}, [filteredTrips, stats, scooter, viewMode, timeframe]);
 
+	const energyStats = useMemo(() => {
+		return calculateEnergyEconomyStats(
+			scooter,
+			filteredTrips,
+			costPerKwh,
+			gasPricePerLiter,
+		);
+	}, [scooter, filteredTrips, costPerKwh, gasPricePerLiter]);
+
 	if (isLoading && !scooter) {
 		return (
 			<ScreenWrapper className="p-6 justify-center items-center">
@@ -175,7 +188,7 @@ export default function ReportsScreen() {
 	}
 
 	return (
-		<ScreenWrapper scrollable contentContainerClassName="px-4 pb-10">
+		<ScreenWrapper scrollable contentContainerClassName="px-4 pb-14">
 			<Text className="text-3xl font-bold text-foreground py-2">Insights</Text>
 
 			{/* TOGGLE SEGMENTADO E FILTRO DE TEMPO */}
@@ -197,6 +210,9 @@ export default function ReportsScreen() {
 
 			{/* INSIGHTS GRID 2x2 CARDS */}
 			<ReportStatsGrid chartStats={chartStats} />
+
+			{/* CARD DE ENERGIA & ECONOMIA FINANCEIRA */}
+			<EnergyEconomyCard stats={energyStats} totalKm={chartStats.mainValue} />
 
 			{/* CARD DE AUTONOMIA REAL & EFICIÊNCIA */}
 			<View className="mb-3">
