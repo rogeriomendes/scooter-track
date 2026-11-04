@@ -5,7 +5,6 @@ import { Card } from "heroui-native/card";
 import { Separator } from "heroui-native/separator";
 import { useMemo, useState } from "react";
 import { type LayoutChangeEvent, Pressable, Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import Svg, {
 	Circle,
 	Defs,
@@ -121,7 +120,7 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 	};
 
 	return (
-		<Animated.View entering={FadeInDown.delay(200).springify()}>
+		<View>
 			<Card
 				variant="default"
 				className="mb-4 bg-surface border border-border shadow-sm p-4 rounded-2xl"
@@ -306,6 +305,6 @@ export function UsageSparkline({ trips }: UsageSparklineProps) {
 					</View>
 				</View>
 			</Card>
-		</Animated.View>
+		</View>
 	);
 }

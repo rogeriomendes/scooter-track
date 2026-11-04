@@ -1,7 +1,6 @@
 import { Button } from "heroui-native/button";
 import { useState } from "react";
 import { Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { ScooterFormSheet } from "@/components/ScooterFormSheet";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
@@ -19,10 +18,7 @@ export function EmptyScooterState({
 
 	return (
 		<ScreenWrapper className="justify-center items-center px-6">
-			<Animated.View
-				entering={FadeInDown.springify()}
-				className="items-center justify-center w-full"
-			>
+			<View className="items-center justify-center w-full">
 				<View className="bg-surface-secondary p-6 rounded-full mb-6 shadow-lg border border-surface">
 					<StyledIcon name="zap" size={64} className="text-success" />
 				</View>
@@ -45,7 +41,7 @@ export function EmptyScooterState({
 					</Button.Label>
 					<StyledIcon name="plus" size={20} className="ml-2 text-white" />
 				</Button>
-			</Animated.View>
+			</View>
 
 			<ScooterFormSheet
 				isOpen={isOpen}

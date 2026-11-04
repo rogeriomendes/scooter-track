@@ -14,7 +14,6 @@ import {
 	useColorScheme,
 	View,
 } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BadgesSheet } from "@/components/BadgesSheet";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -410,7 +409,7 @@ export default function DashboardScreen() {
 				<MonthSummaryCard allLogs={allLogs} />
 
 				{/* AÇÕES RÁPIDAS (Hierarquia Clara de CTAs) */}
-				<Animated.View entering={FadeInDown.delay(300).springify()}>
+				<View>
 					<Text className="text-xs font-bold text-muted mb-3 uppercase tracking-wider ml-1">
 						Ações
 					</Text>
@@ -455,16 +454,13 @@ export default function DashboardScreen() {
 							</Button>
 						)}
 					</View>
-				</Animated.View>
+				</View>
 
 				{/* PRÓXIMA REVISÃO (Só exibe se a scooter tiver manutenção ativada e houver item próximo) */}
 				{scooter?.showMaintenance &&
 					healthStats.nextItem &&
 					healthStats.isPriorityActive && (
-						<Animated.View
-							entering={FadeInDown.delay(300).springify()}
-							className="mb-4"
-						>
+						<View className="mb-4">
 							<Card
 								variant="default"
 								className="border border-warning/30 bg-warning/5 shadow-sm p-0 rounded-xl"
@@ -510,19 +506,11 @@ export default function DashboardScreen() {
 									</View>
 								</Pressable>
 							</Card>
-						</Animated.View>
+						</View>
 					)}
 
 				{/* HISTÓRICO RECENTE */}
-				<Animated.View
-					entering={FadeInDown.delay(
-						scooter?.showMaintenance &&
-							healthStats.nextItem &&
-							healthStats.isPriorityActive
-							? 400
-							: 300,
-					).springify()}
-				>
+				<View>
 					<View className="flex-row justify-between items-center mb-3 ml-1">
 						<Text className="text-xs font-bold text-muted uppercase tracking-wider">
 							Últimos Usos
@@ -648,7 +636,7 @@ export default function DashboardScreen() {
 							})
 						)}
 					</View>
-				</Animated.View>
+				</View>
 			</View>
 
 			<ScooterPickerSheet

@@ -13,7 +13,6 @@ import {
 	Text,
 	View,
 } from "react-native";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
@@ -111,12 +110,9 @@ export function MaintenanceScreen() {
 	return (
 		<ScreenWrapper>
 			{/* CABEÇALHO */}
-			<Animated.Text
-				entering={FadeInDown.delay(100).springify()}
-				className="text-3xl font-bold text-foreground px-4 py-2"
-			>
+			<Text className="text-3xl font-bold text-foreground px-4 py-2">
 				Manutenção
-			</Animated.Text>
+			</Text>
 
 			<FlatList
 				data={filteredMaintenance}
@@ -125,10 +121,7 @@ export function MaintenanceScreen() {
 				showsVerticalScrollIndicator={false}
 				ListHeaderComponent={
 					maintenanceList.length > 0 ? (
-						<Animated.View
-							entering={FadeInDown.delay(300).springify()}
-							className="mb-1 mt-1"
-						>
+						<View className="mb-1 mt-1">
 							<View className="flex-row gap-2">
 								{/* CARD 1: EM RISCO */}
 								<Card
@@ -257,7 +250,7 @@ export function MaintenanceScreen() {
 									})}
 								</ScrollView>
 							</View>
-						</Animated.View>
+						</View>
 					) : undefined
 				}
 				ListEmptyComponent={
@@ -298,7 +291,7 @@ export function MaintenanceScreen() {
 						</View>
 					)
 				}
-				renderItem={({ item, index }) => {
+				renderItem={({ item }) => {
 					const currentTotalKm = stats?.totalKm || 0;
 					const itemType = item.type || "km";
 
@@ -413,7 +406,7 @@ export function MaintenanceScreen() {
 					}
 
 					return (
-						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
+						<View>
 							<Card
 								variant="default"
 								className={`border ${bgGlow} bg-surface shadow-sm p-0 rounded-xl overflow-hidden`}
@@ -506,16 +499,13 @@ export function MaintenanceScreen() {
 									</View>
 								</Pressable>
 							</Card>
-						</Animated.View>
+						</View>
 					);
 				}}
 			/>
 
 			{/* FLOATING ACTION PILL */}
-			<Animated.View
-				entering={FadeInDown.delay(500).springify()}
-				className="absolute bottom-6 left-0 right-0 items-center z-20 pointer-events-box-none"
-			>
+			<View className="absolute bottom-6 left-0 right-0 items-center z-20 pointer-events-box-none">
 				<Button
 					size="md"
 					variant="primary"
@@ -530,7 +520,7 @@ export function MaintenanceScreen() {
 						Nova Manutenção
 					</Button.Label>
 				</Button>
-			</Animated.View>
+			</View>
 
 			<MaintenanceFormSheet
 				isOpen={isBottomSheetOpen}

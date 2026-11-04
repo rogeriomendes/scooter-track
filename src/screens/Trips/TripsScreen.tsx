@@ -11,7 +11,6 @@ import {
 	Text,
 	View,
 } from "react-native";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { MonthSelector } from "@/components/MonthSelector";
@@ -183,18 +182,10 @@ export default function TripsScreen() {
 	return (
 		<ScreenWrapper>
 			{/* CABEÇALHO */}
-			<Animated.Text
-				entering={FadeInDown.delay(100).springify()}
-				className="text-3xl font-bold text-foreground px-4 py-2"
-			>
-				Usos
-			</Animated.Text>
+			<Text className="text-3xl font-bold text-foreground px-4 py-2">Usos</Text>
 
 			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
-			<Animated.View
-				entering={FadeInDown.delay(300).springify()}
-				className="px-4 mb-3 mt-1 gap-2"
-			>
+			<View className="px-4 mb-3 mt-1 gap-2">
 				<View className="flex-row gap-2">
 					<Card
 						variant="default"
@@ -273,13 +264,10 @@ export default function TripsScreen() {
 						</View>
 					</Card>
 				</View>
-			</Animated.View>
+			</View>
 
 			{/* SELETOR DE MÊS */}
-			<Animated.View
-				entering={FadeInDown.delay(400).springify()}
-				className="pl-4 pr-0"
-			>
+			<View className="pl-4 pr-0">
 				<MonthSelector
 					selectedMonth={selectedMonth}
 					minDate={minDate}
@@ -289,7 +277,7 @@ export default function TripsScreen() {
 						setPage(1);
 					}}
 				/>
-			</Animated.View>
+			</View>
 
 			{/* LISTA E DASHBOARD AGRUPADO */}
 			<SectionList
@@ -355,11 +343,11 @@ export default function TripsScreen() {
 						</Text>
 					</View>
 				)}
-				renderItem={({ item, index }) => {
+				renderItem={({ item }) => {
 					const consumption = tripConsumptionMap.get(item.id);
 
 					return (
-						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
+						<View>
 							<Card
 								variant="default"
 								className="border border-border bg-surface shadow-sm p-0 rounded-xl"
@@ -449,16 +437,13 @@ export default function TripsScreen() {
 									) : null}
 								</Pressable>
 							</Card>
-						</Animated.View>
+						</View>
 					);
 				}}
 			/>
 
 			{/* FLOATING ACTION PILL */}
-			<Animated.View
-				entering={FadeInDown.delay(500).springify()}
-				className="absolute bottom-6 left-0 right-0 items-center z-20 pointer-events-box-none"
-			>
+			<View className="absolute bottom-6 left-0 right-0 items-center z-20 pointer-events-box-none">
 				<Button
 					size="md"
 					variant="primary"
@@ -473,7 +458,7 @@ export default function TripsScreen() {
 						Registrar Uso
 					</Button.Label>
 				</Button>
-			</Animated.View>
+			</View>
 
 			<TripFormSheet
 				isOpen={isBottomSheetOpen}

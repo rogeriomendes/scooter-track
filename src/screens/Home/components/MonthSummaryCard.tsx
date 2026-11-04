@@ -3,7 +3,6 @@ import { ptBR } from "date-fns/locale";
 import { Card } from "heroui-native/card";
 import { useMemo } from "react";
 import { Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { StyledIcon } from "@/components/StyledIcon";
 import type { logs } from "@/db/schema";
 
@@ -74,7 +73,7 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 	}, [uniqueDaysRidden, currentDayNumber]);
 
 	return (
-		<Animated.View entering={FadeInDown.delay(200).springify()}>
+		<View>
 			<Card
 				variant="default"
 				className="mb-4 bg-surface border border-border shadow-sm p-3 rounded-2xl"
@@ -172,6 +171,6 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 					</View>
 				</View>
 			</Card>
-		</Animated.View>
+		</View>
 	);
 }

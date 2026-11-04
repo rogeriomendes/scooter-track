@@ -11,7 +11,6 @@ import {
 	Text,
 	View,
 } from "react-native";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { MonthSelector } from "@/components/MonthSelector";
@@ -160,18 +159,12 @@ export default function ChargesScreen() {
 	return (
 		<ScreenWrapper>
 			{/* CABEÇALHO */}
-			<Animated.Text
-				entering={FadeInDown.delay(100).springify()}
-				className="text-3xl font-bold text-foreground px-4 py-2"
-			>
+			<Text className="text-3xl font-bold text-foreground px-4 py-2">
 				Recargas
-			</Animated.Text>
+			</Text>
 
 			{/* ESTATÍSTICAS RÁPIDAS (DASHBOARD GRID 2x2) */}
-			<Animated.View
-				entering={FadeInDown.delay(300).springify()}
-				className="px-4 mb-3 mt-1 gap-2"
-			>
+			<View className="px-4 mb-3 mt-1 gap-2">
 				<View className="flex-row gap-2">
 					<Card
 						variant="default"
@@ -259,13 +252,10 @@ export default function ChargesScreen() {
 						</View>
 					</Card>
 				</View>
-			</Animated.View>
+			</View>
 
 			{/* SELETOR DE MÊS (Chips) */}
-			<Animated.View
-				entering={FadeInDown.delay(400).springify()}
-				className="pl-4 pr-0"
-			>
+			<View className="pl-4 pr-0">
 				<MonthSelector
 					selectedMonth={selectedMonth}
 					minDate={minDate}
@@ -275,7 +265,7 @@ export default function ChargesScreen() {
 						setPage(1);
 					}}
 				/>
-			</Animated.View>
+			</View>
 
 			{/* LISTA DE RECARGAS */}
 			<SectionList
@@ -341,13 +331,13 @@ export default function ChargesScreen() {
 						</Text>
 					</View>
 				)}
-				renderItem={({ item, index }) => {
+				renderItem={({ item }) => {
 					const cycle = stats?.cycles.find((c) => c.chargeLog.id === item.id);
 					const autonomia = cycle ? cycle.distance.toFixed(1) : "0.0";
 					const gain = chargeGainMap.get(item.id);
 
 					return (
-						<Animated.View entering={FadeInRight.delay(index * 40).springify()}>
+						<View>
 							<Card
 								variant="default"
 								className="border border-border bg-surface shadow-sm p-0 rounded-xl"
@@ -443,16 +433,13 @@ export default function ChargesScreen() {
 									) : null}
 								</Pressable>
 							</Card>
-						</Animated.View>
+						</View>
 					);
 				}}
 			/>
 
 			{/* FLOATING ACTION PILL */}
-			<Animated.View
-				entering={FadeInDown.delay(500).springify()}
-				className="absolute bottom-6 left-0 right-0 items-center z-20 pointer-events-box-none"
-			>
+			<View className="absolute bottom-6 left-0 right-0 items-center z-20 pointer-events-box-none">
 				<Button
 					size="md"
 					variant="primary"
@@ -467,7 +454,7 @@ export default function ChargesScreen() {
 						Registrar Recarga
 					</Button.Label>
 				</Button>
-			</Animated.View>
+			</View>
 
 			<ChargeFormSheet
 				isOpen={isBottomSheetOpen}

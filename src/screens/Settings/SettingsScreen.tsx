@@ -10,7 +10,6 @@ import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Platform, Pressable, Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
@@ -369,7 +368,7 @@ export default function SettingsScreen() {
 			</View>
 
 			{/* APARÊNCIA - TEMAS */}
-			<Animated.View entering={FadeInDown.delay(100).springify()}>
+			<View>
 				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Tema do Aplicativo
 				</Text>
@@ -485,10 +484,10 @@ export default function SettingsScreen() {
 						)}
 					</Pressable>
 				</View>
-			</Animated.View>
+			</View>
 
 			{/* PAINEL DE DADOS E ARMAZENAMENTO */}
-			<Animated.View entering={FadeInDown.delay(200).springify()}>
+			<View>
 				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Resumo de Dados
 				</Text>
@@ -525,10 +524,10 @@ export default function SettingsScreen() {
 						</View>
 					</View>
 				</Card>
-			</Animated.View>
+			</View>
 
 			{/* BACKUP E RESTAURAÇÃO COMPLETA */}
-			<Animated.View entering={FadeInDown.delay(300).springify()}>
+			<View>
 				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Backup Completo (Banco + Notas Fiscais)
 				</Text>
@@ -568,10 +567,10 @@ export default function SettingsScreen() {
 						salvas no aparelho.
 					</Text>
 				</Card>
-			</Animated.View>
+			</View>
 
 			{/* ZONA DE PERIGO */}
-			<Animated.View entering={FadeInDown.delay(400).springify()}>
+			<View>
 				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Zona de Perigo
 				</Text>
@@ -594,7 +593,7 @@ export default function SettingsScreen() {
 						permanentemente.
 					</Text>
 				</Card>
-			</Animated.View>
+			</View>
 
 			{/* VERSÃO DINÂMICA DE APP.JSON */}
 			<View className="items-center opacity-50 my-4">

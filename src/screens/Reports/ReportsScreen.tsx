@@ -11,7 +11,6 @@ import {
 	View,
 } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { BadgesSheet } from "@/components/BadgesSheet";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
@@ -173,18 +172,10 @@ export default function ReportsScreen() {
 
 	return (
 		<ScreenWrapper scrollable contentContainerClassName="px-4 pb-24">
-			<Animated.Text
-				entering={FadeInDown.delay(100).springify()}
-				className="text-3xl font-bold text-foreground py-2"
-			>
-				Insights
-			</Animated.Text>
+			<Text className="text-3xl font-bold text-foreground py-2">Insights</Text>
 
 			{/* TOGGLE SEGMENTADO E FILTRO DE TEMPO */}
-			<Animated.View
-				entering={FadeInDown.delay(300).springify()}
-				className="pt-1 mb-3 gap-2.5"
-			>
+			<View className="pt-1 mb-3 gap-2.5">
 				<View className="flex-row bg-surface-tertiary p-1.5 rounded-2xl">
 					<Pressable
 						onPress={() => {
@@ -234,7 +225,6 @@ export default function ReportsScreen() {
 						</Text>
 					</Pressable>
 				</View>
-
 				<View className="flex-row items-center justify-between px-1">
 					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider">
 						Período
@@ -271,10 +261,10 @@ export default function ReportsScreen() {
 						))}
 					</View>
 				</View>
-			</Animated.View>
+			</View>
 
 			{/* GRÁFICO NEON */}
-			<Animated.View entering={FadeInDown.delay(400).springify()}>
+			<View>
 				<Card
 					variant="default"
 					className="mb-3 border border-border bg-surface shadow-sm rounded-2xl overflow-hidden p-0 pt-4 pb-2"
@@ -362,13 +352,10 @@ export default function ReportsScreen() {
 						</View>
 					)}
 				</Card>
-			</Animated.View>
+			</View>
 
 			{/* INSIGHTS GRID 2x2 CARDS */}
-			<Animated.View
-				entering={FadeInDown.delay(500).springify()}
-				className="gap-2 mb-3"
-			>
+			<View className="gap-2 mb-3">
 				<View className="flex-row gap-2">
 					<Card
 						variant="default"
@@ -459,13 +446,10 @@ export default function ReportsScreen() {
 						</View>
 					</Card>
 				</View>
-			</Animated.View>
+			</View>
 
 			{/* CARD DE AUTONOMIA REAL & EFICIÊNCIA */}
-			<Animated.View
-				entering={FadeInDown.delay(600).springify()}
-				className="mb-3"
-			>
+			<View className="mb-3">
 				<Card
 					variant="default"
 					className="p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
@@ -490,10 +474,10 @@ export default function ReportsScreen() {
 						</Text>
 					</View>
 				</Card>
-			</Animated.View>
+			</View>
 
 			{/* CARD DE GAMIFICAÇÃO & CONQUISTAS */}
-			<Animated.View entering={FadeInDown.delay(650).springify()}>
+			<View>
 				<Pressable onPress={() => setIsBadgesOpen(true)}>
 					<Card
 						variant="default"
@@ -528,7 +512,7 @@ export default function ReportsScreen() {
 						</View>
 					</Card>
 				</Pressable>
-			</Animated.View>
+			</View>
 
 			<BadgesSheet
 				isOpen={isBadgesOpen}
