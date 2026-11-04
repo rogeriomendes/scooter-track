@@ -153,7 +153,7 @@ export default function ReportsScreen() {
 		}
 	}, [filteredTrips, stats, scooter, viewMode, timeframe]);
 
-	if (isLoading) {
+	if (isLoading && !scooter) {
 		return (
 			<ScreenWrapper className="p-6 justify-center items-center">
 				<ActivityIndicator size="large" color="#17C964" />

@@ -1,73 +1,128 @@
 import { desc, eq } from "drizzle-orm";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { db } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
 import { calculateScooterStats } from "@/utils/stats";
 
+type ScooterRecord = typeof scooters.$inferSelect;
+type LogRecord = typeof logs.$inferSelect;
+type MaintenanceRecord = typeof maintenance.$inferSelect;
+type StatsResult = ReturnType<typeof calculateScooterStats>;
+
+interface ScooterCache {
+	scooter: ScooterRecord | null;
+	allLogs: LogRecord[];
+	maintenanceList: MaintenanceRecord[];
+	stats: StatsResult | null;
+	totalScooters: number;
+}
+
+let memoryCache: ScooterCache | null = null;
+
 export function useScooterData(activeScooterId: number | null) {
 	const refreshCounter = useAppStore((s) => s.refreshCounter);
-	const [scooter, setScooter] = useState<typeof scooters.$inferSelect | null>(
-		null,
+
+	const cached =
+		memoryCache !== null &&
+		(activeScooterId === null || memoryCache.scooter?.id === activeScooterId)
+			? memoryCache
+			: null;
+
+	const [scooter, setScooter] = useState<ScooterRecord | null>(
+		cached?.scooter ?? null,
 	);
-	const [allLogs, setAllLogs] = useState<(typeof logs.$inferSelect)[]>([]);
-	const [maintenanceList, setMaintenanceList] = useState<
-		(typeof maintenance.$inferSelect)[]
-	>([]);
-	const [stats, setStats] = useState<ReturnType<
-		typeof calculateScooterStats
-	> | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [allLogs, setAllLogs] = useState<LogRecord[]>(cached?.allLogs ?? []);
+	const [maintenanceList, setMaintenanceList] = useState<MaintenanceRecord[]>(
+		cached?.maintenanceList ?? [],
+	);
+	const [stats, setStats] = useState<StatsResult | null>(cached?.stats ?? null);
+	const [isLoading, setIsLoading] = useState(!cached);
+	const [totalScooters, setTotalScooters] = useState(
+		cached?.totalScooters ?? 0,
+	);
 
-	const [totalScooters, setTotalScooters] = useState(0);
+	const hasLoadedRef = useRef(cached !== null);
+	const prevScooterIdRef = useRef(activeScooterId);
 
-	const loadData = useCallback(async () => {
-		try {
-			setIsLoading(true);
+	if (prevScooterIdRef.current !== activeScooterId) {
+		prevScooterIdRef.current = activeScooterId;
+		hasLoadedRef.current =
+			memoryCache !== null && memoryCache.scooter?.id === activeScooterId;
+	}
 
-			const allScooters = await db.select().from(scooters);
-			setTotalScooters(allScooters.length);
+	const loadData = useCallback(
+		async (forceShowSpinner = false) => {
+			try {
+				if (forceShowSpinner || !hasLoadedRef.current) {
+					setIsLoading(true);
+				}
 
-			if (allScooters.length === 0) {
-				setScooter(null);
-				setAllLogs([]);
-				setMaintenanceList([]);
-				setStats(null);
-				return;
+				const allScooters = await db.select().from(scooters);
+				setTotalScooters(allScooters.length);
+
+				if (allScooters.length === 0) {
+					setScooter(null);
+					setAllLogs([]);
+					setMaintenanceList([]);
+					setStats(null);
+					memoryCache = {
+						scooter: null,
+						allLogs: [],
+						maintenanceList: [],
+						stats: null,
+						totalScooters: 0,
+					};
+					return;
+				}
+
+				// Se não houver scooter ativa ou a selecionada não existir mais, seleciona a primeira
+				let currentScooter = allScooters.find(
+					(sc) => sc.id === activeScooterId,
+				);
+
+				if (!currentScooter) {
+					currentScooter = allScooters[0];
+					useAppStore.getState().setActiveScooterId(currentScooter.id);
+				}
+
+				const scooterId = currentScooter.id;
+
+				const l = await db
+					.select()
+					.from(logs)
+					.where(eq(logs.scooterId, scooterId))
+					.orderBy(desc(logs.date));
+
+				const mList = await db
+					.select()
+					.from(maintenance)
+					.where(eq(maintenance.scooterId, scooterId));
+
+				const computedStats = calculateScooterStats(currentScooter, l);
+
+				setScooter(currentScooter);
+				setAllLogs(l);
+				setMaintenanceList(mList);
+				setStats(computedStats);
+
+				memoryCache = {
+					scooter: currentScooter,
+					allLogs: l,
+					maintenanceList: mList,
+					stats: computedStats,
+					totalScooters: allScooters.length,
+				};
+			} catch (error) {
+				console.error("Error fetching scooter data:", error);
+			} finally {
+				hasLoadedRef.current = true;
+				setIsLoading(false);
 			}
-
-			// Se não houver scooter ativa ou a selecionada não existir mais, seleciona a primeira
-			let currentScooter = allScooters.find((sc) => sc.id === activeScooterId);
-
-			if (!currentScooter) {
-				currentScooter = allScooters[0];
-				useAppStore.getState().setActiveScooterId(currentScooter.id);
-			}
-
-			const scooterId = currentScooter.id;
-
-			const l = await db
-				.select()
-				.from(logs)
-				.where(eq(logs.scooterId, scooterId))
-				.orderBy(desc(logs.date));
-
-			const mList = await db
-				.select()
-				.from(maintenance)
-				.where(eq(maintenance.scooterId, scooterId));
-
-			setScooter(currentScooter);
-			setAllLogs(l);
-			setMaintenanceList(mList);
-			setStats(calculateScooterStats(currentScooter, l));
-		} catch (error) {
-			console.error("Error fetching scooter data:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [activeScooterId]);
+		},
+		[activeScooterId],
+	);
 
 	useEffect(() => {
 		void refreshCounter;
@@ -80,6 +135,11 @@ export function useScooterData(activeScooterId: number | null) {
 		}, [loadData]),
 	);
 
+	const refresh = useCallback(() => {
+		useAppStore.getState().triggerRefresh();
+		return loadData(false);
+	}, [loadData]);
+
 	return {
 		scooter,
 		allLogs,
@@ -87,6 +147,6 @@ export function useScooterData(activeScooterId: number | null) {
 		stats,
 		totalScooters,
 		isLoading,
-		refresh: loadData,
+		refresh,
 	};
 }

@@ -90,7 +90,7 @@ export function MaintenanceScreen() {
 		setItemToDelete(null);
 	};
 
-	if (isLoading) {
+	if (isLoading && !scooter) {
 		return (
 			<ScreenWrapper className="p-6 justify-center items-center">
 				<ActivityIndicator size="large" color="#10b981" />
