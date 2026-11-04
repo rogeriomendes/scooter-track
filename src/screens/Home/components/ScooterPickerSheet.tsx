@@ -1,5 +1,6 @@
+import { Button } from "heroui-native/button";
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
@@ -45,83 +46,90 @@ export function ScooterPickerSheet({
 			onOpenChange={onOpenChange}
 			title="Trocar de Scooter"
 		>
-			{scootersList.map((item) => {
-				const isActive = activeScooterId === item.id;
-				return (
-					<Pressable
-						key={item.id}
-						onPress={() => handleSelect(item.id)}
-						className={`flex-row items-center justify-between p-4 mb-2 rounded-2xl border ${
-							isActive
-								? "border-success bg-success/10"
-								: "border-surface-secondary bg-surface"
-						}`}
-					>
-						<View className="flex-row items-center gap-3 flex-1">
-							<View
-								className={`p-2.5 rounded-xl ${
-									isActive ? "bg-success" : "bg-surface-secondary"
-								}`}
-							>
-								<StyledIcon
-									name="navigation"
-									size={18}
-									className={isActive ? "text-white" : "text-muted"}
-								/>
-							</View>
-							<View className="flex-1">
-								<Text className="text-base font-bold text-foreground">
-									{item.name}
-								</Text>
-								{isActive && (
-									<Text className="text-[10px] text-success font-bold uppercase tracking-wider mt-0.5">
-										Ativa agora
-									</Text>
-								)}
-							</View>
-						</View>
-
-						<View className="flex-row items-center gap-2">
-							{onEditRequest && (
-								<Pressable
-									onPress={(e) => {
-										e.stopPropagation();
-										onOpenChange(false);
-										onEditRequest(item);
-									}}
-									className="p-2 rounded-xl bg-surface-secondary/80 active:bg-surface-secondary"
-									hitSlop={8}
+			<ScrollView
+				className="max-h-[360px]"
+				showsVerticalScrollIndicator={false}
+				contentContainerClassName="gap-2 pb-1"
+			>
+				{scootersList.map((item) => {
+					const isActive = activeScooterId === item.id;
+					return (
+						<Pressable
+							key={item.id}
+							onPress={() => handleSelect(item.id)}
+							className={`flex-row items-center justify-between p-4 rounded-2xl border ${
+								isActive
+									? "border-success bg-success/10"
+									: "border-surface-secondary bg-surface"
+							}`}
+						>
+							<View className="flex-row items-center gap-3 flex-1">
+								<View
+									className={`p-2.5 rounded-xl ${
+										isActive ? "bg-success" : "bg-surface-secondary"
+									}`}
 								>
 									<StyledIcon
-										name="edit-2"
-										size={16}
-										className="text-foreground"
+										name="navigation"
+										size={18}
+										className={isActive ? "text-white" : "text-muted"}
 									/>
-								</Pressable>
-							)}
+								</View>
+								<View className="flex-1">
+									<Text className="text-base font-bold text-foreground">
+										{item.name}
+									</Text>
+									{isActive && (
+										<Text className="text-[10px] text-success font-bold uppercase tracking-wider mt-0.5">
+											Ativa agora
+										</Text>
+									)}
+								</View>
+							</View>
 
-							{isActive && (
-								<StyledIcon
-									name="check-circle"
-									size={20}
-									className="text-success"
-								/>
-							)}
-						</View>
-					</Pressable>
-				);
-			})}
+							<View className="flex-row items-center gap-2">
+								{onEditRequest && (
+									<Pressable
+										onPress={(e) => {
+											e.stopPropagation();
+											onOpenChange(false);
+											onEditRequest(item);
+										}}
+										className="p-2 rounded-xl bg-surface-secondary/80 active:bg-surface-secondary"
+										hitSlop={8}
+									>
+										<StyledIcon
+											name="edit-2"
+											size={16}
+											className="text-foreground"
+										/>
+									</Pressable>
+								)}
+
+								{isActive && (
+									<StyledIcon
+										name="check-circle"
+										size={20}
+										className="text-success"
+									/>
+								)}
+							</View>
+						</Pressable>
+					);
+				})}
+			</ScrollView>
 
 			{onAddRequest && (
-				<Pressable
+				<Button
+					variant="secondary"
+					className="mt-3 border border-dashed border-muted/30 h-13"
 					onPress={onAddRequest}
-					className="flex-row items-center justify-center p-4 mt-2 rounded-2xl border border-dashed border-muted/30 bg-transparent active:bg-surface-secondary/50"
 				>
-					<StyledIcon name="plus" size={18} className="text-foreground mr-2" />
-					<Text className="text-base font-bold text-foreground">
+					<StyledIcon name="plus" size={18} className="text-foreground mr-1" />
+					<Button.Label className="text-sm font-bold">
 						Adicionar Nova Scooter
-					</Text>
-				</Pressable>
+					</Button.Label>
+				</Button>
 			)}
 		</AppBottomSheet>
 	);

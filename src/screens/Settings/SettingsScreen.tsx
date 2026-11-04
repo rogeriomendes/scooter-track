@@ -1,53 +1,20 @@
-import { format } from "date-fns";
+import { count } from "drizzle-orm";
 import Constants from "expo-constants";
-import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
-import * as SQLite from "expo-sqlite";
 import { Button } from "heroui-native/button";
 import { Card } from "heroui-native/card";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Platform, Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
-import { db, sqliteDb } from "@/db/client";
+import { db } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
+import { ThemeSelector } from "@/screens/Settings/components/ThemeSelector";
 import { useAppStore } from "@/store/useAppStore";
-import { base64ToUint8Array, uint8ArrayToBase64 } from "@/utils/base64";
-
-async function readFileAsStringSafe(
-	uri: string,
-	encoding: "utf8" | "base64",
-): Promise<string> {
-	try {
-		return await FileSystem.readAsStringAsync(uri, {
-			encoding:
-				encoding === "base64"
-					? FileSystem.EncodingType.Base64
-					: FileSystem.EncodingType.UTF8,
-		});
-	} catch (_fsError) {
-		// Fallback para fetch (capaz de ler URIs file:// e content:// nativamente no Android e contornar restrições de sandbox do Expo Go)
-		const response = await fetch(uri);
-		if (encoding === "base64") {
-			const blob = await response.blob();
-			return new Promise((resolve, reject) => {
-				const reader = new FileReader();
-				reader.onloadend = () => {
-					const result = reader.result as string;
-					const commaIdx = result.indexOf(",");
-					resolve(commaIdx !== -1 ? result.slice(commaIdx + 1) : result);
-				};
-				reader.onerror = reject;
-				reader.readAsDataURL(blob);
-			});
-		}
-		return await response.text();
-	}
-}
+import { performBackup, performRestore } from "@/utils/backupRestore";
 
 export default function SettingsScreen() {
 	const router = useRouter();
@@ -65,22 +32,21 @@ export default function SettingsScreen() {
 
 	const loadStats = useCallback(async () => {
 		try {
-			const sList = await db.select().from(scooters);
-			const lList = await db.select().from(logs);
-			const mList = await db.select().from(maintenance);
+			const [sCountRes, lCountRes, mCountRes, files] = await Promise.all([
+				db.select({ value: count() }).from(scooters),
+				db.select({ value: count() }).from(logs),
+				db.select({ value: count() }).from(maintenance),
+				FileSystem.documentDirectory
+					? FileSystem.readDirectoryAsync(FileSystem.documentDirectory)
+					: Promise.resolve([]),
+			]);
 
-			let pdfCount = 0;
-			if (FileSystem.documentDirectory) {
-				const files = await FileSystem.readDirectoryAsync(
-					FileSystem.documentDirectory,
-				);
-				pdfCount = files.filter((f) => f.endsWith(".pdf")).length;
-			}
+			const pdfCount = files.filter((f) => f.endsWith(".pdf")).length;
 
 			setDbStats({
-				scootersCount: sList.length,
-				logsCount: lList.length,
-				maintenanceCount: mList.length,
+				scootersCount: sCountRes[0]?.value ?? 0,
+				logsCount: lCountRes[0]?.value ?? 0,
+				maintenanceCount: mCountRes[0]?.value ?? 0,
 				invoicesCount: pdfCount,
 			});
 		} catch (error) {
@@ -122,227 +88,17 @@ export default function SettingsScreen() {
 	};
 
 	const handleBackup = async () => {
-		try {
-			// Serializa o banco SQLite diretamente via Expo SQLite (captura transações e WAL sem depender do caminho do SO ou restrições do sandbox)
-			const dbBytes = await sqliteDb.serializeAsync();
-			if (!dbBytes || dbBytes.length === 0) {
-				Alert.alert("Aviso", "Nenhum banco de dados encontrado para backup.");
-				return;
-			}
-
-			// Converter banco SQLite em Base64
-			const dbBase64 = uint8ArrayToBase64(dbBytes);
-
-			// Ler Notas Fiscais em PDF anexadas
-			const pdfInvoices: { filename: string; dataBase64: string }[] = [];
-			if (FileSystem.documentDirectory) {
-				const dirFiles = await FileSystem.readDirectoryAsync(
-					FileSystem.documentDirectory,
-				);
-				const pdfFiles = dirFiles.filter((f) => f.endsWith(".pdf"));
-
-				for (const fileName of pdfFiles) {
-					const pdfPath = `${FileSystem.documentDirectory}${fileName}`;
-					const pdfBase64 = await FileSystem.readAsStringAsync(pdfPath, {
-						encoding: FileSystem.EncodingType.Base64,
-					});
-					pdfInvoices.push({
-						filename: fileName,
-						dataBase64: pdfBase64,
-					});
-				}
-			}
-
-			// Pacote Completo de Backup (Banco + Notas Fiscais em PDF)
-			const backupPayload = {
-				version: appVersion,
-				timestamp: Date.now(),
-				dbBase64,
-				invoices: pdfInvoices,
-			};
-
-			const backupFileName = `scootertrack_backup_${format(new Date(), "yyyyMMdd_HHmm")}.scootertrack`;
-			const backupContent = JSON.stringify(backupPayload);
-
-			// No Android, permitir que o usuário escolha a pasta de destino (Storage Access Framework)
-			if (Platform.OS === "android") {
-				try {
-					const permissions =
-						await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-					if (permissions.granted) {
-						const createdUri =
-							await FileSystem.StorageAccessFramework.createFileAsync(
-								permissions.directoryUri,
-								backupFileName,
-								"application/json",
-							);
-						await FileSystem.writeAsStringAsync(createdUri, backupContent, {
-							encoding: FileSystem.EncodingType.UTF8,
-						});
-						Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-						Alert.alert(
-							"Backup Salvo!",
-							`O arquivo de backup (${backupFileName}) foi salvo na pasta selecionada com sucesso.`,
-						);
-						return;
-					}
-				} catch (safError) {
-					console.log(
-						"SAF canceled or failed, falling back to share",
-						safError,
-					);
-				}
-			}
-
-			// Fallback para Compartilhamento (ou no iOS)
-			const backupFilePath = `${FileSystem.cacheDirectory}${backupFileName}`;
-
-			await FileSystem.writeAsStringAsync(backupFilePath, backupContent, {
-				encoding: FileSystem.EncodingType.UTF8,
-			});
-
-			await Sharing.shareAsync(backupFilePath, {
-				dialogTitle: "Backup ScooterTrack (Banco + Notas Fiscais)",
-				mimeType: "application/json",
-				UTI: "public.json",
-			});
-
-			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-		} catch (e) {
-			Alert.alert("Erro", `Não foi possível gerar o backup: ${e}`);
-		}
+		await performBackup(appVersion);
 	};
 
 	const handleRestore = async () => {
-		try {
-			// No Android, copyToCacheDirectory=false retorna URI content:// que o sistema lê diretamente sem erro de sandbox do Expo Go
-			const result = await DocumentPicker.getDocumentAsync({
-				copyToCacheDirectory: Platform.OS !== "android",
-			});
-
-			if (result.canceled || !result.assets || result.assets.length === 0) {
-				return;
-			}
-
-			const fileAsset = result.assets[0];
-			const fileUri = fileAsset.uri;
-			const fileName = (fileAsset.name || "").toLowerCase();
-
-			let dbBytes: Uint8Array | null = null;
-			let dbBase64Data = "";
-			let invoices: { filename: string; dataBase64: string }[] = [];
-
-			// 1. Backup legado apenas com extensão .db
-			if (fileName.endsWith(".db")) {
-				dbBase64Data = await readFileAsStringSafe(fileUri, "base64");
-				dbBytes = base64ToUint8Array(dbBase64Data);
-			} else {
-				// 2. Pacote Completo .scootertrack ou .json
-				const rawContent = await readFileAsStringSafe(fileUri, "utf8");
-				const payload = JSON.parse(rawContent);
-
-				if (!payload.dbBase64) {
-					Alert.alert("Erro", "Arquivo de backup inválido ou corrompido.");
-					return;
-				}
-
-				dbBase64Data = payload.dbBase64;
-				dbBytes = base64ToUint8Array(payload.dbBase64);
-				if (Array.isArray(payload.invoices)) {
-					invoices = payload.invoices;
-				}
-			}
-
-			// Tentar gravar o arquivo do banco em disco para garantir persistência direta
-			const targetDbPaths = [
-				`${FileSystem.documentDirectory}SQLite/scootertrack.db`,
-			];
-			if (
-				sqliteDb.databasePath &&
-				!targetDbPaths.includes(sqliteDb.databasePath)
-			) {
-				targetDbPaths.push(sqliteDb.databasePath);
-			}
-
-			for (const p of targetDbPaths) {
-				try {
-					const parent = p.substring(0, p.lastIndexOf("/"));
-					const dirInfo = await FileSystem.getInfoAsync(parent);
-					if (!dirInfo.exists) {
-						await FileSystem.makeDirectoryAsync(parent, {
-							intermediates: true,
-						});
-					}
-					await FileSystem.writeAsStringAsync(p, dbBase64Data, {
-						encoding: FileSystem.EncodingType.Base64,
-					});
-				} catch (diskErr) {
-					console.log("Aviso ao gravar cópia do banco em disco:", p, diskErr);
-				}
-			}
-
-			// Restaurar Banco SQLite na conexão ativa via SQLite Backup API
-			if (dbBytes && dbBytes.length > 0) {
-				try {
-					const memoryDb = await SQLite.deserializeDatabaseAsync(dbBytes);
-					await SQLite.backupDatabaseAsync({
-						sourceDatabase: memoryDb,
-						destDatabase: sqliteDb,
-					});
-					await memoryDb.closeAsync();
-					await sqliteDb.execAsync("PRAGMA wal_checkpoint(TRUNCATE);");
-				} catch (backupErr) {
-					console.log("Aviso ao aplicar backup na conexão ativa:", backupErr);
-				}
-			}
-
-			// Auto-migrar colunas que podem não existir em backups de versões anteriores
-			try {
-				sqliteDb.execSync(
-					"ALTER TABLE maintenance ADD COLUMN isCompleted INTEGER NOT NULL DEFAULT 0;",
-				);
-			} catch {}
-			try {
-				sqliteDb.execSync(
-					"ALTER TABLE maintenance ADD COLUMN completedAt INTEGER;",
-				);
-			} catch {}
-			try {
-				sqliteDb.execSync(
-					"ALTER TABLE maintenance ADD COLUMN hasWear INTEGER NOT NULL DEFAULT 1;",
-				);
-			} catch {}
-
-			// Restaurar Notas Fiscais em PDF
-			for (const inv of invoices) {
-				if (inv.filename && inv.dataBase64) {
-					const destPath = `${FileSystem.documentDirectory}${inv.filename}`;
-					await FileSystem.writeAsStringAsync(destPath, inv.dataBase64, {
-						encoding: FileSystem.EncodingType.Base64,
-					});
-				}
-			}
-
-			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-			// Buscar scooters restauradas para reativar a primeira disponível
-			const restoredScooters = await db.select().from(scooters);
-			if (restoredScooters.length > 0) {
-				setActiveScooterId(restoredScooters[0].id);
-			} else {
-				setActiveScooterId(null);
-			}
-
-			triggerRefresh();
-			await loadStats();
-
-			Alert.alert(
-				"Restauração Concluída!",
-				`Backup restaurado com sucesso!\n\n• Scooters: ${restoredScooters.length}\n• Notas Fiscais: ${invoices.length}`,
-			);
-		} catch (e) {
-			Alert.alert("Erro", `Não foi possível restaurar o backup: ${e}`);
-		}
+		await performRestore({
+			onScooterRestored: (id) => setActiveScooterId(id),
+			onSuccess: async () => {
+				triggerRefresh();
+				await loadStats();
+			},
+		});
 	};
 
 	return (
@@ -372,118 +128,7 @@ export default function SettingsScreen() {
 				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
 					Tema do Aplicativo
 				</Text>
-				<View className="flex-row gap-2.5 mb-6">
-					{/* CLARO */}
-					<Pressable
-						onPress={() => {
-							setTheme("light");
-							Haptics.selectionAsync();
-						}}
-						className={`flex-1 p-3 rounded-2xl border flex-col items-center justify-between gap-2 ${
-							theme === "light"
-								? "bg-warning/10 border-warning/50 shadow-sm"
-								: "bg-surface border-surface-secondary/70"
-						}`}
-					>
-						<View
-							className={`w-9 h-9 rounded-xl items-center justify-center ${
-								theme === "light" ? "bg-warning/20" : "bg-surface-secondary/50"
-							}`}
-						>
-							<StyledIcon
-								name="sun"
-								size={18}
-								className={theme === "light" ? "text-warning" : "text-muted"}
-							/>
-						</View>
-						<Text
-							className={`text-xs font-bold ${
-								theme === "light" ? "text-foreground" : "text-muted"
-							}`}
-						>
-							Claro
-						</Text>
-						{theme === "light" ? (
-							<View className="w-1.5 h-1.5 rounded-full bg-warning" />
-						) : (
-							<View className="w-1.5 h-1.5" />
-						)}
-					</Pressable>
-
-					{/* ESCURO */}
-					<Pressable
-						onPress={() => {
-							setTheme("dark");
-							Haptics.selectionAsync();
-						}}
-						className={`flex-1 p-3 rounded-2xl border flex-col items-center justify-between gap-2 ${
-							theme === "dark"
-								? "bg-info/10 border-info/50 shadow-sm"
-								: "bg-surface border-surface-secondary/70"
-						}`}
-					>
-						<View
-							className={`w-9 h-9 rounded-xl items-center justify-center ${
-								theme === "dark" ? "bg-info/20" : "bg-surface-secondary/50"
-							}`}
-						>
-							<StyledIcon
-								name="moon"
-								size={18}
-								className={theme === "dark" ? "text-info" : "text-muted"}
-							/>
-						</View>
-						<Text
-							className={`text-xs font-bold ${
-								theme === "dark" ? "text-foreground" : "text-muted"
-							}`}
-						>
-							Escuro
-						</Text>
-						{theme === "dark" ? (
-							<View className="w-1.5 h-1.5 rounded-full bg-info" />
-						) : (
-							<View className="w-1.5 h-1.5" />
-						)}
-					</Pressable>
-
-					{/* SISTEMA / AUTO */}
-					<Pressable
-						onPress={() => {
-							setTheme("system");
-							Haptics.selectionAsync();
-						}}
-						className={`flex-1 p-3 rounded-2xl border flex-col items-center justify-between gap-2 ${
-							theme === "system"
-								? "bg-success/10 border-success/50 shadow-sm"
-								: "bg-surface border-surface-secondary/70"
-						}`}
-					>
-						<View
-							className={`w-9 h-9 rounded-xl items-center justify-center ${
-								theme === "system" ? "bg-success/20" : "bg-surface-secondary/50"
-							}`}
-						>
-							<StyledIcon
-								name="monitor"
-								size={18}
-								className={theme === "system" ? "text-success" : "text-muted"}
-							/>
-						</View>
-						<Text
-							className={`text-xs font-bold ${
-								theme === "system" ? "text-foreground" : "text-muted"
-							}`}
-						>
-							Sistema
-						</Text>
-						{theme === "system" ? (
-							<View className="w-1.5 h-1.5 rounded-full bg-success" />
-						) : (
-							<View className="w-1.5 h-1.5" />
-						)}
-					</Pressable>
-				</View>
+				<ThemeSelector currentTheme={theme} onSelectTheme={setTheme} />
 			</View>
 
 			{/* PAINEL DE DADOS E ARMAZENAMENTO */}

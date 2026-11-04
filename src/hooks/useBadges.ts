@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { logs, maintenance, scooters } from "@/db/schema";
+import { calculateMaintenanceWear } from "@/utils/maintenance";
 import type { calculateScooterStats } from "@/utils/stats";
 
 export interface Badge {
@@ -21,22 +22,30 @@ export function useBadges(
 ) {
 	return useMemo(() => {
 		const totalKm = stats?.totalKm || 0;
-		const tripsCount = allLogs.filter((l) => l.type === "trip").length;
-		const chargesCount = allLogs.filter((l) => l.type === "charge").length;
+		let tripsCount = 0;
+		let chargesCount = 0;
+		for (const l of allLogs) {
+			if (l.type === "trip") tripsCount++;
+			else if (l.type === "charge") chargesCount++;
+		}
 
 		// CO2 saved: ~0.12 kg CO2 per km compared to gasoline car
 		const co2SavedKg = totalKm * 0.12;
 
-		const completedMaintenanceCount = maintenanceList.filter(
-			(item) => item.isCompleted,
-		).length;
-
-		const hasRisk = maintenanceList.some((item) => {
-			if (item.isCompleted || !(item.hasWear ?? true)) return false;
-			const currentTotalKm = totalKm;
-			const wornKm = currentTotalKm - item.lastMaintenanceKm;
-			return item.intervalKm > 0 && wornKm / item.intervalKm >= 0.7;
-		});
+		let completedMaintenanceCount = 0;
+		let hasRisk = false;
+		for (const item of maintenanceList) {
+			if (item.isCompleted) {
+				completedMaintenanceCount++;
+			} else if (item.hasWear ?? true) {
+				if (
+					!hasRisk &&
+					calculateMaintenanceWear(item, totalKm).wearPercentage >= 70
+				) {
+					hasRisk = true;
+				}
+			}
+		}
 
 		const bestCycleKm = stats?.bestCycleKm || 0;
 		const autonomyGoal = scooter?.autonomyGoal || 30;
@@ -209,7 +218,10 @@ export function useBadges(
 			},
 		];
 
-		const unlockedCount = list.filter((b) => b.isUnlocked).length;
+		let unlockedCount = 0;
+		for (const b of list) {
+			if (b.isUnlocked) unlockedCount++;
+		}
 
 		return {
 			badges: list,
@@ -217,5 +229,11 @@ export function useBadges(
 			totalCount: list.length,
 			co2SavedKg,
 		};
-	}, [allLogs, stats, maintenanceList, scooter]);
+	}, [
+		allLogs,
+		stats?.totalKm,
+		stats?.bestCycleKm,
+		maintenanceList,
+		scooter?.autonomyGoal,
+	]);
 }

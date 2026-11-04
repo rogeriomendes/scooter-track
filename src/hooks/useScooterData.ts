@@ -89,16 +89,17 @@ export function useScooterData(activeScooterId: number | null) {
 
 				const scooterId = currentScooter.id;
 
-				const l = await db
-					.select()
-					.from(logs)
-					.where(eq(logs.scooterId, scooterId))
-					.orderBy(desc(logs.date));
-
-				const mList = await db
-					.select()
-					.from(maintenance)
-					.where(eq(maintenance.scooterId, scooterId));
+				const [l, mList] = await Promise.all([
+					db
+						.select()
+						.from(logs)
+						.where(eq(logs.scooterId, scooterId))
+						.orderBy(desc(logs.date)),
+					db
+						.select()
+						.from(maintenance)
+						.where(eq(maintenance.scooterId, scooterId)),
+				]);
 
 				const computedStats = calculateScooterStats(currentScooter, l);
 

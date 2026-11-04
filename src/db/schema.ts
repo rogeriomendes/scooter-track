@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const scooters = sqliteTable("scooters", {
@@ -53,8 +54,6 @@ export const maintenance = sqliteTable("maintenance", {
 	hasWear: integer("hasWear", { mode: "boolean" }).notNull().default(true),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
 });
-
-import { relations } from "drizzle-orm";
 
 export const scootersRelations = relations(scooters, ({ many }) => ({
 	logs: many(logs),

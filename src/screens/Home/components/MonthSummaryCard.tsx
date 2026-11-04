@@ -21,56 +21,55 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 	const currentMonth = now.getMonth();
 	const currentDayNumber = now.getDate();
 
-	const monthTrips = useMemo(() => {
-		return allLogs.filter((l) => {
-			if (l.type !== "trip") return false;
-			const d = new Date(l.date);
-			return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-		});
-	}, [allLogs, currentYear, currentMonth]);
+	const {
+		totalKmMonth,
+		monthChargesCount,
+		uniqueDaysCount,
+		bestDayDistance,
+		activeDaysPercent,
+	} = useMemo(() => {
+		let totalKm = 0;
+		let chargesCount = 0;
+		const uniqueDays = new Set<string>();
+		const dailyKmMap = new Map<string, number>();
 
-	const monthCharges = useMemo(() => {
-		return allLogs.filter((l) => {
-			if (l.type !== "charge") return false;
-			const d = new Date(l.date);
-			return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-		});
-	}, [allLogs, currentYear, currentMonth]);
+		for (const log of allLogs) {
+			const d = new Date(log.date);
+			if (d.getFullYear() !== currentYear || d.getMonth() !== currentMonth) {
+				continue;
+			}
 
-	const totalKmMonth = useMemo(() => {
-		return monthTrips.reduce((acc, t) => acc + t.distance, 0);
-	}, [monthTrips]);
-
-	const uniqueDaysRidden = useMemo(() => {
-		const daysSet = new Set<string>();
-		for (const t of monthTrips) {
-			daysSet.add(format(new Date(t.date), "yyyy-MM-dd"));
-		}
-		return daysSet;
-	}, [monthTrips]);
-
-	const bestDayDistance = useMemo(() => {
-		if (monthTrips.length === 0) return 0;
-
-		const dailyMap = new Map<string, number>();
-		for (const t of monthTrips) {
-			const dayKey = format(new Date(t.date), "yyyy-MM-dd");
-			dailyMap.set(dayKey, (dailyMap.get(dayKey) || 0) + t.distance);
+			if (log.type === "charge") {
+				chargesCount++;
+			} else if (log.type === "trip") {
+				totalKm += log.distance;
+				const dayKey = format(d, "yyyy-MM-dd");
+				uniqueDays.add(dayKey);
+				dailyKmMap.set(dayKey, (dailyKmMap.get(dayKey) || 0) + log.distance);
+			}
 		}
 
-		let max = 0;
-		for (const dist of dailyMap.values()) {
-			if (dist > max) max = dist;
+		let maxDaily = 0;
+		for (const dist of dailyKmMap.values()) {
+			if (dist > maxDaily) maxDaily = dist;
 		}
-		return max;
-	}, [monthTrips]);
 
-	const activeDaysPercent = useMemo(() => {
-		if (!currentDayNumber || currentDayNumber <= 0) return 0;
-		const pct = (uniqueDaysRidden.size / currentDayNumber) * 100;
-		if (Number.isNaN(pct) || !Number.isFinite(pct)) return 0;
-		return Math.min(100, Math.max(0, Math.round(pct)));
-	}, [uniqueDaysRidden, currentDayNumber]);
+		let activePct = 0;
+		if (currentDayNumber > 0) {
+			const pct = (uniqueDays.size / currentDayNumber) * 100;
+			if (!Number.isNaN(pct) && Number.isFinite(pct)) {
+				activePct = Math.min(100, Math.max(0, Math.round(pct)));
+			}
+		}
+
+		return {
+			totalKmMonth: totalKm,
+			monthChargesCount: chargesCount,
+			uniqueDaysCount: uniqueDays.size,
+			bestDayDistance: maxDaily,
+			activeDaysPercent: activePct,
+		};
+	}, [allLogs, currentYear, currentMonth, currentDayNumber]);
 
 	return (
 		<View>
@@ -90,8 +89,8 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 					</View>
 					<View className="bg-success/10 px-2 py-0.5 rounded-full border border-success/20">
 						<Text className="text-[10px] font-bold text-success">
-							{uniqueDaysRidden.size}{" "}
-							{uniqueDaysRidden.size === 1 ? "dia ativo" : "dias ativos"}
+							{uniqueDaysCount}{" "}
+							{uniqueDaysCount === 1 ? "dia ativo" : "dias ativos"}
 						</Text>
 					</View>
 				</View>
@@ -125,9 +124,9 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 							</Text>
 						</View>
 						<Text className="text-base font-black text-foreground">
-							{monthCharges.length}{" "}
+							{monthChargesCount}{" "}
 							<Text className="text-[10px] font-bold text-muted">
-								{monthCharges.length === 1 ? "carga" : "cargas"}
+								{monthChargesCount === 1 ? "carga" : "cargas"}
 							</Text>
 						</Text>
 					</View>
@@ -157,8 +156,8 @@ export function MonthSummaryCard({ allLogs }: MonthSummaryCardProps) {
 							Frequência de uso no mês
 						</Text>
 						<Text className="text-[11px] font-bold text-foreground">
-							{uniqueDaysRidden.size} de {currentDayNumber} dias (
-							{activeDaysPercent}%)
+							{uniqueDaysCount} de {currentDayNumber} dias ({activeDaysPercent}
+							%)
 						</Text>
 					</View>
 					<View className="w-full h-2 bg-surface-tertiary rounded-full overflow-hidden flex-row">

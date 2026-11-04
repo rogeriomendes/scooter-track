@@ -7,6 +7,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import * as Haptics from "expo-haptics";
+import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 interface MonthSelectorProps {
@@ -22,18 +23,21 @@ export function MonthSelector({
 	minDate,
 	maxDate,
 }: MonthSelectorProps) {
-	const start = minDate
-		? startOfMonth(minDate)
-		: subMonths(startOfMonth(new Date()), 6);
-	const end = maxDate ? startOfMonth(maxDate) : startOfMonth(new Date());
+	const reversedMonths = useMemo(() => {
+		const start = minDate
+			? startOfMonth(minDate)
+			: subMonths(startOfMonth(new Date()), 6);
+		const end = maxDate ? startOfMonth(maxDate) : startOfMonth(new Date());
 
-	// Fallback de segurança caso minDate > maxDate
-	const safeStart = isAfter(start, end) ? end : start;
+		// Fallback de segurança caso minDate > maxDate
+		const safeStart = isAfter(start, end) ? end : start;
+		return eachMonthOfInterval({ start: safeStart, end }).reverse();
+	}, [minDate, maxDate]);
 
-	const months = eachMonthOfInterval({ start: safeStart, end });
-
-	// Mostrar meses mais recentes primeiro
-	const reversedMonths = [...months].reverse();
+	const selectedMonthTime = useMemo(
+		() => (selectedMonth ? startOfMonth(selectedMonth).getTime() : null),
+		[selectedMonth],
+	);
 
 	const isAllSelected = selectedMonth === null;
 
@@ -71,8 +75,7 @@ export function MonthSelector({
 
 				{reversedMonths.map((month) => {
 					const isSelected =
-						selectedMonth !== null &&
-						month.getTime() === startOfMonth(selectedMonth).getTime();
+						selectedMonthTime !== null && month.getTime() === selectedMonthTime;
 					return (
 						<Pressable
 							key={month.getTime()}

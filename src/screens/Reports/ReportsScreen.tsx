@@ -1,5 +1,4 @@
 import { format, startOfMonth, subDays } from "date-fns";
-import * as Haptics from "expo-haptics";
 import { Card } from "heroui-native/card";
 import { useMemo, useState } from "react";
 import {
@@ -10,7 +9,6 @@ import {
 	useColorScheme,
 	View,
 } from "react-native";
-import { LineChart } from "react-native-gifted-charts";
 import { BadgesSheet } from "@/components/BadgesSheet";
 import { EmptyScooterState } from "@/components/EmptyScooterState";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
@@ -18,6 +16,9 @@ import { StyledIcon } from "@/components/StyledIcon";
 import { useBadges } from "@/hooks/useBadges";
 import { useScooterData } from "@/hooks/useScooterData";
 import { useAppStore } from "@/store/useAppStore";
+import { DistanceChart } from "./components/DistanceChart";
+import { ReportFilters } from "./components/ReportFilters";
+import { ReportStatsGrid } from "./components/ReportStatsGrid";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -105,15 +106,17 @@ export default function ReportsScreen() {
 
 	const chartStats = useMemo(() => {
 		if (viewMode === "day") {
-			const total = filteredTrips.reduce((sum, t) => sum + t.distance, 0);
-			const uniqueDays = new Set(
-				filteredTrips.map((t) => format(new Date(t.date), "yyyy-MM-dd")),
-			).size;
-			const maxTrip =
-				filteredTrips.length > 0
-					? Math.max(...filteredTrips.map((t) => t.distance))
-					: 0;
-			const avg = uniqueDays > 0 ? total / uniqueDays : 0;
+			let total = 0;
+			let maxTrip = 0;
+			const uniqueDays = new Set<string>();
+
+			for (const t of filteredTrips) {
+				total += t.distance;
+				if (t.distance > maxTrip) maxTrip = t.distance;
+				uniqueDays.add(format(new Date(t.date), "yyyy-MM-dd"));
+			}
+
+			const avg = uniqueDays.size > 0 ? total / uniqueDays.size : 0;
 			const realAvgCycle =
 				stats?.averageCycleKm && stats.averageCycleKm > 0
 					? `${stats.averageCycleKm.toFixed(1)}`
@@ -131,26 +134,27 @@ export default function ReportsScreen() {
 				countValue: realAvgCycle,
 				countLabel: "Autonomia Média",
 			};
-		} else {
-			const cyclesList = stats?.cycles || [];
-			const cyclesCount = cyclesList.length;
-			const totalCyclesDist = cyclesList.reduce(
-				(sum: number, c) => sum + c.distance,
-				0,
-			);
-			const avg = cyclesCount > 0 ? totalCyclesDist / cyclesCount : 0;
-			const max = stats?.bestCycleKm || 0;
-			return {
-				mainValue: totalCyclesDist,
-				mainLabel: "Total Ciclos",
-				avgValue: avg,
-				avgLabel: "Média / Ciclo",
-				maxValue: max,
-				maxLabel: "Melhor Ciclo",
-				countValue: cyclesCount.toString(),
-				countLabel: "Ciclos Concluídos",
-			};
 		}
+
+		const cyclesList = stats?.cycles || [];
+		const cyclesCount = cyclesList.length;
+		const totalCyclesDist = cyclesList.reduce(
+			(sum: number, c) => sum + c.distance,
+			0,
+		);
+		const avg = cyclesCount > 0 ? totalCyclesDist / cyclesCount : 0;
+		const max = stats?.bestCycleKm || 0;
+
+		return {
+			mainValue: totalCyclesDist,
+			mainLabel: "Total Ciclos",
+			avgValue: avg,
+			avgLabel: "Média / Ciclo",
+			maxValue: max,
+			maxLabel: "Melhor Ciclo",
+			countValue: cyclesCount.toString(),
+			countLabel: "Ciclos Concluídos",
+		};
 	}, [filteredTrips, stats, scooter, viewMode, timeframe]);
 
 	if (isLoading && !scooter) {
@@ -171,282 +175,28 @@ export default function ReportsScreen() {
 	}
 
 	return (
-		<ScreenWrapper scrollable contentContainerClassName="px-4 pb-24">
+		<ScreenWrapper scrollable contentContainerClassName="px-4 pb-10">
 			<Text className="text-3xl font-bold text-foreground py-2">Insights</Text>
 
 			{/* TOGGLE SEGMENTADO E FILTRO DE TEMPO */}
-			<View className="pt-1 mb-3 gap-2.5">
-				<View className="flex-row bg-surface-tertiary p-1.5 rounded-2xl">
-					<Pressable
-						onPress={() => {
-							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-							setViewMode("day");
-						}}
-						className={`flex-1 h-10 rounded-xl flex-row justify-center items-center gap-2 ${
-							viewMode === "day" ? "bg-surface shadow-sm" : "active:opacity-70"
-						}`}
-					>
-						<StyledIcon
-							name="calendar"
-							size={18}
-							className={viewMode === "day" ? "text-success" : "text-muted"}
-						/>
-						<Text
-							className={`text-sm font-bold ${
-								viewMode === "day" ? "text-foreground" : "text-muted"
-							}`}
-						>
-							Por Dia
-						</Text>
-					</Pressable>
-
-					<Pressable
-						onPress={() => {
-							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-							setViewMode("cycle");
-						}}
-						className={`flex-1 h-10 rounded-xl flex-row justify-center items-center gap-2 ${
-							viewMode === "cycle"
-								? "bg-surface shadow-sm"
-								: "active:opacity-70"
-						}`}
-					>
-						<StyledIcon
-							name="zap"
-							size={18}
-							className={viewMode === "cycle" ? "text-success" : "text-muted"}
-						/>
-						<Text
-							className={`text-sm font-bold ${
-								viewMode === "cycle" ? "text-foreground" : "text-muted"
-							}`}
-						>
-							Por Ciclo
-						</Text>
-					</Pressable>
-				</View>
-				<View className="flex-row items-center justify-between px-1">
-					<Text className="text-[10px] font-bold text-muted uppercase tracking-wider">
-						Período
-					</Text>
-					<View className="flex-row gap-1 bg-surface-tertiary p-1 rounded-xl">
-						{(
-							[
-								{ id: "7d", label: "7D" },
-								{ id: "30d", label: "30D" },
-								{ id: "month", label: "Mês" },
-								{ id: "all", label: "Tudo" },
-							] as const
-						).map((t) => (
-							<Pressable
-								key={t.id}
-								onPress={() => {
-									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-									setTimeframe(t.id);
-								}}
-								className={`px-3 py-1 rounded-lg ${
-									timeframe === t.id
-										? "bg-surface shadow-sm"
-										: "active:opacity-70"
-								}`}
-							>
-								<Text
-									className={`text-xs font-bold ${
-										timeframe === t.id ? "text-success" : "text-muted"
-									}`}
-								>
-									{t.label}
-								</Text>
-							</Pressable>
-						))}
-					</View>
-				</View>
-			</View>
+			<ReportFilters
+				viewMode={viewMode}
+				onViewModeChange={setViewMode}
+				timeframe={timeframe}
+				onTimeframeChange={setTimeframe}
+			/>
 
 			{/* GRÁFICO NEON */}
-			<View>
-				<Card
-					variant="default"
-					className="mb-3 border border-border bg-surface shadow-sm rounded-2xl overflow-hidden p-0 pt-4 pb-2"
-				>
-					<View className="px-4 mb-3">
-						<Text className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">
-							Evolução de Distância
-						</Text>
-						<Text className="text-xl font-black text-foreground">
-							{chartData.length > 0 ? "Registros do Período" : "Sem dados"}
-						</Text>
-					</View>
-
-					{chartData.length > 0 ? (
-						<View className="ml-2">
-							<LineChart
-								areaChart
-								curved
-								data={chartData}
-								width={screenWidth - 80}
-								height={150}
-								hideDataPoints={false}
-								dataPointsColor="#17C964"
-								dataPointsRadius={4}
-								color={primaryLineColor}
-								thickness={3}
-								startFillColor="#17C964"
-								endFillColor="#17C964"
-								startOpacity={0.4}
-								endOpacity={0.05}
-								initialSpacing={20}
-								noOfSections={4}
-								yAxisColor="transparent"
-								yAxisThickness={0}
-								rulesType="dashed"
-								rulesColor={gridColor}
-								yAxisTextStyle={{
-									color: mutedColor,
-									fontSize: 10,
-									fontWeight: "bold",
-								}}
-								xAxisColor="transparent"
-								xAxisLabelTextStyle={{
-									color: mutedColor,
-									fontSize: 10,
-									fontWeight: "bold",
-								}}
-								pointerConfig={{
-									pointerStripHeight: 160,
-									pointerStripColor: primaryLineColor,
-									pointerStripWidth: 2,
-									pointerColor: primaryLineColor,
-									radius: 6,
-									pointerLabelWidth: 80,
-									pointerLabelHeight: 60,
-									activatePointersOnLongPress: false,
-									autoAdjustPointerLabelPosition: true,
-									pointerLabelComponent: (
-										items: { date?: string; value: number }[],
-									) => {
-										return (
-											<View className="bg-surface-secondary/90 rounded-xl px-3 py-2 items-center justify-center border border-success/30 -ml-10 -mt-10">
-												<Text className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">
-													{items[0].date}
-												</Text>
-												<Text className="text-sm font-black text-success">
-													{items[0].value.toFixed(1)} km
-												</Text>
-											</View>
-										);
-									},
-								}}
-							/>
-						</View>
-					) : (
-						<View className="h-40 items-center justify-center">
-							<StyledIcon
-								name="activity"
-								size={32}
-								className="text-muted opacity-30 mb-2"
-							/>
-							<Text className="text-muted text-xs font-bold uppercase tracking-widest">
-								Gráfico Indisponível
-							</Text>
-						</View>
-					)}
-				</Card>
-			</View>
+			<DistanceChart
+				chartData={chartData}
+				screenWidth={screenWidth}
+				primaryLineColor={primaryLineColor}
+				gridColor={gridColor}
+				mutedColor={mutedColor}
+			/>
 
 			{/* INSIGHTS GRID 2x2 CARDS */}
-			<View className="gap-2 mb-3">
-				<View className="flex-row gap-2">
-					<Card
-						variant="default"
-						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
-					>
-						<View className="w-9 h-9 rounded-xl bg-success/15 items-center justify-center">
-							<StyledIcon name="map-pin" size={18} className="text-success" />
-						</View>
-						<View className="flex-1">
-							<Text
-								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
-								numberOfLines={1}
-							>
-								{chartStats.mainLabel}
-							</Text>
-							<Text className="text-lg font-black text-foreground">
-								{chartStats.mainValue.toFixed(1)}{" "}
-								<Text className="text-xs font-bold text-muted">km</Text>
-							</Text>
-						</View>
-					</Card>
-
-					<Card
-						variant="default"
-						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
-					>
-						<View className="w-9 h-9 rounded-xl bg-accent/15 items-center justify-center">
-							<StyledIcon
-								name="bar-chart-2"
-								size={18}
-								className="text-accent"
-							/>
-						</View>
-						<View className="flex-1">
-							<Text
-								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
-								numberOfLines={1}
-							>
-								{chartStats.avgLabel}
-							</Text>
-							<Text className="text-lg font-black text-foreground">
-								{chartStats.avgValue.toFixed(1)}{" "}
-								<Text className="text-xs font-bold text-muted">km</Text>
-							</Text>
-						</View>
-					</Card>
-				</View>
-
-				<View className="flex-row gap-2">
-					<Card
-						variant="default"
-						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
-					>
-						<View className="w-9 h-9 rounded-xl bg-warning/15 items-center justify-center">
-							<StyledIcon name="award" size={18} className="text-warning" />
-						</View>
-						<View className="flex-1">
-							<Text
-								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
-								numberOfLines={1}
-							>
-								{chartStats.maxLabel}
-							</Text>
-							<Text className="text-lg font-black text-foreground">
-								{chartStats.maxValue.toFixed(1)}{" "}
-								<Text className="text-xs font-bold text-muted">km</Text>
-							</Text>
-						</View>
-					</Card>
-
-					<Card
-						variant="default"
-						className="flex-1 p-3.5 bg-surface border border-border shadow-sm rounded-2xl flex-row items-center gap-3"
-					>
-						<View className="w-9 h-9 rounded-xl bg-info/15 items-center justify-center">
-							<StyledIcon name="hash" size={18} className="text-info" />
-						</View>
-						<View className="flex-1">
-							<Text
-								className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5"
-								numberOfLines={1}
-							>
-								{chartStats.countLabel}
-							</Text>
-							<Text className="text-lg font-black text-foreground">
-								{chartStats.countValue}
-							</Text>
-						</View>
-					</Card>
-				</View>
-			</View>
+			<ReportStatsGrid chartStats={chartStats} />
 
 			{/* CARD DE AUTONOMIA REAL & EFICIÊNCIA */}
 			<View className="mb-3">

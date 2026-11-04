@@ -17,6 +17,23 @@ interface ScooterDetailsSheetProps {
 	onEditRequest?: () => void;
 }
 
+function DetailCell({
+	label,
+	value,
+}: {
+	label: string;
+	value: string | number;
+}) {
+	return (
+		<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
+			<Text className="text-xs font-medium text-muted mb-1">{label}</Text>
+			<Text className="text-sm font-bold text-foreground" numberOfLines={1}>
+				{value}
+			</Text>
+		</View>
+	);
+}
+
 export function ScooterDetailsSheet({
 	isOpen,
 	onOpenChange,
@@ -59,75 +76,44 @@ export function ScooterDetailsSheet({
 			<View className="gap-2.5 mb-4">
 				{/* Linha 1: Total KM & Odômetro Inicial */}
 				<View className="flex-row gap-2.5">
-					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
-						<Text className="text-xs font-medium text-muted mb-1">
-							Total KM (Geral)
-						</Text>
-						<Text className="text-sm font-bold text-foreground">
-							{(totalKm ?? scooter.initialKm).toFixed(1)} km
-						</Text>
-					</View>
-
-					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
-						<Text className="text-xs font-medium text-muted mb-1">
-							Odômetro Inicial
-						</Text>
-						<Text className="text-sm font-bold text-foreground">
-							{scooter.initialKm} km
-						</Text>
-					</View>
+					<DetailCell
+						label="Total KM (Geral)"
+						value={`${(totalKm ?? scooter.initialKm).toFixed(1)} km`}
+					/>
+					<DetailCell
+						label="Odômetro Inicial"
+						value={`${scooter.initialKm} km`}
+					/>
 				</View>
 
 				{/* Linha 2: Meta Autonomia & Data da Compra */}
 				<View className="flex-row gap-2.5">
-					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
-						<Text className="text-xs font-medium text-muted mb-1">
-							Meta Autonomia
-						</Text>
-						<Text className="text-sm font-bold text-foreground">
-							{scooter.autonomyGoal} km
-						</Text>
-					</View>
-
-					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
-						<Text className="text-xs font-medium text-muted mb-1">
-							Data da Compra
-						</Text>
-						<Text className="text-sm font-bold text-foreground">
-							{scooter.purchaseDate
+					<DetailCell
+						label="Meta Autonomia"
+						value={`${scooter.autonomyGoal} km`}
+					/>
+					<DetailCell
+						label="Data da Compra"
+						value={
+							scooter.purchaseDate
 								? format(new Date(scooter.purchaseDate), "dd/MM/yyyy", {
 										locale: ptBR,
 									})
-								: "Não informada"}
-						</Text>
-					</View>
+								: "Não informada"
+						}
+					/>
 				</View>
 
 				{/* Linha 3: Nº Série & Nº Motor */}
 				<View className="flex-row gap-2.5">
-					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
-						<Text className="text-xs font-medium text-muted mb-1">
-							Nº Série / Chassi
-						</Text>
-						<Text
-							className="text-sm font-bold text-foreground"
-							numberOfLines={1}
-						>
-							{scooter.serialNumber || "Não informado"}
-						</Text>
-					</View>
-
-					<View className="flex-1 bg-surface p-3 rounded-xl border border-surface-secondary">
-						<Text className="text-xs font-medium text-muted mb-1">
-							Nº do Motor
-						</Text>
-						<Text
-							className="text-sm font-bold text-foreground"
-							numberOfLines={1}
-						>
-							{scooter.motorNumber || "Não informado"}
-						</Text>
-					</View>
+					<DetailCell
+						label="Nº Série / Chassi"
+						value={scooter.serialNumber || "Não informado"}
+					/>
+					<DetailCell
+						label="Nº do Motor"
+						value={scooter.motorNumber || "Não informado"}
+					/>
 				</View>
 
 				{/* Linha 4: Aba Manutenção */}

@@ -1,22 +1,16 @@
-import DateTimePicker, {
-	type DateTimePickerChangeEvent,
-} from "@react-native-community/datetimepicker";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { eq } from "drizzle-orm";
 import * as Haptics from "expo-haptics";
 import { Button } from "heroui-native/button";
 import { Label } from "heroui-native/label";
 import { TextField } from "heroui-native/text-field";
 import { useEffect, useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
-import { StyledIcon } from "@/components/StyledIcon";
+import { FormDateTimeField } from "@/components/FormDateTimeField";
 import { BATTERY_CHARTS } from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { logs, type scooters } from "@/db/schema";
-import { calculateScooterStats } from "@/utils/stats";
 
 interface TripFormSheetProps {
 	isOpen: boolean;
@@ -39,8 +33,6 @@ export function TripFormSheet({
 	const [voltage, setVoltage] = useState("");
 	const [notes, setNotes] = useState("");
 	const [date, setDate] = useState(new Date());
-	const [showDatePicker, setShowDatePicker] = useState(false);
-	const [showTimePicker, setShowTimePicker] = useState(false);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -57,26 +49,6 @@ export function TripFormSheet({
 			}
 		}
 	}, [isOpen, editItem]);
-
-	const onChangeDate = (
-		_event: DateTimePickerChangeEvent,
-		selectedDate?: Date,
-	) => {
-		setShowDatePicker(Platform.OS === "ios");
-		if (selectedDate) {
-			setDate(selectedDate);
-		}
-	};
-
-	const onChangeTime = (
-		_event: DateTimePickerChangeEvent,
-		selectedDate?: Date,
-	) => {
-		setShowTimePicker(Platform.OS === "ios");
-		if (selectedDate) {
-			setDate(selectedDate);
-		}
-	};
 
 	const handleSaveTrip = async () => {
 		if (!voltage || !distance) return;
@@ -108,19 +80,6 @@ export function TripFormSheet({
 		setNotes("");
 		onOpenChange(false);
 		onSaved();
-
-		try {
-			const allLogs = await db
-				.select()
-				.from(logs)
-				.where(eq(logs.scooterId, scooter.id));
-			const stats = calculateScooterStats(scooter, allLogs);
-			if (stats && stats.currentCycleKm >= stats.estimatedAutonomy * 0.8) {
-				console.log("Bateria baixa! KM atual: ", stats.currentCycleKm);
-			}
-		} catch (e) {
-			console.error("Error", e);
-		}
 	};
 
 	return (
@@ -130,30 +89,13 @@ export function TripFormSheet({
 			title={editItem ? "Editar Uso" : "Registrar Uso"}
 		>
 			<View className="flex-row gap-2">
-				<TextField className="flex-1">
-					<Label>Data</Label>
-					<Pressable
-						onPress={() => setShowDatePicker(true)}
-						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
-					>
-						<Text className="text-foreground text-sm">
-							{format(date, "dd/MM/yyyy", { locale: ptBR })}
-						</Text>
-						<StyledIcon name="calendar" size={16} className="text-muted" />
-					</Pressable>
-				</TextField>
-				<TextField className="flex-1">
-					<Label>Hora</Label>
-					<Pressable
-						onPress={() => setShowTimePicker(true)}
-						className="bg-surface-tertiary border border-surface-tertiary h-12 rounded-xl flex-row items-center justify-between px-3 active:opacity-80"
-					>
-						<Text className="text-foreground text-sm">
-							{format(date, "HH:mm", { locale: ptBR })}
-						</Text>
-						<StyledIcon name="clock" size={16} className="text-muted" />
-					</Pressable>
-				</TextField>
+				<FormDateTimeField label="Data" value={date} onChange={setDate} />
+				<FormDateTimeField
+					label="Hora"
+					value={date}
+					mode="time"
+					onChange={setDate}
+				/>
 			</View>
 
 			<TextField>
@@ -209,25 +151,6 @@ export function TripFormSheet({
 					<Button.Label>{editItem ? "Salvar" : "Salvar Registro"}</Button.Label>
 				</Button>
 			</View>
-
-			{showDatePicker && (
-				<DateTimePicker
-					value={date}
-					mode="date"
-					is24Hour={true}
-					onValueChange={onChangeDate}
-					onDismiss={() => setShowDatePicker(false)}
-				/>
-			)}
-			{showTimePicker && (
-				<DateTimePicker
-					value={date}
-					mode="time"
-					is24Hour={true}
-					onValueChange={onChangeTime}
-					onDismiss={() => setShowTimePicker(false)}
-				/>
-			)}
 		</AppBottomSheet>
 	);
 }

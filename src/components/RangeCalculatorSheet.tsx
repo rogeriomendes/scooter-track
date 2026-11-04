@@ -17,6 +17,27 @@ interface RangeCalculatorSheetProps {
 	estimatedAutonomyKm: number;
 }
 
+const STATUS_CONFIG = {
+	ok: {
+		containerClass: "bg-success/10 border-success/30",
+		textColor: "text-success",
+		icon: "check-circle" as const,
+		title: "Carga Ok",
+	},
+	warning: {
+		containerClass: "bg-warning/10 border-warning/30",
+		textColor: "text-warning",
+		icon: "alert-triangle" as const,
+		title: "Carga Limite",
+	},
+	danger: {
+		containerClass: "bg-danger/10 border-danger/30",
+		textColor: "text-danger",
+		icon: "alert-circle" as const,
+		title: "Bateria Insuficiente",
+	},
+};
+
 export function RangeCalculatorSheet({
 	isOpen,
 	onOpenChange,
@@ -67,6 +88,8 @@ export function RangeCalculatorSheet({
 		};
 	}, [targetDistance, currentBatteryPercent, autonomyToUse]);
 
+	const statusCfg = calculation ? STATUS_CONFIG[calculation.status] : null;
+
 	return (
 		<AppBottomSheet
 			isOpen={isOpen}
@@ -107,48 +130,20 @@ export function RangeCalculatorSheet({
 				</TextField>
 
 				{/* DIAGNÓSTICO / RESULTADO */}
-				{calculation && (
+				{calculation && statusCfg && (
 					<View
-						className={`p-4 rounded-2xl border ${
-							calculation.status === "ok"
-								? "bg-success/10 border-success/30"
-								: calculation.status === "warning"
-									? "bg-warning/10 border-warning/30"
-									: "bg-danger/10 border-danger/30"
-						}`}
+						className={`p-4 rounded-2xl border ${statusCfg.containerClass}`}
 					>
 						<View className="flex-row items-center gap-2 mb-1.5">
 							<StyledIcon
-								name={
-									calculation.status === "ok"
-										? "check-circle"
-										: calculation.status === "warning"
-											? "alert-triangle"
-											: "alert-circle"
-								}
+								name={statusCfg.icon}
 								size={18}
-								className={
-									calculation.status === "ok"
-										? "text-success"
-										: calculation.status === "warning"
-											? "text-warning"
-											: "text-danger"
-								}
+								className={statusCfg.textColor}
 							/>
 							<Text
-								className={`text-sm font-black uppercase tracking-wider ${
-									calculation.status === "ok"
-										? "text-success"
-										: calculation.status === "warning"
-											? "text-warning"
-											: "text-danger"
-								}`}
+								className={`text-sm font-black uppercase tracking-wider ${statusCfg.textColor}`}
 							>
-								{calculation.status === "ok"
-									? "Carga Ok"
-									: calculation.status === "warning"
-										? "Carga Limite"
-										: "Bateria Insuficiente"}
+								{statusCfg.title}
 							</Text>
 						</View>
 
