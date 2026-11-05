@@ -1,0 +1,16 @@
+{
+	"mcpServers": {
+		"heroui-native": {
+			"command": "cmd.exe",
+			"args": ["/d", "/c", "npx", "-y", "@heroui/native-mcp@latest"]
+		},
+		"expo": {
+			"type": "http",
+			"url": "https://mcp.expo.dev/mcp"
+		},
+		"drizzle": {
+			"command": "cmd.exe",
+			"args": ["/d", "/c", "pnpm", "exec", "drizzle-kit", "mcp"]
+		}
+	}
+}

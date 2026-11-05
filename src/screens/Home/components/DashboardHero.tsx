@@ -1,4 +1,4 @@
-import { differenceInDays } from "date-fns";
+import { differenceInCalendarDays } from "date-fns";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button } from "heroui-native/button";
 import { useMemo } from "react";
@@ -92,8 +92,8 @@ export function DashboardHero({
 
 	const lastChargeText = useMemo(() => {
 		if (!stats?.lastChargeDate) return "Sem registros";
-		const days = differenceInDays(new Date(), stats.lastChargeDate);
-		if (days === 0) return "Hoje";
+		const days = differenceInCalendarDays(new Date(), stats.lastChargeDate);
+		if (days <= 0) return "Hoje";
 		if (days === 1) return "Ontem";
 		return `Há ${days} dias`;
 	}, [stats?.lastChargeDate]);
