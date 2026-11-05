@@ -78,6 +78,18 @@ export const maintenance = sqliteTable(
 	],
 );
 
+export const batteryConfigs = sqliteTable("battery_configs", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	key: text("key").notNull().unique(), // ex: '36V', '48V', 'CUSTOM_54V'
+	label: text("label").notNull(), // ex: '36V (10S)'
+	nominalVoltage: real("nominalVoltage").notNull(), // 36
+	cells: integer("cells").notNull().default(0), // 10
+	maxVoltage: real("maxVoltage").notNull(), // 42.0
+	minVoltage: real("minVoltage").notNull(), // 30.0
+	isDefault: integer("isDefault", { mode: "boolean" }).notNull().default(false),
+	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
+});
+
 export const scootersRelations = relations(scooters, ({ many }) => ({
 	logs: many(logs),
 	maintenance: many(maintenance),

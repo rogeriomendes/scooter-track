@@ -1,13 +1,14 @@
 import BottomSheet, { BottomSheetView } from "@expo/ui/community/bottom-sheet";
 import type React from "react";
 import { useEffect, useRef } from "react";
-import { Keyboard, ScrollView, Text, useColorScheme } from "react-native";
+import { Keyboard, ScrollView, Text, useColorScheme, View } from "react-native";
 import { useAppStore } from "@/store/useAppStore";
 
 interface AppBottomSheetProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
 	title?: string;
+	headerRight?: React.ReactNode;
 	snapPoints?: (string | number)[];
 	enableDynamicSizing?: boolean;
 	children: React.ReactNode;
@@ -17,6 +18,7 @@ export function AppBottomSheet({
 	isOpen,
 	onOpenChange,
 	title,
+	headerRight,
 	snapPoints,
 	enableDynamicSizing = true,
 	children,
@@ -64,10 +66,17 @@ export function AppBottomSheet({
 					keyboardShouldPersistTaps="handled"
 					contentContainerStyle={{ paddingBottom: 16 }}
 				>
-					{title && (
-						<Text className="text-xl font-bold text-foreground mb-4">
-							{title}
-						</Text>
+					{(title || headerRight) && (
+						<View className="flex-row items-center justify-between mb-4">
+							{title ? (
+								<Text className="text-xl font-bold text-foreground flex-1 pr-2">
+									{title}
+								</Text>
+							) : (
+								<View className="flex-1" />
+							)}
+							{headerRight}
+						</View>
 					)}
 					{children}
 				</ScrollView>

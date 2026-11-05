@@ -36,6 +36,25 @@ try {
 	// A coluna já existe
 }
 
+// Cria tabela de configurações de bateria / voltagens se não existir
+try {
+	sqliteDb.execSync(`
+		CREATE TABLE IF NOT EXISTS battery_configs (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			key TEXT NOT NULL UNIQUE,
+			label TEXT NOT NULL,
+			nominalVoltage REAL NOT NULL,
+			cells INTEGER NOT NULL DEFAULT 0,
+			maxVoltage REAL NOT NULL,
+			minVoltage REAL NOT NULL,
+			isDefault INTEGER NOT NULL DEFAULT 0,
+			createdAt INTEGER NOT NULL
+		);
+	`);
+} catch {
+	// Tabela já existe
+}
+
 // Cria índices para consultas rápidas
 try {
 	sqliteDb.execSync(

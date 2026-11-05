@@ -1,4 +1,3 @@
-import { Button } from "heroui-native/button";
 import { ScrollView, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import {
@@ -150,14 +149,6 @@ export function BadgesSheet({
 						);
 					})}
 				</ScrollView>
-
-				<Button
-					variant="secondary"
-					className="mt-1"
-					onPress={() => onOpenChange(false)}
-				>
-					<Button.Label>Fechar</Button.Label>
-				</Button>
 			</View>
 		</AppBottomSheet>
 	);

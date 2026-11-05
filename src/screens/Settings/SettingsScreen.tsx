@@ -12,6 +12,7 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { StyledIcon } from "@/components/StyledIcon";
 import { db } from "@/db/client";
 import { logs, maintenance, scooters } from "@/db/schema";
+import { BatteryConfigsSection } from "@/screens/Settings/components/BatteryConfigsSection";
 import { EnergySettingsSection } from "@/screens/Settings/components/EnergySettingsSection";
 import { ThemeSelector } from "@/screens/Settings/components/ThemeSelector";
 import { useAppStore } from "@/store/useAppStore";
@@ -138,6 +139,14 @@ export default function SettingsScreen() {
 					Tarifas de Energia & Economia
 				</Text>
 				<EnergySettingsSection />
+			</View>
+
+			{/* VOLTAGENS DA BATERIA */}
+			<View>
+				<Text className="text-xs font-bold text-muted mb-2 uppercase tracking-widest ml-1">
+					Tabela de Voltagens
+				</Text>
+				<BatteryConfigsSection />
 			</View>
 
 			{/* PAINEL DE DADOS E ARMAZENAMENTO */}

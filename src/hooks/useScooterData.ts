@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { db } from "@/db/client";
@@ -10,6 +10,20 @@ type ScooterRecord = typeof scooters.$inferSelect;
 type LogRecord = typeof logs.$inferSelect;
 type MaintenanceRecord = typeof maintenance.$inferSelect;
 type StatsResult = ReturnType<typeof calculateScooterStats>;
+
+// Prepared statements para execução ultra-rápida sem overhead de compilação SQL
+const getLogsByScooterIdStmt = db
+	.select()
+	.from(logs)
+	.where(eq(logs.scooterId, sql.placeholder("scooterId")))
+	.orderBy(desc(logs.date))
+	.prepare();
+
+const getMaintenanceByScooterIdStmt = db
+	.select()
+	.from(maintenance)
+	.where(eq(maintenance.scooterId, sql.placeholder("scooterId")))
+	.prepare();
 
 interface ScooterCache {
 	scooter: ScooterRecord | null;
@@ -90,15 +104,8 @@ export function useScooterData(activeScooterId: number | null) {
 				const scooterId = currentScooter.id;
 
 				const [l, mList] = await Promise.all([
-					db
-						.select()
-						.from(logs)
-						.where(eq(logs.scooterId, scooterId))
-						.orderBy(desc(logs.date)),
-					db
-						.select()
-						.from(maintenance)
-						.where(eq(maintenance.scooterId, scooterId)),
+					getLogsByScooterIdStmt.execute({ scooterId }),
+					getMaintenanceByScooterIdStmt.execute({ scooterId }),
 				]);
 
 				const computedStats = calculateScooterStats(currentScooter, l);

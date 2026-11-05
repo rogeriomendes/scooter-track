@@ -9,7 +9,10 @@ import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { FormDateTimeField } from "@/components/FormDateTimeField";
 import { InvoiceAttachmentField } from "@/components/InvoiceAttachmentField";
-import { BATTERY_CHARTS } from "@/constants/batteryCharts";
+import {
+	type BatteryConfig,
+	getBatteryConfigs,
+} from "@/constants/batteryCharts";
 import { db } from "@/db/client";
 import { scooters } from "@/db/schema";
 import { useAppStore } from "@/store/useAppStore";
@@ -42,8 +45,20 @@ export function ScooterFormSheet({
 	const [serialNumber, setSerialNumber] = useState("");
 	const [motorNumber, setMotorNumber] = useState("");
 	const [invoicePdfPath, setInvoicePdfPath] = useState<string | null>(null);
+	const [batteryOptions, setBatteryOptions] = useState<BatteryConfig[]>([]);
 
 	const { setActiveScooterId } = useAppStore();
+
+	const loadBatteryOptions = useCallback(async () => {
+		const list = await getBatteryConfigs();
+		setBatteryOptions(list);
+	}, []);
+
+	useEffect(() => {
+		if (isOpen) {
+			loadBatteryOptions();
+		}
+	}, [isOpen, loadBatteryOptions]);
 
 	const resetForm = useCallback(() => {
 		setName("");
@@ -173,16 +188,16 @@ export function ScooterFormSheet({
 						showsHorizontalScrollIndicator={false}
 						contentContainerClassName="gap-2 py-0.5"
 					>
-						{Object.keys(BATTERY_CHARTS).map((key) => (
+						{batteryOptions.map((opt) => (
 							<Button
-								key={key}
+								key={opt.key}
 								size="sm"
-								variant={batteryType === key ? "primary" : "secondary"}
-								className="px-3 py-1 h-8 min-h-0 rounded-xl"
-								onPress={() => setBatteryType(key)}
+								variant={batteryType === opt.key ? "primary" : "secondary"}
+								className="px-2 py-1 h-7 min-h-0 rounded-xl"
+								onPress={() => setBatteryType(opt.key)}
 							>
 								<Button.Label className="text-xs font-bold">
-									{BATTERY_CHARTS[key].label}
+									{opt.label}
 								</Button.Label>
 							</Button>
 						))}
