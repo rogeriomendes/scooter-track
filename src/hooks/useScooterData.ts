@@ -11,19 +11,37 @@ type LogRecord = typeof logs.$inferSelect;
 type MaintenanceRecord = typeof maintenance.$inferSelect;
 type StatsResult = ReturnType<typeof calculateScooterStats>;
 
-// Prepared statements para execução ultra-rápida sem overhead de compilação SQL
-const getLogsByScooterIdStmt = db
-	.select()
-	.from(logs)
-	.where(eq(logs.scooterId, sql.placeholder("scooterId")))
-	.orderBy(desc(logs.date))
-	.prepare();
+const createLogsStmt = () =>
+	db
+		.select()
+		.from(logs)
+		.where(eq(logs.scooterId, sql.placeholder("scooterId")))
+		.orderBy(desc(logs.date))
+		.prepare();
 
-const getMaintenanceByScooterIdStmt = db
-	.select()
-	.from(maintenance)
-	.where(eq(maintenance.scooterId, sql.placeholder("scooterId")))
-	.prepare();
+const createMaintStmt = () =>
+	db
+		.select()
+		.from(maintenance)
+		.where(eq(maintenance.scooterId, sql.placeholder("scooterId")))
+		.prepare();
+
+type LogsPreparedStmt = ReturnType<typeof createLogsStmt>;
+type MaintPreparedStmt = ReturnType<typeof createMaintStmt>;
+
+// Prepared statements criados sob demanda após a inicialização e migrações do banco
+let getLogsByScooterIdStmt: LogsPreparedStmt | null = null;
+let getMaintenanceByScooterIdStmt: MaintPreparedStmt | null = null;
+
+function getPreparedStatements() {
+	if (!getLogsByScooterIdStmt) {
+		getLogsByScooterIdStmt = createLogsStmt();
+	}
+	if (!getMaintenanceByScooterIdStmt) {
+		getMaintenanceByScooterIdStmt = createMaintStmt();
+	}
+	return { getLogsByScooterIdStmt, getMaintenanceByScooterIdStmt };
+}
 
 interface ScooterCache {
 	scooter: ScooterRecord | null;
@@ -103,9 +121,14 @@ export function useScooterData(activeScooterId: number | null) {
 
 				const scooterId = currentScooter.id;
 
+				const {
+					getLogsByScooterIdStmt: logsStmt,
+					getMaintenanceByScooterIdStmt: maintStmt,
+				} = getPreparedStatements();
+
 				const [l, mList] = await Promise.all([
-					getLogsByScooterIdStmt.execute({ scooterId }),
-					getMaintenanceByScooterIdStmt.execute({ scooterId }),
+					logsStmt.execute({ scooterId }),
+					maintStmt.execute({ scooterId }),
 				]);
 
 				const computedStats = calculateScooterStats(currentScooter, l);

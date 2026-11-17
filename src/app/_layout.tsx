@@ -12,7 +12,7 @@ import { Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Uniwind } from "uniwind";
-import { db } from "@/db/client";
+import { applyManualMigrations, db, sqliteDb } from "@/db/client";
 import migrations from "@/drizzle/migrations";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -25,6 +25,12 @@ export default function RootLayout() {
 
 	const isDark =
 		theme === "dark" || (theme === "system" && systemColorScheme === "dark");
+
+	useEffect(() => {
+		if (success) {
+			applyManualMigrations(sqliteDb);
+		}
+	}, [success]);
 
 	useEffect(() => {
 		// Sincroniza o tema do Zustand ('light' | 'dark' | 'system') com o Uniwind

@@ -4,7 +4,7 @@ import { Button } from "heroui-native/button";
 import { Label } from "heroui-native/label";
 import { TextField } from "heroui-native/text-field";
 import { useCallback, useEffect, useState } from "react";
-import { ScrollView, Switch, Text, View } from "react-native";
+import { Alert, ScrollView, Switch, Text, View } from "react-native";
 import { AppBottomSheet } from "@/components/AppBottomSheet";
 import { BottomSheetInput } from "@/components/BottomSheetInput";
 import { FormDateTimeField } from "@/components/FormDateTimeField";
@@ -104,51 +104,56 @@ export function ScooterFormSheet({
 		if (!name.trim()) return;
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-		if (editItem) {
-			await db
-				.update(scooters)
-				.set({
-					name,
-					batteryType,
-					trackingMode,
-					showMaintenance,
-					initialKm: parseFloat(initialKm) || 0,
-					autonomyGoal: parseFloat(autonomyGoal) || 0,
-					batteryCapacityWh: parseFloat(batteryCapacityWh) || 0,
-					purchaseDate,
-					serialNumber,
-					motorNumber,
-					invoicePdfPath,
-				})
-				.where(eq(scooters.id, editItem.id));
-		} else {
-			const [newScooter] = await db
-				.insert(scooters)
-				.values({
-					name,
-					batteryType,
-					trackingMode,
-					showMaintenance,
-					initialKm: parseFloat(initialKm) || 0,
-					autonomyGoal: parseFloat(autonomyGoal) || 0,
-					batteryCapacityWh: parseFloat(batteryCapacityWh) || 0,
-					purchaseDate,
-					serialNumber,
-					motorNumber,
-					invoicePdfPath,
-					createdAt: new Date(),
-				})
-				.returning();
+		try {
+			if (editItem) {
+				await db
+					.update(scooters)
+					.set({
+						name,
+						batteryType,
+						trackingMode,
+						showMaintenance,
+						initialKm: parseFloat(initialKm) || 0,
+						autonomyGoal: parseFloat(autonomyGoal) || 0,
+						batteryCapacityWh: parseFloat(batteryCapacityWh) || 0,
+						purchaseDate,
+						serialNumber,
+						motorNumber,
+						invoicePdfPath,
+					})
+					.where(eq(scooters.id, editItem.id));
+			} else {
+				const [newScooter] = await db
+					.insert(scooters)
+					.values({
+						name,
+						batteryType,
+						trackingMode,
+						showMaintenance,
+						initialKm: parseFloat(initialKm) || 0,
+						autonomyGoal: parseFloat(autonomyGoal) || 0,
+						batteryCapacityWh: parseFloat(batteryCapacityWh) || 0,
+						purchaseDate,
+						serialNumber,
+						motorNumber,
+						invoicePdfPath,
+						createdAt: new Date(),
+					})
+					.returning();
 
-			const existingScooters = await db.select().from(scooters);
-			if (existingScooters.length === 1) {
-				setActiveScooterId(newScooter.id);
+				const existingScooters = await db.select().from(scooters);
+				if (existingScooters.length === 1) {
+					setActiveScooterId(newScooter.id);
+				}
 			}
-		}
 
-		resetForm();
-		onOpenChange(false);
-		onSaved();
+			resetForm();
+			onOpenChange(false);
+			onSaved();
+		} catch (error) {
+			console.error("Erro ao salvar scooter:", error);
+			Alert.alert("Erro", "Não foi possível salvar os dados da scooter.");
+		}
 	};
 
 	return (

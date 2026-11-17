@@ -17,6 +17,7 @@ import { EnergySettingsSection } from "@/screens/Settings/components/EnergySetti
 import { ThemeSelector } from "@/screens/Settings/components/ThemeSelector";
 import { useAppStore } from "@/store/useAppStore";
 import { performBackup, performRestore } from "@/utils/backupRestore";
+import { exportDatabaseToCsv } from "@/utils/csvExport";
 
 export default function SettingsScreen() {
 	const router = useRouter();
@@ -29,6 +30,8 @@ export default function SettingsScreen() {
 		maintenanceCount: 0,
 		invoicesCount: 0,
 	});
+
+	const [isExportingCsv, setIsExportingCsv] = useState(false);
 
 	const appVersion = Constants.expoConfig?.version || "1.1.0";
 
@@ -91,6 +94,15 @@ export default function SettingsScreen() {
 
 	const handleBackup = async () => {
 		await performBackup(appVersion);
+	};
+
+	const handleExportCsv = async () => {
+		setIsExportingCsv(true);
+		try {
+			await exportDatabaseToCsv();
+		} finally {
+			setIsExportingCsv(false);
+		}
 	};
 
 	const handleRestore = async () => {
@@ -221,13 +233,29 @@ export default function SettingsScreen() {
 							<Button.Label className="text-foreground">Restaurar</Button.Label>
 						</Button>
 					</View>
+
+					<Button
+						variant="outline"
+						className="w-full border-surface-secondary bg-surface-secondary/40 mb-3"
+						onPress={handleExportCsv}
+						isDisabled={isExportingCsv}
+					>
+						<StyledIcon name="file-text" size={16} className="text-success" />
+						<Button.Label className="text-foreground font-semibold">
+							{isExportingCsv
+								? "Gerando CSV..."
+								: "Exportar Banco em CSV (Planilhas)"}
+						</Button.Label>
+					</Button>
+
 					<Text className="text-xs text-muted leading-5">
 						Gera um pacote de segurança contendo todas as scooters, viagens,
 						recargas, manutenções e{" "}
 						<Text className="font-bold text-foreground">
 							Notas Fiscais em PDF
 						</Text>{" "}
-						salvas no aparelho.
+						salvas no aparelho, ou exporte em formato tabular CSV para abrir no
+						Excel.
 					</Text>
 				</Card>
 			</View>

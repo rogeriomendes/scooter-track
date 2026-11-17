@@ -5,7 +5,7 @@ import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
 import * as SQLite from "expo-sqlite";
 import { Alert, Platform } from "react-native";
-import { db, sqliteDb } from "@/db/client";
+import { applyManualMigrations, db, sqliteDb } from "@/db/client";
 import { scooters } from "@/db/schema";
 import { base64ToUint8Array, uint8ArrayToBase64 } from "@/utils/base64";
 
@@ -208,21 +208,7 @@ export async function performRestore(options: {
 			}
 		}
 
-		try {
-			sqliteDb.execSync(
-				"ALTER TABLE maintenance ADD COLUMN isCompleted INTEGER NOT NULL DEFAULT 0;",
-			);
-		} catch {}
-		try {
-			sqliteDb.execSync(
-				"ALTER TABLE maintenance ADD COLUMN completedAt INTEGER;",
-			);
-		} catch {}
-		try {
-			sqliteDb.execSync(
-				"ALTER TABLE maintenance ADD COLUMN hasWear INTEGER NOT NULL DEFAULT 1;",
-			);
-		} catch {}
+		applyManualMigrations(sqliteDb);
 
 		await Promise.all(
 			invoices.map(async (inv) => {
